@@ -934,7 +934,11 @@ function renderDetail(id){
     +'<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v">'+(e.pr||'정보 없음')+'</div></div></div>'
     +'</div>';
   if(lks.length){h+='<div class="det-sec"><div class="det-sec-title">바로가기</div><div class="link-grid">'+lks.map(function(l){var m=LM[l.type]||{label:l.type,icon:"🔗",cls:"ic-web"};return'<a href="'+l.url+'" target="_blank" rel="noopener" class="link-btn"><div class="link-icon '+m.cls+'">'+m.icon+'</div><div class="link-label">'+m.label+'</div></a>';}).join('')+'</div></div>';}
-  h+='<div class="det-sec"><div class="det-sec-title">소개</div><div class="det-desc">'+e.ds+'</div></div>';
+  // ds가 공연시간표면 소개 숨김 (요일 포함 여부로 판단)
+  var dsText=e.ds||'';
+  if(dsText&&dsText.indexOf('요일')<0&&dsText.length>10){
+    h+='<div class="det-sec"><div class="det-sec-title">소개</div><div class="det-desc">'+dsText+'</div></div>';
+  }
   if(district||vibes.length||tags.length){
     h+='<div class="det-sec"><div class="det-sec-title">태그</div><div class="tags">';
     if(district){h+='<span class="tag tag-district" onclick="goTag(\'district\',\''+district+'\')">'+district+'</span>';}
