@@ -493,21 +493,39 @@ function loadEvents(callback){
     callback(_cache);
     return;
   }
-  fetch(API_URL)
-    .then(function(r){return r.json();})
-    .then(function(data){
-      _cache=data.events||[];
-      _cacheTime=Date.now();
-      ev=_cache;
-      applyLocalReactions(ev);
-      callback(ev);
-    })
-    .catch(function(err){
-      console.error('API 오류:',err);
-      // API 실패시 캐시 사용
-      if(_cache){callback(_cache);}
-      else{callback([]);}
-    });
+  // JSONP 방식으로 CORS 우회
+  var cbName='_cb'+Date.now();
+  window[cbName]=function(data){
+    delete window[cbName];
+    if(script.parentNode)script.parentNode.removeChild(script);
+    _cache=data.events||[];
+    _cacheTime=Date.now();
+    ev=_cache;
+    applyLocalReactions(ev);
+    callback(ev);
+  };
+  var script=document.createElement('script');
+  script.onerror=function(){
+    delete window[cbName];
+    if(script.parentNode)script.parentNode.removeChild(script);
+    console.error('JSONP 오류');
+    if(_cache){callback(_cache);}
+    else{
+      // fetch 폴백
+      fetch(API_URL)
+        .then(function(r){return r.json();})
+        .then(function(data){
+          _cache=data.events||[];
+          _cacheTime=Date.now();
+          ev=_cache;
+          applyLocalReactions(ev);
+          callback(ev);
+        })
+        .catch(function(){callback([]);});
+    }
+  };
+  script.src=API_URL+'?callback='+cbName;
+  document.head.appendChild(script);
 }
 function applyLocalReactions(events){
   var vcMap=JSON.parse(localStorage.getItem('snr_vc')||'{}');
