@@ -810,7 +810,7 @@ function renderHome(){
   });
   h+='</div>';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px"><div style="font-size:15px;font-weight:800">HOT NOW</div><button style="font-size:12px;color:#505068;font-weight:500;background:none;border:none;cursor:pointer" onclick="curNav=\'ranking\';go(\'ranking\')">전체보기 ›</button></div>';
-  h+='<div class="h-scroll">'+hot5.map(function(e){var t=tc(e._s,mx),c=tC(t);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')"><div class="h-card-img">'+IC[e.ct]+'<div class="h-card-temp" style="background:'+tB(t)+';color:'+c+'">'+t+'°C</div></div><div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';
+  h+='<div class="h-scroll">'+hot5.map(function(e){var t=tc(e._s,mx),c=tC(t);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')"><div class=""+hThumb(e,'<div class="h-card-temp" style="background:'+tB(t)+';color:'+c+'">'+t+'°C</div></div><div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';
   if(closing.length){h+='<div style="padding:0 20px;margin-bottom:12px"><div style="font-size:15px;font-weight:800">곧 종료</div></div><div class="dl-list">';closing.forEach(function(e){h+='<div class="dl-item" onclick="viewEv(\''+e.id+'\')"><div class="dl-thumb">'+IC[e.ct]+'</div><div class="dl-info"><div class="dl-title">'+e.t+'</div><div class="dl-meta">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div></div><div class="dl-dday">D-'+dd(e.ed)+'</div></div>';});h+='</div>';}
   if(upcoming.length){h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px;margin-top:4px"><div style="font-size:15px;font-weight:800">오픈 예정</div></div><div class="h-scroll">'+upcoming.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')"><div class="h-card-img">'+IC[e.ct]+'<div class="h-card-temp" style="background:rgba(79,195,247,0.15);color:#4fc3f7">D-'+Math.max(s,0)+'</div></div><div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';}
   document.getElementById("page-home").innerHTML=h;
@@ -836,7 +836,7 @@ function renderRanking(){
   h+='<div class="meta-bar">2026년 4월 5일 기준 · '+(regionActive?cRegion:'전국')+' · '+list.length+'건</div>';
   // 리스트
   if(!list.length){h+='<div class="empty"><div style="font-size:36px;margin-bottom:12px">🏪</div><p>이벤트가 없어요</p></div>';}
-  else{list.forEach(function(e,i){var rk=i+1,df=e.pk-rk,t=tc(e._s,mx),cc=df>0?'up':df<0?'dn':'sm',ct=df>0?df+'▲':df<0?Math.abs(df)+'▼':'—';h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.04)+'s both"><div class="rk-n"><div class="rk-n-v">'+rk+'</div><div class="rk-ch '+cc+'">'+ct+'</div></div><div class="rk-img">'+IC[e.ct]+'</div><div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+gr(e)+'</div><div class="rk-sub-date">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div></div></div>'+thermo(t)+'</div>';});}
+  else{list.forEach(function(e,i){var rk=i+1,df=e.pk-rk,t=tc(e._s,mx),cc=df>0?'up':df<0?'dn':'sm',ct=df>0?df+'▲':df<0?Math.abs(df)+'▼':'—';h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.04)+'s both"><div class="rk-n"><div class="rk-n-v">'+rk+'</div><div class="rk-ch '+cc+'">'+ct+'</div></div><div class=""+rkThumb(e)+"<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+gr(e)+'</div><div class="rk-sub-date">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div></div></div>'+thermo(t)+'</div>';});}
   document.getElementById("page-ranking").innerHTML=h;
   });}
 function openRegionSheet(){document.getElementById("regionSheet").classList.add("show");}
@@ -895,7 +895,7 @@ function renderMy(){
   h+='<div class="my-stats"><div class="my-stat"><div class="my-stat-v">'+bm.length+'</div><div class="my-stat-l">저장</div></div><div class="my-stat"><div class="my-stat-v">'+lk.length+'</div><div class="my-stat-l">좋아요</div></div></div>';
   h+='<div class="my-tabs"><button class="my-tab'+(myTab==="bookmark"?" on":"")+'\" onclick="myTab=\'bookmark\';renderMy()">저장한 이벤트</button><button class="my-tab'+(myTab==="like"?" on":"")+'\" onclick="myTab=\'like\';renderMy()">좋아요</button></div>';
   if(!list.length){h+='<div class="empty"><div style="font-size:48px;margin:20px 0 14px">'+(myTab==="bookmark"?"📌":"🤍")+'</div><p style="font-size:14px;font-weight:600;margin-bottom:6px;color:#8d8da0">'+(myTab==="bookmark"?"저장한 이벤트가 없어요":"좋아요한 이벤트가 없어요")+'</p></div>';}
-  else{var all=ev.map(function(x){return Object.assign({},x,{_s:sc(x)});}).sort(function(a,b){return b._s-a._s;});var mx=all.length?all[0]._s:1;list.forEach(function(e,i){var t=tc(sc(e),mx);h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.04)+'s both"><div class="rk-img" style="margin-left:4px">'+IC[e.ct]+'</div><div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+e.lo+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+gauge(t,44)+'</div>';});}
+  else{var all=ev.map(function(x){return Object.assign({},x,{_s:sc(x)});}).sort(function(a,b){return b._s-a._s;});var mx=all.length?all[0]._s:1;list.forEach(function(e,i){var t=tc(sc(e),mx);h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.04)+'s both"><div class=""+rkThumb(e)+"<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+e.lo+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+gauge(t,44)+'</div>';});}
   document.getElementById("page-my").innerHTML=h;
 }
 
@@ -923,8 +923,23 @@ function renderDetail(id){
   var related=all.filter(function(x){return x.id!==id&&x.ct===e.ct&&x.st!=="ended";}).slice(0,5);
   var rvl=rvDB[id]||[],rva=rvl.length?(rvl.reduce(function(a,b){return a+b.rating;},0)/rvl.length).toFixed(1):"0";
   var ico=IC[e.ct]||"🎫";
-  var h='<div class="det-hero">'+ico+'<div class="det-hero-grad"></div><div class="det-top-actions"><button class="det-ico" onclick="go(curNav===\'ranking\'?\'ranking\':curNav===\'calendar\'?\'calendar\':curNav===\'my\'?\'my\':\'home\')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="det-top-right"><button class="det-ico'+(ibm?' on':'')+'\" onclick="toggleBm(\''+e.id+'\')">'+(ibm?'🔖':'🏷️')+'</button></div></div></div>';
-  h+='<div class="det-poster-wrap"><div class="det-poster">'+ico+'</div><div class="det-poster-info"><div class="det-badges"><span class="det-badge" style="background:'+dc+'20;color:'+dc+';border:1px solid '+dc+'40">'+dt+'</span>'+(e.fr?'<span class="det-badge" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)">무료</span>':'')+'</div><div class="det-cat-text">'+ico+' '+e.ct+'</div></div></div>';
+  // 포스터 이미지 추출 (sr 필드에서)
+  var posterUrl='';
+  if(e.sr){
+    var srParts=e.sr.split('|');
+    if(srParts.length>=2){
+      var srUrl=srParts.slice(1).join('|').trim();
+      if(srUrl.match(/\.(jpg|jpeg|gif|png)/i))posterUrl=srUrl;
+    }
+  }
+  if(!posterUrl&&e.imgPoster)posterUrl=e.imgPoster;
+
+  var heroStyle=posterUrl
+    ?'background:linear-gradient(135deg,#1a1a28,#2a1a20);background-image:url('+posterUrl+');background-size:cover;background-position:center top'
+    :'background:linear-gradient(135deg,#1a1a28,#2a1a20)';
+
+  var h='<div class="det-hero" style="'+heroStyle+'">'+(!posterUrl?ico:'')+'<div class="det-hero-grad"></div><div class="det-top-actions"><button class="det-ico" onclick="go(curNav===\'ranking\'?\'ranking\':curNav===\'calendar\'?\'calendar\':curNav===\'my\'?\'my\':\'home\')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="det-top-right"><button class="det-ico'+(ibm?' on':'')+'\" onclick="toggleBm(\''+e.id+'\')">'+(ibm?'🔖':'🏷️')+'</button></div></div></div>';
+  h+='<div class="det-poster-wrap"><div class="det-poster" style="'+(posterUrl?'background-image:url('+posterUrl+');background-size:cover;background-position:center;font-size:0':'')+'">'+(!posterUrl?ico:'')+'</div><div class="det-poster-info"><div class="det-badges"><span class="det-badge" style="background:'+dc+'20;color:'+dc+';border:1px solid '+dc+'40">'+dt+'</span>'+(e.fr?'<span class="det-badge" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)">무료</span>':'')+'</div><div class="det-cat-text">'+ico+' '+e.ct+'</div></div></div>';
   h+='<div class="det-title-sec"><div class="det-title">'+e.t+'</div><div class="det-sub"><span>'+e.lo+'</span><span class="dot"></span><span>'+e.sd.replace(/-/g,'.')+' ~ '+e.ed.replace(/-/g,'.')+'</span></div></div>';
   h+='<div class="det-temp"><div class="det-temp-icon" style="background:'+c+'22;color:'+c+'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div><div class="det-temp-body"><div class="det-temp-row"><span class="det-temp-label">온도 · #'+(all.findIndex(function(x){return x.id===id;})+1)+'위</span><span class="det-temp-v" style="color:'+c+'">'+t+'°C</span></div><div class="det-temp-bar"><div class="det-temp-fill" style="width:'+t+'%;background:linear-gradient(90deg,'+c+'88,'+c+')"></div></div></div></div>';
   h+='<div class="quick-bar"><button class="quick-btn'+(ilk?' active':'')+'\" onclick="likeEv(\''+e.id+'\')"><svg fill="'+(ilk?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="qb-label">좋아요</span><span class="qb-count">'+e.lc.toLocaleString()+'</span></button><button class="quick-btn'+(ibm?' active':'')+'\" onclick="toggleBm(\''+e.id+'\')"><svg fill="'+(ibm?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="qb-label">'+(ibm?'저장됨':'저장')+'</span><span class="qb-count"> </span></button></div>';
@@ -1024,7 +1039,7 @@ function renderTagPage(key){
   } else {
     matched.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).sort(function(a,b){return b._s-a._s;}).forEach(function(e,i){
       var t=tc(e._s,mx);
-      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.05)+'s both"><div class="rk-img">'+IC[e.ct]+'</div><div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.district||gr(e))+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+thermo(t)+'</div>';
+      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.05)+'s both"><div class=""+rkThumb(e)+"<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.district||gr(e))+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+thermo(t)+'</div>';
     });
   }
   document.getElementById("page-tag").innerHTML=h;
@@ -1074,7 +1089,7 @@ function renderSBody(q){
   function hl(txt){return txt.replace(new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")",'gi'),'<span class="s-hl">$1</span>');}
   var h='<div class="s-section"><div class="s-sec-title">🔍 검색 결과 · '+res.length+'건</div>';
   if(!res.length){h+='<div style="text-align:center;padding:50px 0"><div style="font-size:44px;opacity:0.5;margin-bottom:12px">🔍</div><p style="font-size:14px;color:#8d8da0">"'+q+'"에 대한 결과가 없어요</p></div>';}
-  else{res.forEach(function(e){var t=tc(sc(e),mx);h+='<div class="rk" style="padding:12px 0" onclick="doS(\''+q.replace(/'/g,"\\'")+'\')+closeSearch();viewEv(\''+e.id+'\')"><div class="rk-img" style="margin-right:10px">'+IC[e.ct]+'</div><div class="rk-info"><div class="rk-title">'+hl(e.t)+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+e.lo+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+gauge(t,40)+'</div>';});}
+  else{res.forEach(function(e){var t=tc(sc(e),mx);h+='<div class="rk" style="padding:12px 0" onclick="doS(\''+q.replace(/'/g,"\\'")+'\')+closeSearch();viewEv(\''+e.id+'\')"><div class=""+rkThumb(e)+"<div class="rk-info"><div class="rk-title">'+hl(e.t)+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+e.lo+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+gauge(t,40)+'</div>';});}
   h+='</div>';body.innerHTML=h;
 }
 function doS(q){document.getElementById("sInput").value=q;document.getElementById("sClr").style.display="flex";saveSH(q);renderSBody(q);}
