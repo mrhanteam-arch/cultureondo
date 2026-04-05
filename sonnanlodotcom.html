@@ -851,6 +851,18 @@ function goSlide(i){sIdx=i;var tr=document.getElementById("heroTrack");if(!tr)re
 function renderRanking(){
   curNav="ranking";
   loadEvents(function(data){ev=data;
+  // 팝업스토어 준비중
+  if(cCat==="팝업스토어"){
+    var h='<div class="rk-hdr"><div class="rk-title">컬처온도 랭킹</div></div>';
+    h+='<div class="rk-cat-tabs">'+CATS.map(function(c){return'<button class="rk-cat-tab'+(cCat===c?' on':'')+'\" onclick="cCat=\''+c+'\';renderRanking()">'+c+'</button>';}).join('')+'</div>';
+    h+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:50vh;gap:16px">';
+    h+='<div style="font-size:48px">🏪</div>';
+    h+='<div style="font-size:18px;font-weight:800;color:var(--tx)">팝업스토어</div>';
+    h+='<div style="font-size:14px;color:var(--sub);text-align:center;line-height:1.6">팝업스토어 데이터를 준비 중이에요.<br>곧 만나보실 수 있어요!</div>';
+    h+='</div>';
+    document.getElementById("page-ranking").innerHTML=h+'<div class="kopis-credit">출처: (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr)</div>';
+    return;
+  }
   var list=ev.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).filter(function(e){return(cCat==="전체"||e.ct===cCat)&&(cRegion==="전국"||gr(e)===cRegion)&&e.st!=="ended";}).sort(function(a,b){return b._s-a._s;});
   var mx=list.length?list[0]._s:1;
   var regionActive=cRegion!=="전국";
@@ -1002,8 +1014,8 @@ function renderDetail(id){
   if(rvl.length){h+='<div class="rv-list">'+rvl.slice(0,3).map(function(r){var dots='';for(var i=1;i<=5;i++)dots+='<span style="color:'+(i<=r.rating?'#ffd60a':'#2a2a38');dots+=';font-size:10px">●</span>';return'<div class="rv-item"><div class="rv-item-hdr"><div class="rv-avatar">'+r.avatar+'</div><div><div class="rv-name">'+r.name+'</div><div class="rv-date" style="display:flex;align-items:center;gap:6px"><span>'+r.date+'</span><span style="display:flex;gap:1px">'+dots+'</span></div></div></div><div class="rv-body">'+r.text+'</div></div>';}).join('')+'</div>';}
   h+='</div>';
   if(related.length){h+='<div class="det-sec"><div class="det-sec-title">비슷한 '+e.ct+'</div><div class="related">'+related.map(function(r){var rt=tc(r._s,mx),rc=tC(rt);return'<div class="related-item" onclick="viewEv(\''+r.id+'\')"><div class="related-img" style="'+(getPoster(r)?'background-image:url('+getPoster(r)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(r)?IC[r.ct]:'')+' <div class="related-temp" style="background:'+tB(rt)+';color:'+rc+'">'+rt+'°</div></div><div class="related-title">'+r.t+'</div><div style="font-size:10.5px;color:#8d8da0;margin-top:2px">'+r.lo+'</div></div>';}).join('')+'</div></div>';}
-  h+='<div class="bottom-action"><button class="bottom-btn fav'+(ibm?' on':'')+'" onclick="toggleBm(\''+e.id+'\')" style="font-size:18px">'+(ibm?'🔖':'🏷️')+'</button>'+(lks.find(function(l){return l.type==="ticket";})?'<button class="bottom-btn primary" onclick="window.open(\''+lks.find(function(l){return l.type==="ticket";}).url+'\',\'_blank\')">예매하러 가기</button>':'<button class="bottom-btn primary">길찾기</button>')+'</div>';
-  document.getElementById("page-detail").innerHTML=h;
+  h+=// bottom-action 제거
+  document.getElementById("page-detail").innerHTML=h+'<div class="kopis-credit">출처: (재)예술경영지원센터 공연예술통합전산망(www.kopis.or.kr)</div>';
 }
 function goTag(type,val){go("tag",type+"::"+val);}
 function goCuration(cid){
