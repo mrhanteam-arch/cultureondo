@@ -549,9 +549,16 @@ var LM={homepage:{label:"홈페이지",icon:"🌐",cls:"ic-web"},instagram:{labe
 
 function dd(e){return Math.ceil((new Date(e)-NOW)/864e5);}
 function getPoster(e){
-  if(e.imgPoster)return e.imgPoster.replace('http://','https://');
-  if(e.sr){var p=e.sr.split('|');if(p.length>=2){var u=p.slice(1).join('|').trim();if(/\.(jpg|jpeg|gif|png)/i.test(u))return u.replace('http://','https://');}}
-  return '';
+  var url='';
+  if(e.imgPoster)url=e.imgPoster;
+  else if(e.sr){var p=e.sr.split('|');if(p.length>=2){var u=p.slice(1).join('|').trim();if(/\.(jpg|jpeg|gif|png)/i.test(u))url=u;}}
+  if(!url)return '';
+  url=url.replace('http://','https://');
+  // KOPIS 이미지는 프록시로 우회
+  if(url.indexOf('kopis.or.kr')>=0){
+    return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=300&output=webp';
+  }
+  return url;
 }
 function rkThumb(e){
   var p=getPoster(e);
