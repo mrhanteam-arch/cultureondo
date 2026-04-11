@@ -387,7 +387,7 @@ a{color:inherit;text-decoration:none}
 .booking-btn-kopis:hover{color:var(--tx);border-color:var(--sub)}
 .empty{text-align:center;padding:60px 20px;color:var(--mu)}
 /* 검색 모달 */
-.modal{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;animation:fi 0.2s}
+.modal{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;animation:fi 0.2s;max-width:480px;left:50%;transform:translateX(-50%)}
 .modal.show{display:block}
 .s-hdr{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--bdL)}
 .s-back{background:none;border:none;color:var(--sub);padding:0;cursor:pointer}
@@ -1382,7 +1382,7 @@ function renderExplore(){
 
   // 인기 랭킹
   h+='<div style="padding:0 20px;margin-bottom:20px">'
-    +'<div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">🔥 실시간 인기</div>';
+    +'<div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">실시간 인기</div>';
   tr.forEach(function(t,i){
     var rk=i+1;
     var chHtml=t.isNew
@@ -1400,15 +1400,28 @@ function renderExplore(){
   });
   h+='</div>';
 
-  // 카테고리
+  // 카테고리 SVG 아이콘 맵
+  var CAT_SVG={
+    '뮤지컬':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+    '연극':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+    '콘서트/페스티벌':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
+    '클래식/무용':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>',
+    '복합':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+    '팝업스토어':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
+  };
+  var CAT_COLOR={
+    '뮤지컬':'#bf5af2','연극':'#ffd60a','콘서트/페스티벌':'#ff5e3a',
+    '클래식/무용':'#4fc3f7','복합':'#30d158','팝업스토어':'#ff9500'
+  };
+
   h+='<div style="padding:0 20px;margin-bottom:20px">'
     +'<div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">장르별</div>'
     +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
   CATS.filter(function(c){return c!=='전체';}).forEach(function(c){
-    h+='<div style="padding:12px 8px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);text-align:center;cursor:pointer;transition:all 0.15s" onclick="cCat=\''+c+'\';go(\'ranking\')">'
-      +'<div style="font-size:22px;margin-bottom:4px">'+IC[c]+'</div>'
-      +'<div style="font-size:12px;font-weight:700;margin-bottom:2px">'+c+'</div>'
-      +'<div style="font-size:10px;color:var(--mu)">'+catCnt[c]+'건</div>'
+    var cnt=catCnt[c]||0;
+    h+='<div style="padding:14px 8px;border-radius:14px;border:1px solid var(--bd);background:var(--sf);text-align:center;cursor:pointer;transition:all 0.15s" onclick="cCat=\''+c+'\';go(\'ranking\')">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--tx)">'+c+'</div>'
+      +'<div style="font-size:10px;color:var(--mu)">'+cnt+'건</div>'
       +'</div>';
   });
   h+='</div></div>';
