@@ -1949,7 +1949,7 @@ function renderTagPage(key){
     +'<button class="hdr-btn" onclick="history.back()" style="margin-right:8px"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
     +'<div style="flex:1"><div style="font-size:11px;color:var(--mu);font-weight:600;margin-bottom:2px">'+(typeLabel[type]||"태그")+'</div>'
     +'<span style="font-size:16px;font-weight:800">'+pageTitle+'</span></div>'
-    +'<span style="font-size:12px;color:var(--mu);font-weight:600">'+matched.length+'건</span></div>';
+    +'<span style="font-size:12px;color:var(--mu);font-weight:600">'+(matched.length>20&&(type==='curation'||type==='weekend'||type==='hotOndo'||type==='catTop'||type==='__closing__')?'TOP 20':matched.length+'건')+'</span></div>';
   // 관련 태그 (district/vibe/keyword만)
   if(type==="district"||type==="vibe"||type==="keyword"){
     var relTags={};
