@@ -852,7 +852,7 @@ function go(pg,id){
     if(!user){curNav="my";updateNav();go('login');return;}
     showSkl("my",sklM);setTimeout(renderMy,DL);
   }
-  else if(pg==="detail"){showSkl("detail",sklD);setTimeout(function(){renderDetail(id);},DL);}
+  else if(pg==="detail"){renderDetail(id);}
   else if(pg==="tag"){showSkl("tag",function(){return R(6,function(){return'<div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #21212e"><div style="width:50px;height:66px;border-radius:5px" class="sk"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px"><div style="width:80%;height:14px" class="sk"></div><div style="width:50%;height:12px" class="sk"></div></div><div style="width:46px;height:46px;border-radius:50%" class="sk"></div></div>';});});setTimeout(function(){renderTagPage(id);},DL);}
 }
 function updateNav(){document.querySelectorAll(".bnav-i,.bnav-center").forEach(function(b){b.classList.toggle("on",b.dataset.k===curNav);});}
@@ -1545,7 +1545,16 @@ function viewEv(id){
     vcMap[id]=(vcMap[id]||0)+1;
     localStorage.setItem('snr_vc',JSON.stringify(vcMap));
   }
-  go("detail",id);
+  // 페이지 전환 후 즉시 렌더 (딜레이 없음)
+  if(sTimer){clearInterval(sTimer);sTimer=null;}
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");p.style.display="";});
+  var pg=document.getElementById("page-detail");
+  pg.style.display="";
+  pg.classList.add("active");
+  curPage="detail";
+  document.getElementById("bnav").style.display="none";
+  window.scrollTo(0,0);
+  renderDetail(id);
 }
 
 function _buildDetailHTML(id,e,kd){
@@ -1562,18 +1571,21 @@ function _buildDetailHTML(id,e,kd){
   var ico=IC[e.ct]||"🎫";
 
   // KOPIS 상세 데이터 추출
-  var cast=kd&&kd.prfcast?kd.prfcast:'';
-  var runtime=kd&&kd.prfruntime?kd.prfruntime:'';
-  var age=kd&&kd.prfage?kd.prfage:'';
+  var cast=kd&&kd.prfcast?kd.prfcast:(e.prfcast||'');
+  var runtime=kd&&kd.prfruntime?kd.prfruntime:(e.prfruntime||'');
+  var age=kd&&kd.prfage?kd.prfage:(e.prfage||'');
   var price=kd&&kd.pcseguidance?kd.pcseguidance:(e.pr||'');
-  var schedule=kd&&kd.dtguidance?kd.dtguidance:'';
-  var synopsis=kd&&kd.sty?kd.sty:'';
+  var schedule=kd&&kd.dtguidance?kd.dtguidance:(e.ds||'');
+  var synopsis=kd&&kd.sty?kd.sty:(e.sty||'');
   var introImgs=[];
   if(kd&&kd.styurls){
     var imgs=Array.isArray(kd.styurls)?kd.styurls:[kd.styurls];
     imgs.forEach(function(u){if(u&&u.trim())introImgs.push(proxyImg(u.trim()));});
+  } else if(e.styurls){
+    // events.json에 저장된 콤마 구분 URL
+    String(e.styurls).split(',').forEach(function(u){if(u&&u.trim())introImgs.push(proxyImg(u.trim()));});
   }
-  var company=kd&&kd.entrpsnmP?kd.entrpsnmP:'';
+  var company=kd&&kd.entrpsnmP?kd.entrpsnmP:(e.entrpsnmP||'');
   var isBoxoffice=kd&&kd.boxoffice_rank;
 
   // 포스터 이미지
@@ -1775,13 +1787,18 @@ function renderDetail(id){
   }
   var pg=document.getElementById("page-detail");
   var isKopis=id&&id.match(/^PF/i);
-  // 즉시 기본 데이터로 렌더 (빠른 표시)
-  pg.innerHTML=_buildDetailHTML(id,e,null);
-  // 백그라운드로 KOPIS 상세 데이터 보완
-  if(isKopis){
-    fetchKopisDetail(id,function(kd){
-      if(curPage==='detail'&&kd)pg.innerHTML=_buildDetailHTML(id,e,kd);
-    });
+  // events.json에 상세 데이터가 있으면 API 호출 불필요
+  var hasDetail = e.prfcast || e.sty || e.prfruntime;
+  if(hasDetail){
+    pg.innerHTML=_buildDetailHTML(id,e,null);
+  } else {
+    // 즉시 기본 데이터로 렌더 후 백그라운드 보완
+    pg.innerHTML=_buildDetailHTML(id,e,null);
+    if(isKopis){
+      fetchKopisDetail(id,function(kd){
+        if(curPage==='detail'&&kd)pg.innerHTML=_buildDetailHTML(id,e,kd);
+      });
+    }
   }
 }
 function goTag(type,val){go("tag",type+"::"+val);}
