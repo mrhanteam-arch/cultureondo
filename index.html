@@ -599,7 +599,7 @@ var liked=new Set(),bookmarked=new Set(JSON.parse(localStorage.getItem('snr_bm')
   });
 })();
 var cPd="일간",cCat="전체",cRegion="전국",curNav="home",curPage="home",prevNav="home";
-var sIdx=0,sTimer=null,calYear=new Date().getFullYear(),calMonth=new Date().getMonth(),calSel=null,myTab="bookmark";
+var sIdx=0,sTimer=null,calYear=new Date().getFullYear(),calMonth=new Date().getMonth(),calSel=null,myTab="bookmark",calCat="전체";
 var sHist=JSON.parse(localStorage.getItem('snr_sh')||'[]');
 var rvId=null,rvRating=0,rvDB=JSON.parse(localStorage.getItem('snr_rv')||'{}');
 var user=JSON.parse(localStorage.getItem('snr_user')||'null');
@@ -964,9 +964,14 @@ function renderHome(){
   +'</div>';
   if(slides.length){
     h+='<div class="hero-slider"><div class="hero-track" id="heroTrack">';
-    slides.forEach(function(e,i){var t=tc(e._s,mx);var _p=getPoster(e);h+='<div class="hero-slide" style="background:linear-gradient(135deg,#1a1a28,#2a1'+i+'a20)'+(_p?';background-image:url('+_p+');background-size:cover;background-position:center top':'')+';cursor:pointer" onclick="viewEv(\''+e.id+'\')">'+(_p?'':''+IC[e.ct])+'<div class="hero-ov"><div class="hero-badge">HOT '+t+'°C</div><div class="hero-title">'+e.t+'</div><div class="hero-sub">'+e.ct+' · '+e.lo+'</div></div></div>';});
+    slides.forEach(function(e,i){var t=tc(e._s,mx);var _p=getPoster(e);h+='<div class="hero-slide" style="background:linear-gradient(135deg,#1a1a28,#2a1'+i+'a20)'+(_p?';background-image:url('+_p+');background-size:cover;background-position:center center':'')+';cursor:pointer" onclick="viewEv(\''+e.id+'\')">'+(_p?'':''+IC[e.ct])+'<div class="hero-ov"><div class="hero-badge">HOT '+t+'°C</div><div class="hero-title">'+e.t+'</div><div class="hero-sub">'+e.ct+' · '+e.lo+'</div></div></div>';});
     h+='</div>';
-    if(slides.length>1){h+='<div class="hero-dots">'+slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'\" onclick="goSlide('+i+')"></div>';}).join('')+'</div>';}
+    if(slides.length>1){
+      // 좌우 화살표
+      h+='<button onclick="event.stopPropagation();(function(){var l=document.getElementById('heroTrack').children.length;goSlide((sIdx-1+l)%l);})()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)">‹</button>';
+      h+='<button onclick="event.stopPropagation();(function(){var l=document.getElementById('heroTrack').children.length;goSlide((sIdx+1)%l);})()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)">›</button>';
+      h+='<div class="hero-dots">'+slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'" onclick="goSlide('+i+')"></div>';}).join('')+'</div>';
+    }
     h+='</div>';
     sTimer=setInterval(function(){sIdx=(sIdx+1)%slides.length;goSlide(sIdx);},3500);
   }
@@ -1191,6 +1196,7 @@ function renderCalendar(){
     dt.setHours(0,0,0,0);
     return ev.filter(function(e){
       if(!e.sd||!e.ed)return false;
+      if(calCat!=='전체'&&e.ct!==calCat)return false;
       var s=new Date(e.sd);s.setHours(0,0,0,0);
       var en=new Date(e.ed);en.setHours(0,0,0,0);
       return dt>=s&&dt<=en;
@@ -1203,6 +1209,14 @@ function renderCalendar(){
     +'<div class="cal-month">'+yr+'년 '+mn[mo]+'</div>'
     +'<button onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}calSel=null;renderCalendar()">›</button>'
   +'</div>';
+  // 카테고리 필터 탭
+  var calCats=["전체","뮤지컬","연극","콘서트/페스티벌","클래식/무용","복합"];
+  h+='<div style="display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none">';
+  calCats.forEach(function(cat){
+    var on=(calCat===cat);
+    h+='<button onclick="calCat=\''+cat+'\';renderCalendar()" style="flex:0 0 auto;padding:6px 14px;border-radius:20px;border:'+(on?'none':'1px solid var(--bd)')+';background:'+(on?'var(--hot)':'var(--sf)')+';color:'+(on?'#fff':'var(--sub)')+';font-size:12px;font-weight:'+(on?'700':'500')+';cursor:pointer;font-family:inherit;white-space:nowrap">'+cat+'</button>';
+  });
+  h+='</div>';
 
   // ── 요일 헤더 ──
   h+='<div class="cal-grid">';
@@ -1252,9 +1266,11 @@ function renderCalendar(){
   // ── 선택된 날 이벤트 목록 ──
   var de=eod(selD);
   // 저장한 이벤트 최상단 정렬
-  var bmList=de.filter(function(e){return bookmarked.has(e.id);});
-  var restList=de.filter(function(e){return!bookmarked.has(e.id);});
-  var sortedDe=bmList.concat(restList);
+  // 온도순 정렬
+  var deSorted=de.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).sort(function(a,b){return b._s-a._s;});
+  var bmList=deSorted.filter(function(e){return bookmarked.has(e.id);});
+  var restList=deSorted.filter(function(e){return!bookmarked.has(e.id);});
+  var sortedDe=bmList.concat(restList).slice(0,30);
 
   var dateLabel=yr+'.'+String(mo+1).padStart(2,'0')+'.'+String(selD).padStart(2,'0');
   var isTodaySel=(yr===todayY&&mo===todayM&&selD===todayD);
@@ -1890,7 +1906,11 @@ function renderTagPage(key){
   if(!matched.length){
     h+='<div class="empty"><div style="font-size:48px;margin-bottom:14px">🏷️</div><p style="font-weight:700;margin-bottom:6px">연결된 이벤트가 없어요</p></div>';
   } else {
-    matched.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).sort(function(a,b){return b._s-a._s;}).forEach(function(e,i){
+    // curation 타입은 온도 상위 20개만 표시
+    var isCuration=(type==='curation'||type==='weekend'||type==='hotOndo'||type==='catTop'||type==='__closing__');
+    var displayList=matched.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).sort(function(a,b){return b._s-a._s;});
+    if(isCuration) displayList=displayList.slice(0,20);
+    displayList.forEach(function(e,i){
       var t=tc(e._s,mx);
       h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.05)+'s both">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.district||gr(e))+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+thermo(t,e,mx)+'</div>';
     });
