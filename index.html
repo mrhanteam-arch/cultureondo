@@ -182,7 +182,7 @@ a{color:inherit;text-decoration:none}
 .dl-dday{flex-shrink:0;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(255,94,58,0.12);color:var(--hot);border:1px solid rgba(255,94,58,0.2)}
 /* 랭킹 */
 /* ── 랭킹 카테고리 탭 ── */
-.rk-cat-tabs{display:flex;border-bottom:1px solid var(--bdL);overflow-x:auto;scrollbar-width:none}
+.rk-cat-tabs{display:flex;border-bottom:1px solid var(--bdL);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .rk-cat-tab{flex:0 0 auto;padding:12px 16px;font-size:13px;font-weight:500;color:var(--mu);background:transparent;border:none;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:all 0.2s;white-space:nowrap;text-align:center;cursor:pointer}
 .rk-cat-tab.on{font-weight:800;color:var(--hot);border-bottom-color:var(--hot)}
 /* 랭킹 기간 탭 + 지역 필터 바 */
@@ -610,6 +610,19 @@ var REG=["전국","서울","경기","인천","부산","대구","대전","광주"
 
 // ── 캐시 — 30분 유지 (static JSON은 더 오래 써도 OK) ──────────
 var _cache=null,_cacheTime=0;
+var _scoredCache=null;
+function getScoredEvents(){
+  if(_scoredCache)return _scoredCache;
+  var mx_=0;
+  var tmp=ev.map(function(e){
+    var s=sc(e,ev);
+    if(s>mx_)mx_=s;
+    return Object.assign({},e,{_s:s});
+  }).filter(function(e){return e.st!=='ended';})
+    .sort(function(a,b){return b._s-a._s;});
+  _scoredCache=tmp;
+  return _scoredCache;
+}
 function loadEvents(callback){
   var now=Date.now();
   if(_cache&&(now-_cacheTime)<1800000){  // 30분
@@ -627,6 +640,7 @@ function loadEvents(callback){
       _cache=data.events||[];
       _cacheTime=Date.now();
       ev=_cache;
+      _scoredCache=null;  // 점수 캐시 리셋
       applyLocalReactions(ev);
       callback(ev);
     })
@@ -639,6 +653,7 @@ function loadEvents(callback){
           _cache=data.events||[];
           _cacheTime=Date.now();
           ev=_cache;
+          _scoredCache=null;  // 점수 캐시 리셋
           applyLocalReactions(ev);
           callback(ev);
         })
@@ -650,6 +665,7 @@ function loadEvents(callback){
     });
 }
 function applyLocalReactions(events){
+  _scoredCache=null;  // 반응 변경 시 점수 캐시 리셋
   var vcMap=JSON.parse(localStorage.getItem('snr_vc')||'{}');
   var lcMap=JSON.parse(localStorage.getItem('snr_lc')||'{}');
   var bcMap=JSON.parse(localStorage.getItem('snr_bc')||'{}');
@@ -928,7 +944,7 @@ function submitEmail(){
 /* 홈 */
 function renderHome(){
   curNav="home";
-  var ranked=ev.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).filter(function(e){return e.st!=="ended";}).sort(function(a,b){return b._s-a._s;});
+  var ranked=getScoredEvents();
   var mx=ranked.length?ranked[0]._s:1;
   var hot5=ranked.slice(0,6),closing=ranked.filter(function(e){return dd(e.ed)>=0&&dd(e.ed)<=7&&e.st==="ongoing";}).sort(function(a,b){return dd(a.ed)-dd(b.ed);}).slice(0,4);
   var upcoming=ranked.filter(function(e){return e.st==="upcoming";}).slice(0,6),slides=ranked.slice(0,4);
@@ -964,20 +980,38 @@ function renderHome(){
   +'</div>';
   if(slides.length){
     h+='<div class="hero-slider"><div class="hero-track" id="heroTrack">';
-    slides.forEach(function(e,i){var t=tc(e._s,mx);var _p=getPoster(e);h+='<div class="hero-slide" style="background:linear-gradient(135deg,#1a1a28,#2a1'+i+'a20)'+(_p?';background-image:url('+_p+');background-size:cover;background-position:center center':'')+';cursor:pointer" onclick="viewEv(\''+e.id+'\')">'+(_p?'':''+IC[e.ct])+'<div class="hero-ov"><div class="hero-badge">HOT '+t+'°C</div><div class="hero-title">'+e.t+'</div><div class="hero-sub">'+e.ct+' · '+e.lo+'</div></div></div>';});
+    var gradients=['linear-gradient(135deg,#1a1228,#2d1535)','linear-gradient(135deg,#0d1a2d,#1a2d42)','linear-gradient(135deg,#1a1a10,#2d2d14)','linear-gradient(135deg,#1a0d1a,#2d1a2d)'];
+    slides.forEach(function(e,i){
+      var t=tc(e._s,mx);
+      var _p=getPoster(e);
+      var bg=gradients[i%gradients.length];
+      h+='<div class="hero-slide" style="background:'+bg+';cursor:pointer;display:flex;align-items:center;padding:0 16px;gap:14px" onclick="viewEv(\''+e.id+'\')">'
+        +'<div style="flex-shrink:0;width:86px;height:114px;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.5);background:#2a2a38;display:flex;align-items:center;justify-content:center;font-size:32px">'
+        +(_p?'<img src="'+_p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="eager">':IC[e.ct])
+        +'</div>'
+        +'<div style="flex:1;min-width:0;padding-bottom:20px">'
+          +'<div class="hero-badge" style="margin-bottom:8px">HOT '+t+'°C</div>'
+          +'<div class="hero-title">'+e.t+'</div>'
+          +'<div class="hero-sub">'+e.ct+' · '+e.lo+'</div>'
+        +'</div>'
+        +'</div>';
+    });
     h+='</div>';
     if(slides.length>1){
       // 좌우 화살표
-      h+='<button onclick="event.stopPropagation();goPrevSlide()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)">‹</button>';
-      h+='<button onclick="event.stopPropagation();goNextSlide()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)">›</button>';
-      h+='<div class="hero-dots">'+slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'" onclick="goSlide('+i+')"></div>';}).join('')+'</div>';
+      // 화살표 + dots 하단 중앙에 나란히
+      h+='<div style="position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:8px;z-index:10">'
+        +'<button onclick="event.stopPropagation();goPrevSlide()" style="width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">‹</button>'
+        +'<div style="display:flex;gap:5px;align-items:center">'+slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'" onclick="event.stopPropagation();goSlide('+i+')" style="cursor:pointer"></div>';}).join('')+'</div>'
+        +'<button onclick="event.stopPropagation();goNextSlide()" style="width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">›</button>'
+        +'</div>';
     }
     h+='</div>';
     sTimer=setInterval(function(){sIdx=(sIdx+1)%slides.length;goSlide(sIdx);},3500);
   }
   // 큐레이션 테마 카드
   var curations=getCurations();
-  var allScored=ev.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).filter(function(e){return e.st!=="ended";});
+  var allScored=getScoredEvents();
 
   // 카테고리별 1위 추출
   var catTops={};
@@ -1068,7 +1102,7 @@ function renderHome(){
       +'<div class="cc-bg" style="'+bgStyle+'"></div>'
       +'<div class="cc-overlay" style="background:linear-gradient(160deg,'+c.color1+'55 0%,'+c.color2+'dd 100%)"></div>'
       +(svgIcon?'<div class="cc-icon" style="color:rgba(255,255,255,0.9)">'+svgIcon+'</div>':'<div class="cc-icon">'+c.icon+'</div>')
-      +'<div class="cc-body"><div class="cc-title">'+c.title+'</div><div class="cc-count">'+cnt+'개 이벤트</div></div>'
+      +'<div class="cc-body"><div class="cc-title">'+c.title+'</div><div class="cc-count">'+(cnt>20?'TOP 20':cnt+'개 이벤트')+'</div></div>'
       +'</div>';
   });
   h+='</div>';
@@ -1128,7 +1162,8 @@ function renderRanking(){
   }
   // 기간 필터 — 해당 범위 내에 공연이 진행 중인 것만
   var rng=pdRange();
-  var list=ev.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).filter(function(e){
+  var _allScored=getScoredEvents();
+  var list=_allScored.filter(function(e){
     if(e.st==="ended")return false;
     if(cCat!=="전체"&&e.ct!==cCat)return false;
     if(cRegion!=="전국"&&gr(e)!==cRegion)return false;
@@ -1311,8 +1346,8 @@ function renderCalendar(){
 /* 탐색 */
 function renderExplore(){
   curNav="explore";
-  var all=ev.filter(function(e){return e.st!=="ended";});
-  var scored=all.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).sort(function(a,b){return b._s-a._s;});
+  var all=getScoredEvents();
+  var scored=getScoredEvents();
   // 인기 검색어: 점수 상위에서 공연명 첫 단어 추출
   var tr=scored.slice(0,10).map(function(e,i){
     var prev=e.prev_rank!=null?Number(e.prev_rank):null;
@@ -1430,7 +1465,7 @@ function renderMy(){
   var lk=ev.filter(function(e){return liked.has(e.id);});
   var rvKeys=Object.keys(rvDB);
   var list=myTab==="bookmark"?bm:myTab==="like"?lk:[];
-  var all=ev.map(function(x){return Object.assign({},x,{_s:sc(x)});}).sort(function(a,b){return b._s-a._s;});
+  var all=getScoredEvents();
   var mx=all.length?all[0]._s:1;
   var H=[];
 
@@ -1576,7 +1611,7 @@ function viewEv(id){
 }
 
 function _buildDetailHTML(id,e,kd){
-  var all=ev.map(function(x){return Object.assign({},x,{_s:sc(x)});}).sort(function(a,b){return b._s-a._s;});
+  var all=getScoredEvents();
   var mx=all.length?all[0]._s:1,t=tc(sc(e),mx),c=tC(t),d=dd(e.ed);
   var sd2=scDetail(e,ev); // 온도 breakdown
   var dt="진행중",dc="#2ecc71";
@@ -1887,7 +1922,7 @@ function renderTagPage(key){
   else if(type==="vibe"){matched=ev.filter(function(e){return(e.vibes||[]).indexOf(val)>=0;});}
   else if(type==="keyword"){matched=ev.filter(function(e){return(e.tags||[]).indexOf(val)>=0;});}
   else{matched=[];}
-  var all=ev.map(function(x){return Object.assign({},x,{_s:sc(x)});}).sort(function(a,b){return b._s-a._s;});
+  var all=getScoredEvents();
   var mx=all.length?all[0]._s:1;
   var h='<div class="hdr">'
     +'<button class="hdr-btn" onclick="go(\'home\')" style="margin-right:8px"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
