@@ -968,8 +968,8 @@ function renderHome(){
     h+='</div>';
     if(slides.length>1){
       // 좌우 화살표
-      h+='<button onclick="event.stopPropagation();(function(){var l=document.getElementById('heroTrack').children.length;goSlide((sIdx-1+l)%l);})()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)">‹</button>';
-      h+='<button onclick="event.stopPropagation();(function(){var l=document.getElementById('heroTrack').children.length;goSlide((sIdx+1)%l);})()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)">›</button>';
+      h+='<button onclick="event.stopPropagation();goPrevSlide()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)">‹</button>';
+      h+='<button onclick="event.stopPropagation();goNextSlide()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)">›</button>';
       h+='<div class="hero-dots">'+slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'" onclick="goSlide('+i+')"></div>';}).join('')+'</div>';
     }
     h+='</div>';
@@ -1079,6 +1079,8 @@ function renderHome(){
   document.getElementById("page-home").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
 }
 function goSlide(i){sIdx=i;var tr=document.getElementById("heroTrack");if(!tr)return;tr.style.transform="translateX(-"+(i*100)+"%)";document.querySelectorAll(".hero-dot").forEach(function(d,j){d.classList.toggle("on",j===i);});}
+function goPrevSlide(){var l=document.getElementById("heroTrack").children.length;goSlide((sIdx-1+l)%l);}
+function goNextSlide(){var l=document.getElementById("heroTrack").children.length;goSlide((sIdx+1)%l);}
 
 /* 랭킹 */
 function pdRange(){
