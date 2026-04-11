@@ -1580,10 +1580,10 @@ function _buildDetailHTML(id,e,kd){
   var introImgs=[];
   if(kd&&kd.styurls){
     var imgs=Array.isArray(kd.styurls)?kd.styurls:[kd.styurls];
-    imgs.forEach(function(u){if(u&&u.trim())introImgs.push(proxyImg(u.trim()));});
+    imgs.slice(0,3).forEach(function(u){if(u&&u.trim())introImgs.push(proxyImg(u.trim()));});
   } else if(e.styurls){
-    // events.json에 저장된 콤마 구분 URL
-    String(e.styurls).split(',').forEach(function(u){if(u&&u.trim())introImgs.push(proxyImg(u.trim()));});
+    // events.json에 저장된 콤마 구분 URL — 최대 3장
+    String(e.styurls).split(',').slice(0,3).forEach(function(u){if(u&&u.trim())introImgs.push(proxyImg(u.trim()));});
   }
   var company=kd&&kd.entrpsnmP?kd.entrpsnmP:(e.entrpsnmP||'');
   var isBoxoffice=kd&&kd.boxoffice_rank;
