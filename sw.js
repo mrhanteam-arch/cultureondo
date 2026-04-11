@@ -2,7 +2,7 @@
 //  컬처온도 Service Worker
 //  버전을 올리면 activate 시 구버전 캐시 자동 삭제
 // ─────────────────────────────────────────────
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 
 const CACHE_NAMES = {
   static:  'co-static-'  + CACHE_VERSION,   // HTML, JS, manifest
@@ -191,7 +191,8 @@ async function staleWhileRevalidate(request, cacheName, ttlDays = 1) {
   }
 
   // 캐시 없음 — 네트워크 대기
-  return fetchAndUpdate() || new Response(null, { status: 503 });
+  const result = await fetchAndUpdate();
+  return result || new Response(null, { status: 503 });
 }
 
 // ─────────────────────────────────────────────
