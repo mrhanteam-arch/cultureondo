@@ -1775,11 +1775,13 @@ function renderDetail(id){
   }
   var pg=document.getElementById("page-detail");
   var isKopis=id&&id.match(/^PF/i);
+  // 즉시 기본 데이터로 렌더 (빠른 표시)
+  pg.innerHTML=_buildDetailHTML(id,e,null);
+  // 백그라운드로 KOPIS 상세 데이터 보완
   if(isKopis){
-    pg.innerHTML=sklD();
-    fetchKopisDetail(id,function(kd){if(curPage==='detail')pg.innerHTML=_buildDetailHTML(id,e,kd);});
-  } else {
-    pg.innerHTML=_buildDetailHTML(id,e,null);
+    fetchKopisDetail(id,function(kd){
+      if(curPage==='detail'&&kd)pg.innerHTML=_buildDetailHTML(id,e,kd);
+    });
   }
 }
 function goTag(type,val){go("tag",type+"::"+val);}
