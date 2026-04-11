@@ -618,7 +618,7 @@ function loadEvents(callback){
     return;
   }
   // 1순위: events.json (GitHub Pages)
-  fetch(JSON_URL)  // 30분 버스팅
+  fetch(JSON_URL)
     .then(function(r){
       if(!r.ok)throw new Error('json_404');
       return r.json();
