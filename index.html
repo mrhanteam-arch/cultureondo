@@ -582,7 +582,12 @@ a{color:inherit;text-decoration:none}
 
 <script>
 // ── Google Sheets API 연결 ──
+// ── API 엔드포인트 ──────────────────────────────────────────
+// 1순위: GitHub Pages static JSON (빠름, CDN 캐시)
+// 2순위: Apps Script (실시간, fallback)
+var JSON_URL='https://mrhanteam-arch.github.io/cultureondo/events.json';
 var API_URL='https://script.google.com/macros/s/AKfycbytHPW2_H1V0d6Q4_lLH5wL3oUXbDvqGnL0YZKh8pe0SFyPGNnpkzm9TVUcyF405Hg/exec';
+
 var ev=[];
 var liked=new Set(),bookmarked=new Set(JSON.parse(localStorage.getItem('snr_bm')||'[]'));
 // bc(저장수) — localStorage에서 복원
@@ -603,17 +608,21 @@ var CATS=["전체","뮤지컬","콘서트/페스티벌","연극","클래식/무�
 var IC={"전체":"🔥","뮤지컬":"🎭","연극":"🎬","콘서트/페스티벌":"🎤","클래식/무용":"🎻","복합":"✨","팝업스토어":"🏪"};
 var REG=["전국","서울","경기","인천","부산","대구","대전","광주","강원","충청","경상","전라","제주"];
 
-// 캐시 — 5분 유지
+// ── 캐시 — 30분 유지 (static JSON은 더 오래 써도 OK) ──────────
 var _cache=null,_cacheTime=0;
 function loadEvents(callback){
   var now=Date.now();
-  if(_cache&&(now-_cacheTime)<300000){
+  if(_cache&&(now-_cacheTime)<1800000){  // 30분
     applyLocalReactions(_cache);
     callback(_cache);
     return;
   }
-  fetch(API_URL)
-    .then(function(r){return r.json();})
+  // 1순위: events.json (GitHub Pages)
+  fetch(JSON_URL+'?t='+Math.floor(now/1800000))  // 30분 버스팅
+    .then(function(r){
+      if(!r.ok)throw new Error('json_404');
+      return r.json();
+    })
     .then(function(data){
       _cache=data.events||[];
       _cacheTime=Date.now();
@@ -621,10 +630,23 @@ function loadEvents(callback){
       applyLocalReactions(ev);
       callback(ev);
     })
-    .catch(function(err){
-      console.error('API 오류:',err);
-      if(_cache){callback(_cache);}
-      else{callback([]);}
+    .catch(function(){
+      // 2순위: Apps Script fallback
+      console.warn('[컬처온도] events.json 실패 — Apps Script fallback');
+      fetch(API_URL)
+        .then(function(r){return r.json();})
+        .then(function(data){
+          _cache=data.events||[];
+          _cacheTime=Date.now();
+          ev=_cache;
+          applyLocalReactions(ev);
+          callback(ev);
+        })
+        .catch(function(err){
+          console.error('[컬처온도] API 오류:',err);
+          if(_cache){callback(_cache);}
+          else{callback([]);}
+        });
     });
 }
 function applyLocalReactions(events){
@@ -906,7 +928,6 @@ function submitEmail(){
 /* 홈 */
 function renderHome(){
   curNav="home";
-  loadEvents(function(data){ev=data;
   var ranked=ev.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).filter(function(e){return e.st!=="ended";}).sort(function(a,b){return b._s-a._s;});
   var mx=ranked.length?ranked[0]._s:1;
   var hot5=ranked.slice(0,6),closing=ranked.filter(function(e){return dd(e.ed)>=0&&dd(e.ed)<=7&&e.st==="ongoing";}).sort(function(a,b){return dd(a.ed)-dd(b.ed);}).slice(0,4);
@@ -1051,7 +1072,7 @@ function renderHome(){
   if(closing.length){h+='<div style="padding:0 20px;margin-bottom:12px"><div style="font-size:15px;font-weight:800">곧 종료</div></div><div class="dl-list">';closing.forEach(function(e){h+='<div class="dl-item" onclick="viewEv(\''+e.id+'\')"><div class="dl-thumb" style="'+(getPoster(e)?'background-image:url('+getPoster(e)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(e)?IC[e.ct]:'')+' </div><div class="dl-info"><div class="dl-title">'+e.t+'</div><div class="dl-meta">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div></div><div class="dl-dday">D-'+dd(e.ed)+'</div></div>';});h+='</div>';}
   if(upcoming.length){h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px;margin-top:4px"><div style="font-size:15px;font-weight:800">오픈 예정</div></div><div class="h-scroll">'+upcoming.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:rgba(79,195,247,0.15);color:#4fc3f7">D-'+Math.max(s,0)+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';}
   document.getElementById("page-home").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
-  });}
+}
 function goSlide(i){sIdx=i;var tr=document.getElementById("heroTrack");if(!tr)return;tr.style.transform="translateX(-"+(i*100)+"%)";document.querySelectorAll(".hero-dot").forEach(function(d,j){d.classList.toggle("on",j===i);});}
 
 /* 랭킹 */
@@ -1080,7 +1101,6 @@ function pdLabel(){
 }
 function renderRanking(){
   curNav="ranking";
-  loadEvents(function(data){ev=data;
   // 팝업스토어 준비중
   if(cCat==="팝업스토어"){
     var regionActive=cRegion!=="전국";
@@ -1139,7 +1159,7 @@ function renderRanking(){
       +thermo(t,e,mx)+'</div>';
   });}
   document.getElementById("page-ranking").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
-  });}
+}
 function openRegionSheet(){document.getElementById("regionSheet").classList.add("show");}
 function closeRegionSheet(){document.getElementById("regionSheet").classList.remove("show");}
 function selectRegion(r){
@@ -1153,7 +1173,6 @@ function selectRegion(r){
 /* 캘린더 */
 function renderCalendar(){
   curNav="calendar";
-  loadEvents(function(data){ev=data;
   // ── 실제 오늘 날짜 기준 ──
   var realToday=new Date();
   realToday.setHours(0,0,0,0);
@@ -1269,13 +1288,11 @@ function renderCalendar(){
   }
   h+='</div>';
   document.getElementById("page-calendar").innerHTML=h;
-  });
 }
 
 /* 탐색 */
 function renderExplore(){
   curNav="explore";
-  loadEvents(function(data){ev=data;
   var all=ev.filter(function(e){return e.st!=="ended";});
   var scored=all.map(function(e){return Object.assign({},e,{_s:sc(e,ev)});}).sort(function(a,b){return b._s-a._s;});
   // 인기 검색어: 점수 상위에서 공연명 첫 단어 추출
@@ -1386,13 +1403,11 @@ function renderExplore(){
   }
 
   document.getElementById("page-explore").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
-  });
 }
 
 /* 마이페이지 */
 function renderMy(){
   curNav="my";
-  loadEvents(function(data){ev=data;
   var bm=ev.filter(function(e){return bookmarked.has(e.id);});
   var lk=ev.filter(function(e){return liked.has(e.id);});
   var rvKeys=Object.keys(rvDB);
@@ -1500,7 +1515,6 @@ function renderMy(){
 
   var credit='<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
   document.getElementById("page-my").innerHTML=H.join('')+credit;
-  });
 }
 
 function proxyImg(url){
