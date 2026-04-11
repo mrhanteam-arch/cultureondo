@@ -712,7 +712,7 @@ function getPoster(e){
   url=url.replace('http://','https://');
   // KOPIS 이미지는 프록시로 우회
   if(url.indexOf('kopis.or.kr')>=0){
-    return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=300&output=webp';
+    return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=200&output=webp&q=75';
   }
   return url;
 }
@@ -1520,7 +1520,7 @@ function renderMy(){
 function proxyImg(url){
   if(!url)return'';
   url=url.replace('http://','https://');
-  if(url.indexOf('kopis.or.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=600&output=webp';
+  if(url.indexOf('kopis.or.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=80';
   return url;
 }
 var _detailCache={};
