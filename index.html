@@ -1787,19 +1787,8 @@ function renderDetail(id){
   }
   var pg=document.getElementById("page-detail");
   var isKopis=id&&id.match(/^PF/i);
-  // events.json에 상세 데이터가 있으면 API 호출 불필요
-  var hasDetail = e.prfcast || e.sty || e.prfruntime;
-  if(hasDetail){
-    pg.innerHTML=_buildDetailHTML(id,e,null);
-  } else {
-    // 즉시 기본 데이터로 렌더 후 백그라운드 보완
-    pg.innerHTML=_buildDetailHTML(id,e,null);
-    if(isKopis){
-      fetchKopisDetail(id,function(kd){
-        if(curPage==='detail'&&kd)pg.innerHTML=_buildDetailHTML(id,e,kd);
-      });
-    }
-  }
+  // events.json 데이터로 즉시 렌더 (fetchKopisDetail 호출 없음)
+  pg.innerHTML=_buildDetailHTML(id,e,null);
 }
 function goTag(type,val){go("tag",type+"::"+val);}
 function goCuration(cid){
