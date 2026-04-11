@@ -2,7 +2,12 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="컬처온도">
+<meta name="theme-color" content="#111114">
 <title>컬처온도 - 문화생활 온도 랭킹</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -18,7 +23,7 @@ a{color:inherit;text-decoration:none}
 :root{--bg:#111114;--sf:#1a1a20;--card:#1e1e28;--bd:#2a2a38;--bdL:#21212e;--tx:#ededf0;--sub:#8d8da0;--mu:#505068;--hot:#ff5e3a;--warm:#ff9500;--cool:#4fc3f7;}
 .sk{background:linear-gradient(90deg,#1e1e28 0%,#252530 50%,#1e1e28 100%);background-size:200px 100%;animation:skl 1.3s ease-in-out infinite;border-radius:6px}
 #app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;overflow-x:hidden}
-.page{display:none;animation:fi 0.25s ease;padding-bottom:72px}
+.page{display:none;animation:fi 0.25s ease;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 .page.active{display:block}
 .login-page{padding-bottom:0!important;min-height:100vh;display:flex;flex-direction:column}.page.login-page:not(.active){display:none!important}
 /* ── 네비게이션 바 ── */
@@ -30,6 +35,7 @@ a{color:inherit;text-decoration:none}
   border-top:1px solid rgba(255,255,255,0.06);
   display:flex;align-items:center;
   padding:6px 4px 16px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
   z-index:100;gap:0;
 }
 .credit-block{
@@ -689,17 +695,17 @@ function applyLocalReactions(events){
 // 큐레이션 테마 — localStorage에 저장/덮어쓰기 가능 (어드민에서 관리)
 var DEFAULT_CURATIONS=[
   {id:"c1",title:"주말 추천",icon:"__weekend__",color1:"#27ae60",color2:"#1a6b3a",filter:"weekend",wide:false,
-   bg:"https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&h=220&fit=crop&q=80"},
+   bg:"https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=200&h=110&fit=crop&q=60"},
   {id:"c2",title:"이번 주 마감",icon:"__closing__icon__",color1:"#e74c3c",color2:"#922b21",filter:"closing",tags:["__closing__"],wide:false,
-   bg:"https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=220&fit=crop&q=80"},
+   bg:"https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=200&h=110&fit=crop&q=60"},
   {id:"c3",title:"신규 오픈",icon:"__new__",color1:"#8e44ad",color2:"#5b2c6f",filter:"new",wide:false,
-   bg:"https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=220&fit=crop&q=80"},
+   bg:"https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=110&fit=crop&q=60"},
   {id:"c4",title:"예매 HOT",icon:"__hot__",color1:"#ff5e3a",color2:"#c0392b",filter:"boxoffice",wide:false,
-   bg:"https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=220&fit=crop&q=80"},
+   bg:"https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=200&h=110&fit=crop&q=60"},
   {id:"c5",title:"뮤지컬",icon:"__musical__",color1:"#2980b9",color2:"#1a5276",filter:"ct_musical",wide:false,
-   bg:"https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=400&h=220&fit=crop&q=80"},
+   bg:"https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=200&h=110&fit=crop&q=60"},
   {id:"c6",title:"콘서트·페스티벌",icon:"__concert__",color1:"#f39c12",color2:"#b7770d",filter:"ct_concert",wide:false,
-   bg:"https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=220&fit=crop&q=80"},
+   bg:"https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=200&h=110&fit=crop&q=60"},
 ];
 function getCurations(){
   try{var s=localStorage.getItem('co_curations');return s?JSON.parse(s):DEFAULT_CURATIONS;}
@@ -734,12 +740,12 @@ function getPoster(e){
 }
 function rkThumb(e){
   var p=getPoster(e);
-  if(p)return '<div class="rk-img" style="background-image:url('+p+');background-size:cover;background-position:center top"></div>';
+  if(p)return '<div class="rk-img" style="font-size:0"><img src="'+p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="lazy"></div>';
   return '<div class="rk-img">'+IC[e.ct]+'</div>';
 }
 function hThumb(e,badge){
   var p=getPoster(e);
-  if(p)return '<div class="h-card-img" style="background-image:url('+p+');background-size:cover;background-position:center top;font-size:0">'+badge+'</div>';
+  if(p)return '<div class="h-card-img" style="font-size:0"><img src="'+p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="lazy">'+badge+'</div>';
   return '<div class="h-card-img">'+IC[e.ct]+badge+'</div>';
 }
 function gr(e){
@@ -987,7 +993,7 @@ function renderHome(){
       var bg=gradients[i%gradients.length];
       h+='<div class="hero-slide" style="background:'+bg+';cursor:pointer;display:flex;align-items:center;padding:0 16px;gap:14px" onclick="viewEv(\''+e.id+'\')">'
         +'<div style="flex-shrink:0;width:86px;height:114px;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.5);background:#2a2a38;display:flex;align-items:center;justify-content:center;font-size:32px">'
-        +(_p?'<img src="'+_p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="eager">':IC[e.ct])
+        +(_p?'<img src="'+_p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="lazy">':IC[e.ct])
         +'</div>'
         +'<div style="flex:1;min-width:0;padding-bottom:20px">'
           +'<div class="hero-badge" style="margin-bottom:8px">HOT '+t+'°C</div>'
@@ -2216,6 +2222,15 @@ document.addEventListener('click', function(ev){
 function closePoster(){
   document.getElementById('posterModal').classList.remove('on');
   document.body.style.overflow='';
+}
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(reg){ console.log('[SW] 등록 완료:', reg.scope); })
+      .catch(function(err){ console.log('[SW] 등록 실패:', err); });
+  });
 }
 </script>
 </body>
