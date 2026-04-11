@@ -522,7 +522,7 @@ a{color:inherit;text-decoration:none}
   </div>
   <!-- 이메일 로그인/회원가입 -->
   <div id="page-email" class="page" style="display:none">
-    <button class="email-back" onclick="go('login')">
+    <button class="email-back" onclick="history.back()">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       뒤로
     </button>
@@ -855,16 +855,17 @@ function go(pg,id){
   document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");p.style.display="";});
   var el=document.getElementById("page-"+pg);
   if(!el){console.error("page-"+pg+" not found");return;}
-  el.style.display="";  // display:none 인라인 스타일 초기화
+  el.style.display="";
   el.classList.add("active");
   curPage=pg;
-  // bnav: detail 제외 항상 표시
+  // history.pushState — 사파리 뒤로가기 지원
+  var state={pg:pg,id:id||null};
+  var title=pg==='detail'&&id?'상세':'컬처온도';
+  history.pushState(state,'컬처온도');
   document.getElementById("bnav").style.display=pg==="detail"?"none":"flex";
   window.scrollTo(0,0);
-  // 네비탭 하이라이트: 탭 페이지이면 curNav 업데이트
   var navPages=["home","ranking","calendar","explore","my"];
   if(navPages.indexOf(pg)>=0){curNav=pg;updateNav();}
-  // login/email 페이지에서는 이전 탭 하이라이트 유지
   else if(pg==="login"||pg==="email"){updateNav();}
   if(pg==="home"){showSkl("home",sklH);if(ev&&ev.length){renderHome();}else{loadEvents(function(data){ev=data;renderHome();});}}
   else if(pg==="ranking"){showSkl("ranking",sklR);if(ev&&ev.length){renderRanking();}else{loadEvents(function(data){ev=data;renderRanking();});}}
@@ -1674,7 +1675,7 @@ function _buildDetailHTML(id,e,kd){
     ?'background:linear-gradient(135deg,#1a1a28,#2a1a20);background-image:url('+posterUrl+');background-size:cover;background-position:center top'
     :'background:linear-gradient(135deg,#1a1a28,#2a1a20)';
 
-  var h='<div class="det-hero" style="'+heroStyle+'">'+(!posterUrl?'<span style="font-size:90px">'+ico+'</span>':'')+'<div class="det-hero-grad"></div><div class="det-top-actions"><button class="det-ico" onclick="go(curNav===\'ranking\'?\'ranking\':curNav===\'calendar\'?\'calendar\':curNav===\'my\'?\'my\':\'home\')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>';
+  var h='<div class="det-hero" style="'+heroStyle+'">'+(!posterUrl?'<span style="font-size:90px">'+ico+'</span>':'')+'<div class="det-hero-grad"></div><div class="det-top-actions"><button class="det-ico" onclick="history.back()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>';
 
   h+='<div class="det-poster-wrap">';
   if(posterUrl){
@@ -1945,7 +1946,7 @@ function renderTagPage(key){
   var all=getScoredEvents();
   var mx=all.length?all[0]._s:1;
   var h='<div class="hdr">'
-    +'<button class="hdr-btn" onclick="go(\'home\')" style="margin-right:8px"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+    +'<button class="hdr-btn" onclick="history.back()" style="margin-right:8px"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
     +'<div style="flex:1"><div style="font-size:11px;color:var(--mu);font-weight:600;margin-bottom:2px">'+(typeLabel[type]||"태그")+'</div>'
     +'<span style="font-size:16px;font-weight:800">'+pageTitle+'</span></div>'
     +'<span style="font-size:12px;color:var(--mu);font-weight:600">'+matched.length+'건</span></div>';
@@ -2077,6 +2078,37 @@ function updateNav(){
     b.classList.toggle("on",b.dataset.k===curNav);
   });
 }
+
+// 사파리/브라우저 뒤로가기 감지
+window.addEventListener('popstate', function(e){
+  if(e.state && e.state.pg){
+    var pg=e.state.pg;
+    var id=e.state.id;
+    // go() 대신 직접 렌더 (pushState 중복 방지)
+    if(sTimer){clearInterval(sTimer);sTimer=null;}
+    document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");p.style.display="";});
+    var el=document.getElementById("page-"+pg);
+    if(!el)return;
+    el.style.display="";
+    el.classList.add("active");
+    curPage=pg;
+    document.getElementById("bnav").style.display=pg==="detail"?"none":"flex";
+    window.scrollTo(0,0);
+    var navPages=["home","ranking","calendar","explore","my"];
+    if(navPages.indexOf(pg)>=0){curNav=pg;updateNav();}
+    // 해당 페이지 렌더
+    if(pg==="home"){if(ev&&ev.length)renderHome();else loadEvents(function(d){ev=d;renderHome();});}
+    else if(pg==="ranking"){if(ev&&ev.length)renderRanking();else loadEvents(function(d){ev=d;renderRanking();});}
+    else if(pg==="calendar"){if(ev&&ev.length)renderCalendar();else loadEvents(function(d){ev=d;renderCalendar();});}
+    else if(pg==="explore"){setTimeout(renderExplore,0);}
+    else if(pg==="my"){setTimeout(renderMy,0);}
+    else if(pg==="detail"&&id){renderDetail(id);}
+    else if(pg==="tag"&&id){setTimeout(function(){renderTagPage(id);},0);}
+  } else {
+    // 히스토리 없으면 홈으로
+    go('home');
+  }
+});
 
 /* 초기화 */
 renderNav();
