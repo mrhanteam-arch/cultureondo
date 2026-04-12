@@ -222,9 +222,9 @@ a{color:inherit;text-decoration:none}
 .dl-dday{flex-shrink:0;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(255,94,58,0.12);color:var(--hot);border:1px solid rgba(255,94,58,0.2)}
 /* 랭킹 */
 /* ── 랭킹 카테고리 탭 ── */
-.rk-cat-tabs{display:flex;border-bottom:1px solid var(--bdL);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;-webkit-tap-highlight-color:transparent}
+.rk-cat-tabs{display:flex;border-bottom:1px solid var(--bdL);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;-webkit-tap-highlight-color:transparent;touch-action:pan-x;overscroll-behavior-x:contain}
 .rk-cat-tabs::-webkit-scrollbar{display:none}
-.rk-cat-tab{flex:0 0 auto;padding:14px 18px;font-size:13.5px;font-weight:500;color:var(--mu);background:transparent;border:none;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s;white-space:nowrap;text-align:center;cursor:pointer;min-height:48px;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.rk-cat-tab{flex:0 0 auto;padding:14px 18px;font-size:13.5px;font-weight:500;color:var(--mu);background:transparent;border:none;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s;white-space:nowrap;text-align:center;cursor:pointer;min-height:48px;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .rk-cat-tab.on{font-weight:800;color:var(--hot);border-bottom-color:var(--hot)}
 /* 랭킹 기간 탭 + 지역 필터 바 */
 .rk-ctrl-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;gap:8px}
@@ -245,7 +245,7 @@ a{color:inherit;text-decoration:none}
 .region-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px 20px}
 .region-item{padding:10px 4px;border-radius:10px;border:1.5px solid var(--bd);background:var(--card);color:var(--sub);font-size:13px;font-weight:600;text-align:center;cursor:pointer;transition:all 0.15s}
 .region-item.on{color:#fff;background:var(--hot);border-color:var(--hot)}
-.rk{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid var(--bdL);cursor:pointer;transition:background 0.12s}
+.rk{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid var(--bdL);cursor:pointer;transition:background 0.12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .rk:hover{background:var(--sf)}
 .rk-n{width:30px;text-align:center;flex-shrink:0;margin-right:6px}
 .rk-n-v{font-size:17px;font-weight:800;line-height:1}
@@ -2556,15 +2556,14 @@ function closePoster(){
 <script>
 /* ── 터치: 스크롤 vs 탭 구분 ── */
 (function(){
-  var _sx=0,_sy=0,_scrolling=false,_timer=null;
+  var _sx=0,_sy=0,_scrolling=false,_catScrolling=false,_timer=null;
 
-  // 가로 스크롤 컨테이너 (related, h-scroll, 카테고리 탭 등)
   document.addEventListener('touchstart',function(e){
     _sx=e.touches[0].clientX;
     _sy=e.touches[0].clientY;
     _scrolling=false;
+    _catScrolling=false;
     clearTimeout(_timer);
-    // 스크롤 컨테이너 안에서만 작동
     var sc=e.target.closest('.related,.h-scroll,.rk-cat-tabs');
     if(sc)sc._tstart={x:_sx,y:_sy};
   },{passive:true});
@@ -2572,6 +2571,11 @@ function closePoster(){
   document.addEventListener('touchmove',function(e){
     var dx=Math.abs(e.touches[0].clientX-_sx);
     var dy=Math.abs(e.touches[0].clientY-_sy);
+    // 카테고리 탭 안에서 가로 이동이 세로보다 크면 세로 스크롤 차단
+    var inCatTabs=e.target.closest('.rk-cat-tabs');
+    if(inCatTabs&&dx>dy&&dx>4){
+      _catScrolling=true;
+    }
     if(dx>6||dy>6)_scrolling=true;
   },{passive:true});
 
@@ -2582,6 +2586,7 @@ function closePoster(){
       if(item){e.stopImmediatePropagation();e.preventDefault();}
     }
     _scrolling=false;
+    _catScrolling=false;
   },true);
 
   // 온도계(.thermo) 클릭 → 상세 페이지 이동 차단
