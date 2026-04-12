@@ -1763,7 +1763,7 @@ function renderMy(){
 function proxyImg(url){
   if(!url)return'';
   url=url.replace('http://','https://');
-  if(url.indexOf('kopis.or.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=80';
+  if(url.indexOf('kopis.or.kr')>=0||url.indexOf('culture.go.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=80';
   return url;
 }
 var _detailCache={};
@@ -1841,8 +1841,10 @@ function _buildDetailHTML(id,e,kd){
   if(kd&&kd.poster)posterUrl=proxyImg(kd.poster);
   if(!posterUrl&&e.imgPoster)posterUrl=proxyImg(e.imgPoster);
   if(!posterUrl&&e.sr){
-    var srParts=e.sr.split('|');
-    if(srParts.length>=2){var srUrl=srParts.slice(1).join('|').trim();if(srUrl.match(/\.(jpg|jpeg|gif|png)/i))posterUrl=proxyImg(srUrl);}
+    var srFirst=e.sr.split(',')[0].trim();
+    var srParts=srFirst.split('|');
+    if(srParts.length>=2){var srUrl=srParts.slice(1).join('|').trim();posterUrl=proxyImg(srUrl);}
+    else if(srFirst.match(/^https?:\/\//))posterUrl=proxyImg(srFirst);
   }
 
   var heroStyle=posterUrl
@@ -1948,7 +1950,7 @@ function _buildDetailHTML(id,e,kd){
   else h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="color:#505068">정보 없음</div></div></div>';
   if(age)h+='<div class="info-row"><div class="info-body"><div class="info-l">관람연령</div><div class="info-v">'+age+'</div></div></div>';
   if(schedule)h+='<div class="info-row"><div class="info-body"><div class="info-l">공연시간</div><div class="info-v" style="font-size:13px;line-height:1.6">'+schedule+'</div></div></div>';
-  if(cast)h+='<div class="info-row"><div class="info-body"><div class="info-l">출연진</div><div class="info-v" style="font-size:13px;line-height:1.5">'+cast+'</div></div></div>';
+  if(cast){var castLabel=e.ct==='전시/미술'?'문의':'출연진';h+='<div class="info-row"><div class="info-body"><div class="info-l">'+castLabel+'</div><div class="info-v" style="font-size:13px;line-height:1.5">'+cast+'</div></div></div>';}
   h+='</div>';
 
   // 바로가기 링크 — ticket/instagram/shop만 어드민에서, 나머지 자동
