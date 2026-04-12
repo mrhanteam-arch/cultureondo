@@ -817,6 +817,7 @@ function getPoster(e){
     if(p.length>=2){var u=p.slice(1).join('|').trim();if(/\.(jpg|jpeg|gif|png)/i.test(u))url=u;}
   }
   if(!url)return '';
+  var wasHttp=url.indexOf('http://')===0;
   url=url.replace('http://','https://');
   // KOPIS 이미지는 프록시로 우회
   if(url.indexOf('kopis.or.kr')>=0){
@@ -824,6 +825,8 @@ function getPoster(e){
   }
   // 한국문화정보원 이미지 프록시
   if(url.indexOf('culture.go.kr')>=0)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=200&output=jpg&q=75';
+  // http였던 외부 이미지 — Mixed Content 방지
+  if(wasHttp)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=200&output=jpg&q=75';
   return url;
 }
 function rkThumb(e){
@@ -1766,10 +1769,13 @@ function renderMy(){
 
 function proxyImg(url){
   if(!url)return'';
+  var wasHttp=url.indexOf('http://')===0;
   url=url.replace('http://','https://');
   if(url.indexOf('kopis.or.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=80';
   // 한국문화정보원 이미지 프록시
   if(url.indexOf('culture.go.kr')>=0)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=480&output=jpg&q=80';
+  // http였던 외부 이미지 — Mixed Content 방지
+  if(wasHttp)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=480&output=jpg&q=80';
   return url;
 }
 var _detailCache={};
