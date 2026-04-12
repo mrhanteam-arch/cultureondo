@@ -1286,6 +1286,17 @@ function renderRanking(){
       +'<div style="font-size:13.5px;color:var(--sub);line-height:1.7">팝업스토어 데이터를 준비 중이에요.<br>곧 만나보실 수 있어요!</div>'
     +'</div>';
     document.getElementById("page-ranking").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
+    requestAnimationFrame(function(){
+      var tabs=document.querySelector('#page-ranking .rk-cat-tabs');
+      var active=tabs&&tabs.querySelector('.rk-cat-tab.on');
+      if(tabs&&active){
+        var tLeft=tabs.getBoundingClientRect().left;
+        var tW=tabs.getBoundingClientRect().width;
+        var aLeft=active.getBoundingClientRect().left;
+        var aW=active.getBoundingClientRect().width;
+        tabs.scrollLeft=tabs.scrollLeft+(aLeft-tLeft)-(tW/2)+(aW/2);
+      }
+    });
     return;
   }
   // 기간 필터 — 해당 범위 내에 공연이 진행 중인 것만
@@ -1339,6 +1350,18 @@ function renderRanking(){
       +thermo(t,e,mx)+'</div>';
   });}
   document.getElementById("page-ranking").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
+  // 활성 카테고리 탭 자동 스크롤 (탭이 잘려 안 보이는 문제 해결)
+  requestAnimationFrame(function(){
+    var tabs=document.querySelector('#page-ranking .rk-cat-tabs');
+    var active=tabs&&tabs.querySelector('.rk-cat-tab.on');
+    if(tabs&&active){
+      var tLeft=tabs.getBoundingClientRect().left;
+      var tW=tabs.getBoundingClientRect().width;
+      var aLeft=active.getBoundingClientRect().left;
+      var aW=active.getBoundingClientRect().width;
+      tabs.scrollLeft=tabs.scrollLeft+(aLeft-tLeft)-(tW/2)+(aW/2);
+    }
+  });
 }
 function openRegionSheet(){document.getElementById("regionSheet").classList.add("show");}
 function closeRegionSheet(){document.getElementById("regionSheet").classList.remove("show");}
