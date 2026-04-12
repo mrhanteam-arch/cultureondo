@@ -1835,7 +1835,7 @@ function _buildDetailHTML(id,e,kd){
   var runtime=kd&&kd.prfruntime?kd.prfruntime:(e.prfruntime||'');
   var age=kd&&kd.prfage?kd.prfage:(e.prfage||'');
   var price=kd&&kd.pcseguidance?kd.pcseguidance:(e.pr||'');
-  var schedule=kd&&kd.dtguidance?kd.dtguidance:(e.ds||'');
+  var schedule=kd&&kd.dtguidance?kd.dtguidance:(e.ct==='전시/미술'?'':(e.ds||''));
   var synopsis=kd&&kd.sty?kd.sty:(e.sty||'');
   var introImgs=[];
   if(kd&&kd.styurls){
@@ -1961,7 +1961,7 @@ function _buildDetailHTML(id,e,kd){
   if(price)h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="font-size:13px;line-height:1.5">'+price+'</div></div></div>';
   else h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="color:#505068">정보 없음</div></div></div>';
   if(age)h+='<div class="info-row"><div class="info-body"><div class="info-l">관람연령</div><div class="info-v">'+age+'</div></div></div>';
-  if(schedule)h+='<div class="info-row"><div class="info-body"><div class="info-l">공연시간</div><div class="info-v" style="font-size:13px;line-height:1.6">'+schedule+'</div></div></div>';
+  if(schedule&&e.ct!=='전시/미술')h+='<div class="info-row"><div class="info-body"><div class="info-l">공연시간</div><div class="info-v" style="font-size:13px;line-height:1.6">'+schedule+'</div></div></div>';
   if(cast){var castLabel=e.ct==='전시/미술'?'문의':'출연진';h+='<div class="info-row"><div class="info-body"><div class="info-l">'+castLabel+'</div><div class="info-v" style="font-size:13px;line-height:1.5">'+cast+'</div></div></div>';}
   h+='</div>';
 
