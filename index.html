@@ -1998,7 +1998,10 @@ function _buildDetailHTML(id,e,kd){
   var descText=synopsis||(e.ds||'');
   // descText 내 img src http:// → 프록시 치환 (Mixed Content 방지)
   if(descText){
-    descText=descText.replace(/src=["'](http:\/\/[^"']+)["']/gi,function(m,u){
+    descText=descText.replace(/src="(http:\/\/[^"]+)"/gi,function(m,u){
+      return 'src="https://images.weserv.nl/?url='+u.replace('http://','')+'&w=480&output=jpg&q=80"';
+    });
+    descText=descText.replace(/src='(http:\/\/[^']+)'/gi,function(m,u){
       return 'src="https://images.weserv.nl/?url='+u.replace('http://','')+'&w=480&output=jpg&q=80"';
     });
   }
