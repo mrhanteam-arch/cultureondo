@@ -818,7 +818,8 @@ function getPoster(e){
   if(url.indexOf('kopis.or.kr')>=0){
     return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=200&output=webp&q=75';
   }
-  // 한국문화정보원 이미지 직접 로드
+  // 한국문화정보원 이미지 프록시
+  if(url.indexOf('culture.go.kr')>=0)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=200&output=jpg&q=75';
   return url;
 }
 function rkThumb(e){
@@ -1763,7 +1764,8 @@ function proxyImg(url){
   if(!url)return'';
   url=url.replace('http://','https://');
   if(url.indexOf('kopis.or.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=80';
-  // 한국문화정보원 이미지 직접 로드
+  // 한국문화정보원 이미지 프록시
+  if(url.indexOf('culture.go.kr')>=0)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=480&output=jpg&q=80';
   return url;
 }
 var _detailCache={};
