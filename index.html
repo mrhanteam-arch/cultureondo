@@ -205,13 +205,13 @@ a{color:inherit;text-decoration:none}
 .hot-card-sub{font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px}
 .hot-card-arrow{font-size:20px;color:rgba(255,255,255,0.6);flex-shrink:0}
 /* 카드 스크롤 */
-.h-scroll{display:flex;gap:12px;padding:0 20px 4px;overflow-x:auto;scrollbar-width:none;margin-bottom:24px}
-.h-card{flex:0 0 auto;width:140px;cursor:pointer}
-.h-card-img{width:140px;height:186px;border-radius:10px;overflow:hidden;margin-bottom:8px;background:var(--card);position:relative;display:flex;align-items:center;justify-content:center;font-size:44px}
-.h-card-temp{position:absolute;top:8px;right:8px;padding:3px 7px;border-radius:8px;font-size:11px;font-weight:800}
-.h-card-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.h-card-sub{font-size:11px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.h-card-date{font-size:10px;color:var(--mu);margin-top:2px}
+.h-scroll{display:flex;gap:14px;padding:0 20px 4px;overflow-x:auto;scrollbar-width:none;margin-bottom:24px}
+.h-card{flex:0 0 auto;width:152px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.h-card-img{width:152px;height:202px;border-radius:12px;overflow:hidden;margin-bottom:10px;background:var(--card);position:relative;display:flex;align-items:center;justify-content:center;font-size:44px}
+.h-card-temp{position:absolute;top:8px;right:8px;padding:4px 9px;border-radius:8px;font-size:11px;font-weight:800}
+.h-card-title{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-card-sub{font-size:11.5px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-card-date{font-size:10.5px;color:var(--mu);margin-top:3px}
 /* 종료임박 */
 .dl-list{padding:0 20px;margin-bottom:24px}
 .dl-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdL);cursor:pointer}
@@ -224,38 +224,38 @@ a{color:inherit;text-decoration:none}
 /* ── 랭킹 카테고리 탭 ── */
 .rk-cat-tabs{display:flex;border-bottom:1px solid var(--bdL);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;-webkit-tap-highlight-color:transparent;touch-action:pan-x;overscroll-behavior-x:contain}
 .rk-cat-tabs::-webkit-scrollbar{display:none}
-.rk-cat-tab{flex:0 0 auto;padding:14px 18px;font-size:13.5px;font-weight:500;color:var(--mu);background:transparent;border:none;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s;white-space:nowrap;text-align:center;cursor:pointer;min-height:48px;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.rk-cat-tab{flex:0 0 auto;padding:16px 20px;font-size:14px;font-weight:500;color:var(--mu);background:transparent;border:none;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s;white-space:nowrap;text-align:center;cursor:pointer;min-height:52px;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .rk-cat-tab.on{font-weight:800;color:var(--hot);border-bottom-color:var(--hot)}
 /* 랭킹 기간 탭 + 지역 필터 바 */
-.rk-ctrl-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;gap:8px}
-.rk-period-tabs{display:flex;background:var(--sf);border-radius:10px;padding:3px;border:1px solid var(--bd);height:44px;align-items:center}
-.rk-period-tab{padding:0 16px;border-radius:8px;font-size:13px;font-weight:500;color:var(--sub);background:transparent;border:none;transition:all 0.18s;cursor:pointer;height:38px;min-width:56px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.rk-ctrl-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;gap:8px}
+.rk-period-tabs{display:flex;background:var(--sf);border-radius:12px;padding:4px;border:1px solid var(--bd);height:48px;align-items:center}
+.rk-period-tab{padding:0 18px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--sub);background:transparent;border:none;transition:all 0.18s;cursor:pointer;height:40px;min-width:62px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .rk-period-tab.on{font-weight:700;color:var(--tx);background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,0.4)}
-.rk-region-btn{display:flex;align-items:center;gap:5px;padding:0 14px;border-radius:10px;border:1px solid var(--bd);background:var(--sf);color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;height:44px;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.rk-region-btn{display:flex;align-items:center;gap:5px;padding:0 16px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);color:var(--sub);font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.15s;height:48px;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .rk-region-btn.active{color:var(--hot);border-color:var(--hot);background:rgba(255,94,58,0.08)}
 .rk-region-btn svg{width:14px;height:14px;flex-shrink:0}
 .meta-bar{padding:2px 20px 8px;font-size:11.5px;color:var(--mu)}
 /* ── 지역 바텀시트 ── */
-.region-sheet{position:fixed;inset:0;z-index:250;display:none}
-.region-sheet.show{display:block}
-.region-dim{position:absolute;inset:0;background:rgba(0,0,0,0.6)}
-.region-body{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--sf);border-radius:20px 20px 0 0;border:1px solid var(--bd);padding:0 0 32px;animation:slideUp 0.28s ease}
+.region-sheet{position:fixed;inset:0;z-index:250;display:none;align-items:flex-end;justify-content:center}
+.region-sheet.show{display:flex;animation:fi 0.15s}
+.region-dim{position:absolute;inset:0;background:rgba(0,0,0,0.6);z-index:0}
+.region-body{position:relative;z-index:1;width:100%;max-width:480px;background:var(--sf);border-radius:20px 20px 0 0;border:1px solid var(--bd);padding:0 0 calc(32px + env(safe-area-inset-bottom));animation:slideUp 0.28s ease}
 .region-handle{width:36px;height:4px;border-radius:2px;background:var(--bd);margin:12px auto 16px}
 .region-title{font-size:15px;font-weight:800;padding:0 20px 14px;border-bottom:1px solid var(--bdL)}
-.region-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px 20px}
-.region-item{padding:10px 4px;border-radius:10px;border:1.5px solid var(--bd);background:var(--card);color:var(--sub);font-size:13px;font-weight:600;text-align:center;cursor:pointer;transition:all 0.15s}
+.region-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 20px}
+.region-item{padding:14px 4px;border-radius:12px;border:1.5px solid var(--bd);background:var(--card);color:var(--sub);font-size:14px;font-weight:600;text-align:center;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:48px;display:flex;align-items:center;justify-content:center}
 .region-item.on{color:#fff;background:var(--hot);border-color:var(--hot)}
-.rk{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid var(--bdL);cursor:pointer;transition:background 0.12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.rk{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bdL);cursor:pointer;transition:background 0.12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .rk:hover{background:var(--sf)}
-.rk-n{width:30px;text-align:center;flex-shrink:0;margin-right:6px}
-.rk-n-v{font-size:17px;font-weight:800;line-height:1}
-.rk-ch{margin-top:3px;font-size:10px;font-weight:700;line-height:1}
+.rk-n{width:34px;text-align:center;flex-shrink:0;margin-right:8px}
+.rk-n-v{font-size:18px;font-weight:800;line-height:1}
+.rk-ch{margin-top:4px;font-size:10px;font-weight:700;line-height:1}
 .rk-ch.up{color:var(--hot)}.rk-ch.dn{color:var(--cool)}.rk-ch.sm{color:var(--mu)}
 .rk-ch.new-entry{color:#bf5af2;font-size:9px}
-.rk-img{width:50px;height:66px;border-radius:5px;overflow:hidden;flex-shrink:0;margin-right:12px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px}
+.rk-img{width:54px;height:72px;border-radius:6px;overflow:hidden;flex-shrink:0;margin-right:14px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px}
 .rk-info{flex:1;min-width:0;margin-right:10px}
-.rk-title{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;line-height:1.2}
-.rk-sub{font-size:11.5px;color:var(--sub);display:flex;flex-direction:column;gap:2px}
+.rk-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;line-height:1.2}
+.rk-sub{font-size:12px;color:var(--sub);display:flex;flex-direction:column;gap:3px}
 .rk-sub-loc{display:flex;align-items:center;gap:3px}
 .rk-sub-date{font-size:10.5px;color:var(--mu)}
 /* 온도 게이지 (원형 - 상세/홈 등 유지) */
