@@ -735,8 +735,8 @@ var DEFAULT_CURATIONS=[
    bg:"https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=200&h=110&fit=crop&q=60"},
   {id:"c3",title:"신규 오픈",icon:"__new__",color1:"#8e44ad",color2:"#5b2c6f",filter:"new",wide:false,
    bg:"https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=110&fit=crop&q=60"},
-  {id:"c4",title:"예매 HOT",icon:"__hot__",color1:"#ff5e3a",color2:"#c0392b",filter:"boxoffice",wide:false,
-   bg:"https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=200&h=110&fit=crop&q=60"},
+  {id:"c4",title:"무료공연",icon:"__free__",color1:"#27ae60",color2:"#1a5276",filter:"free",wide:false,
+   bg:"https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=200&h=110&fit=crop&q=60"},
   {id:"c5",title:"뮤지컬",icon:"__musical__",color1:"#2980b9",color2:"#1a5276",filter:"ct_musical",wide:false,
    bg:"https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=200&h=110&fit=crop&q=60"},
   {id:"c6",title:"콘서트·페스티벌",icon:"__concert__",color1:"#f39c12",color2:"#b7770d",filter:"ct_concert",wide:false,
@@ -760,7 +760,7 @@ function getNaverSearchLink(title){
   return'https://search.naver.com/search.naver?query='+encodeURIComponent(title+' 예매');
 }
 
-function dd(e){return Math.ceil((new Date(e)-NOW)/864e5);}
+function dd(e){return Math.floor((new Date(e)-NOW)/864e5);}
 function getPoster(e){
   var url='';
   if(e.imgPoster)url=e.imgPoster;
@@ -1071,7 +1071,7 @@ function renderHome(){
     "주말 추천":'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg>',
     "이번 주 마감":'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
     "신규 오픈":'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
-    "예매 HOT":'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+    "무료공연":'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>',
     "뮤지컬":'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
     "콘서트·페스티벌":'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><path d="M5 9l6-1M5 13l6-1"/><circle cx="3.5" cy="18.5" r="2.5"/><circle cx="15.5" cy="16.5" r="2.5"/></svg>',
   };
@@ -1123,8 +1123,8 @@ function renderHome(){
         var a=Math.ceil((NOW3-new Date(e.ca))/864e5);
         return a>=0&&a<=14;
       }).length;
-    } else if(f==='boxoffice'){
-      cnt=allScored.filter(function(e){return Number(e.boxoffice_rank)>0;}).length;
+    } else if(f==='free'){
+      cnt=allScored.filter(function(e){return Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0);}).length;
     } else if(f==='ct_musical'){
       cnt=allScored.filter(function(e){return e.ct==='뮤지컬';}).length;
     } else if(f==='ct_concert'){
@@ -1962,8 +1962,8 @@ function renderTagPage(key){
           var a=Math.ceil((NOW2-new Date(e.ca))/864e5);
           return a>=0&&a<=14;
         });
-      } else if(f==='boxoffice'){
-        matched=ev.filter(function(e){return Number(e.boxoffice_rank)>0&&e.st!=='ended';});
+      } else if(f==='free'){
+        matched=ev.filter(function(e){return(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))&&e.st!=='ended';});
       } else if(f==='ct_musical'){
         matched=ev.filter(function(e){return e.ct==='뮤지컬'&&e.st!=='ended';});
       } else if(f==='ct_concert'){
