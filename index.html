@@ -44,6 +44,8 @@ gtag('config','G-ZYH2PMLHHJ');
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+/* 모든 버튼/링크/클릭 요소 300ms 딜레이 제거 */
+button,a,[onclick]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 html{height:100%}
 body{height:100%;background:#111114;color:#ededf0;font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 ::-webkit-scrollbar{width:0;height:0}
@@ -2554,46 +2556,36 @@ function closePoster(){
 }
 </script>
 <script>
-/* ── 터치: 스크롤 vs 탭 구분 ── */
+/* ── 터치: 스크롤 vs 탭 구분 (재설계) ── */
 (function(){
-  var _sx=0,_sy=0,_scrolling=false,_catScrolling=false,_timer=null;
+  var _sx=0,_sy=0,_moved=false;
 
   document.addEventListener('touchstart',function(e){
     _sx=e.touches[0].clientX;
     _sy=e.touches[0].clientY;
-    _scrolling=false;
-    _catScrolling=false;
-    clearTimeout(_timer);
-    var sc=e.target.closest('.related,.h-scroll,.rk-cat-tabs');
-    if(sc)sc._tstart={x:_sx,y:_sy};
+    _moved=false;
   },{passive:true});
 
   document.addEventListener('touchmove',function(e){
     var dx=Math.abs(e.touches[0].clientX-_sx);
     var dy=Math.abs(e.touches[0].clientY-_sy);
-    // 카테고리 탭 안에서 가로 이동이 세로보다 크면 세로 스크롤 차단
-    var inCatTabs=e.target.closest('.rk-cat-tabs');
-    if(inCatTabs&&dx>dy&&dx>4){
-      _catScrolling=true;
-    }
-    if(dx>6||dy>6)_scrolling=true;
+    // 12px 이상 움직여야 스크롤로 판정 (기존 6px → 2배로 완화)
+    if(dx>12||dy>12)_moved=true;
   },{passive:true});
 
-  // related-item 클릭: 스크롤 중이면 차단
+  // 가로 스크롤 컨테이너 안 아이템만 차단 (일반 버튼/행은 차단 안 함)
   document.addEventListener('click',function(e){
-    if(_scrolling){
-      var item=e.target.closest('.related-item,.h-card,.rk-cat-tab');
+    if(_moved){
+      var item=e.target.closest('.related-item,.h-card');
       if(item){e.stopImmediatePropagation();e.preventDefault();}
     }
-    _scrolling=false;
-    _catScrolling=false;
+    _moved=false;
   },true);
 
   // 온도계(.thermo) 클릭 → 상세 페이지 이동 차단
   document.addEventListener('click',function(e){
     var th=e.target.closest('.thermo');
     if(th){
-      // 랭킹 리스트에서 온도계만 클릭한 경우 부모 rk 클릭 차단
       var rk=th.closest('.rk');
       if(rk){e.stopPropagation();}
     }
