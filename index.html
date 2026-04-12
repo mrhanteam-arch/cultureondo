@@ -817,7 +817,7 @@ function getPoster(e){
   if(!url)return '';
   url=url.replace('http://','https://');
   // KOPIS 이미지는 프록시로 우회
-  if(url.indexOf('kopis.or.kr')>=0){
+  if(url.indexOf('kopis.or.kr')>=0||url.indexOf('culture.go.kr')>=0){
     return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=200&output=webp&q=75';
   }
   return url;
