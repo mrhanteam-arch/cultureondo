@@ -1996,6 +1996,12 @@ function _buildDetailHTML(id,e,kd){
 
   // 줄거리 (KOPIS sty 우선, 없으면 ds)
   var descText=synopsis||(e.ds||'');
+  // descText 내 img src http:// → 프록시 치환 (Mixed Content 방지)
+  if(descText){
+    descText=descText.replace(/src=["'](http:\/\/[^"']+)["']/gi,function(m,u){
+      return 'src="https://images.weserv.nl/?url='+u.replace('http://','')+'&w=480&output=jpg&q=80"';
+    });
+  }
   if(descText&&descText.indexOf('요일')<0&&descText.length>10){
     h+='<div class="det-sec"><div class="det-sec-title">소개</div><div class="det-desc">'+descText+'</div></div>';
   }
