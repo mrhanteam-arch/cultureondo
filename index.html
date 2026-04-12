@@ -1660,6 +1660,7 @@ function viewEv(id){
   pg.style.display="";
   pg.classList.add("active");
   curPage="detail";
+  history.pushState({pg:"detail",id:id},'컬처온도');
   document.getElementById("bnav").style.display="none";
   window.scrollTo(0,0);
   renderDetail(id);
@@ -1670,7 +1671,9 @@ function _buildDetailHTML(id,e,kd){
   var mx=all.length?all[0]._s:1,t=tc(sc(e),mx),c=tC(t),d=dd(e.ed);
   var sd2=scDetail(e,ev); // 온도 breakdown
   var dt="진행중",dc="#2ecc71";
-  if(e.st==="ended"||d<0){dt="종료";dc="#505068";}else if(e.st==="upcoming"){dt="오픈예정";dc="#4fc3f7";}else if(d<=3){dt="D-"+d;dc="#ff5e3a";}else if(d<=7){dt="D-"+d;dc="#ff9500";}
+  if(e.st==="ended"||d<0){dt="종료";dc="#505068";}
+  else if(dd(e.sd)>0){dt="오픈예정";dc="#4fc3f7";}  // 시작일이 아직 안 됐을 때만 오픈예정
+  else if(d<=3){dt="D-"+d;dc="#ff5e3a";}else if(d<=7){dt="D-"+d;dc="#ff9500";}
   var ilk=liked.has(id),ibm=bookmarked.has(id),lks=pLinks(e.sr||"");
   var tags=e.tags||[],am=e.amenities||[],vibes=e.vibes||[],district=e.district||"";
   var amM={"parking":{ic:"🅿️",l:"주차"},"wifi":{ic:"📶",l:"와이파이"},"photo":{ic:"📸",l:"포토존"},"kids":{ic:"👶",l:"아이동반"},"wheelchair":{ic:"♿",l:"휠체어"}};
