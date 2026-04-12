@@ -1330,7 +1330,7 @@ function renderRanking(){
       ct=df>0?df+'▲':df<0?Math.abs(df)+'▼':'—';
     }
     var t=tc(e._s,mx);
-    h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.04)+'s both">'
+    h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'
       +'<div class="rk-n"><div class="rk-n-v">'+rk+'</div><div class="rk-ch '+cc+'">'+ct+'</div></div>'
       +rkThumb(e)
       +'<div class="rk-info"><div class="rk-title">'+e.t+'</div>'
@@ -2146,7 +2146,7 @@ function renderTagPage(key){
     if(isCuration) displayList=displayList.slice(0,20);
     displayList.forEach(function(e,i){
       var t=tc(e._s,mx);
-      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')" style="animation:si 0.3s ease '+(i*0.05)+'s both">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.district||gr(e))+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+thermo(t,e,mx)+'</div>';
+      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.district||gr(e))+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+thermo(t,e,mx)+'</div>';
     });
   }
   document.getElementById("page-tag").innerHTML=h;
