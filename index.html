@@ -391,7 +391,9 @@ a{color:inherit;text-decoration:none}
 .tag-keyword{background:var(--card);color:var(--sub);border-color:var(--bd)}
 .tag-keyword:hover{background:var(--sf);color:var(--tx)}
 .related{display:flex;gap:10px;overflow-x:auto;padding:0 20px;margin:0 -20px;scrollbar-width:none}
-.related-item{flex:0 0 auto;width:120px;cursor:pointer}
+.related-item{flex:0 0 auto;width:120px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* 스크롤 중 실수 탭 방지 */
+.scroll-locked *{pointer-events:none!important}
 .related-img{width:120px;height:160px;border-radius:8px;background:var(--card);margin-bottom:6px;position:relative;display:flex;align-items:center;justify-content:center;font-size:36px}
 .related-temp{position:absolute;top:6px;right:6px;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:800}
 .related-title{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -832,7 +834,7 @@ function scDetail(e,allEv){
   var s5=0;
   if(e.sd&&e.ed){var span=Math.ceil((new Date(e.ed)-new Date(e.sd))/864e5);s5=span<=7?12:span<=14?6:0;}
   // ⑥ 무료입장 (8점)
-  var s6=Number(e.fr)===1?8:0;
+  var s6=(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))?8:0;
   // ⑦ 사용자 반응 (max 20점) — 로그 스케일로 소수점 쏠림 방지
   var maxVL=1,maxLL=1,maxBL=1;
   arr.forEach(function(x){
@@ -1402,7 +1404,7 @@ function renderExplore(){
   var regCnt={};
   REG.forEach(function(r){regCnt[r]=all.filter(function(e){return r==="전국"||gr(e)===r;}).length;});
   // 무료 이벤트
-  var freeList=scored.filter(function(e){return Number(e.fr)===1;}).slice(0,4);
+  var freeList=scored.filter(function(e){return Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0);}).slice(0,4);
   // 신규 오픈
   var newList=scored.filter(function(e){
     if(!e.ca)return false;
@@ -1717,14 +1719,14 @@ function _buildDetailHTML(id,e,kd){
   }
   h+='<div class="det-poster-info"><div class="det-badges">';
   h+='<span class="det-badge" style="background:'+dc+'20;color:'+dc+';border:1px solid '+dc+'40">'+dt+'</span>';
-  if(e.fr)h+='<span class="det-badge" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)">무료</span>';
+  if(e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))h+='<span class="det-badge" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)">무료</span>';
   if(isBoxoffice)h+='<span class="det-badge" style="background:rgba(255,94,58,0.12);color:#ff5e3a;border:1px solid rgba(255,94,58,0.3)">예매'+kd.boxoffice_rank+'위</span>';
-  h+='</div><div class="det-cat-text">'+ico+' '+e.ct+'</div>';
+  h+='</div><div class="det-cat-text">'+e.ct+'</div>';
   if(company)h+='<div style="font-size:11px;color:#8d8da0;margin-top:5px">'+company+'</div>';
   h+='</div></div>';
 
   h+='<div class="det-title-sec"><div class="det-title">'+e.t+'</div>';
-  h+='<div class="det-sub"><span>'+e.lo+'</span><span class="dot"></span><span>'+e.sd.replace(/-/g,'.')+' ~ '+e.ed.replace(/-/g,'.')+'</span>';
+  h+='<div class="det-sub"><span>'+e.lo+'</span><span class="dot"></span><span>'+fmtRange(e.sd,e.ed)+'</span>';
   if(runtime)h+='<span class="dot"></span><span>'+runtime+'</span>';
   h+='</div></div>';
 
@@ -1794,7 +1796,7 @@ function _buildDetailHTML(id,e,kd){
       +'</div>'
     +'</div>'
   +'</div>';
-  h+='<div class="info-row"><div class="info-body"><div class="info-l">기간</div><div class="info-v">'+e.sd+' ~ '+e.ed+'</div>'+(d>=0&&e.st==="ongoing"?'<div style="font-size:12px;color:'+(d<=7?'#ff5e3a':'#8d8da0')+';margin-top:3px">'+(d===0?'오늘 마감':d+'일 남음')+'</div>':'')+'</div></div>';
+  h+='<div class="info-row"><div class="info-body"><div class="info-l">기간</div><div class="info-v">'+fmtRange(e.sd,e.ed)+'</div>'+(d>=0&&e.st==="ongoing"?'<div style="font-size:12px;color:'+(d<=7?'#ff5e3a':'#8d8da0')+';margin-top:3px">'+(d===0?'오늘 마감':d+'일 남음')+'</div>':'')+'</div></div>';
   h+='<div class="info-row"><div class="info-body"><div class="info-l">장소</div><div class="info-v">'+e.lo+'</div>'+(e.ad?'<div style="font-size:12px;color:#8d8da0;margin-top:3px">'+e.ad+'</div>':'')+'</div></div>';
   if(price)h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="font-size:13px;line-height:1.5">'+price+'</div></div></div>';
   else h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="color:#505068">정보 없음</div></div></div>';
@@ -2290,6 +2292,47 @@ function closePoster(){
 }
 </script>
 <script>
+/* ── 터치: 스크롤 vs 탭 구분 ── */
+(function(){
+  var _sx=0,_sy=0,_scrolling=false,_timer=null;
+
+  // 가로 스크롤 컨테이너 (related, h-scroll 등)
+  document.addEventListener('touchstart',function(e){
+    _sx=e.touches[0].clientX;
+    _sy=e.touches[0].clientY;
+    _scrolling=false;
+    clearTimeout(_timer);
+    // 스크롤 컨테이너 안에서만 작동
+    var sc=e.target.closest('.related,.h-scroll');
+    if(sc)sc._tstart={x:_sx,y:_sy};
+  },{passive:true});
+
+  document.addEventListener('touchmove',function(e){
+    var dx=Math.abs(e.touches[0].clientX-_sx);
+    var dy=Math.abs(e.touches[0].clientY-_sy);
+    if(dx>6||dy>6)_scrolling=true;
+  },{passive:true});
+
+  // related-item 클릭: 스크롤 중이면 차단
+  document.addEventListener('click',function(e){
+    if(_scrolling){
+      var item=e.target.closest('.related-item,.h-card');
+      if(item){e.stopImmediatePropagation();e.preventDefault();}
+    }
+    _scrolling=false;
+  },true);
+
+  // 온도계(.thermo) 클릭 → 상세 페이지 이동 차단
+  document.addEventListener('click',function(e){
+    var th=e.target.closest('.thermo');
+    if(th){
+      // 랭킹 리스트에서 온도계만 클릭한 경우 부모 rk 클릭 차단
+      var rk=th.closest('.rk');
+      if(rk){e.stopPropagation();}
+    }
+  },true);
+})();
+
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
     navigator.serviceWorker.register('/sw.js')
