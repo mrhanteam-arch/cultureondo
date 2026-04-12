@@ -811,7 +811,11 @@ function dd(e){return Math.floor((new Date(e)-NOW)/864e5);}
 function getPoster(e){
   var url='';
   if(e.imgPoster)url=e.imgPoster;
-  else if(e.sr){var p=e.sr.split('|');if(p.length>=2){var u=p.slice(1).join('|').trim();if(/\.(jpg|jpeg|gif|png)/i.test(u))url=u;}}
+  else if(e.sr){
+    var srFirst=e.sr.split(',')[0].trim();
+    var p=srFirst.split('|');
+    if(p.length>=2){var u=p.slice(1).join('|').trim();if(/\.(jpg|jpeg|gif|png)/i.test(u))url=u;}
+  }
   if(!url)return '';
   url=url.replace('http://','https://');
   // KOPIS 이미지는 프록시로 우회
