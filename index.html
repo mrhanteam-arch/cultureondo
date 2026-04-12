@@ -1163,10 +1163,22 @@ function renderHome(){
   var openSoon=ranked.filter(function(e){var dS=dd(e.sd);return dS>0&&dS<=3;}).slice(0,6);
   if(openSoon.length){h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px;margin-top:4px"><div style="font-size:15px;font-weight:800">오픈 예정</div><button style="font-size:12px;color:#505068;font-weight:500;background:none;border:none;cursor:pointer" onclick="go(\'tag\',\'openSoon::오픈 예정\')">전체보기 ›</button></div><div class="h-scroll">'+openSoon.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:rgba(255,149,0,0.2);color:#ff9500">D-'+s+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';}
   document.getElementById("page-home").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
+  // 히어로 슬라이더 자동재생 시작 (DOM 렌더 후)
+  setTimeout(startHeroAutoplay, 0);
 }
 function goSlide(i){sIdx=i;var tr=document.getElementById("heroTrack");if(!tr)return;tr.style.transform="translateX(-"+(i*100)+"%)";document.querySelectorAll(".hero-dot").forEach(function(d,j){d.classList.toggle("on",j===i);});}
-function goPrevSlide(){var l=document.getElementById("heroTrack").children.length;goSlide((sIdx-1+l)%l);}
-function goNextSlide(){var l=document.getElementById("heroTrack").children.length;goSlide((sIdx+1)%l);}
+function goPrevSlide(){var l=document.getElementById("heroTrack").children.length;goSlide((sIdx-1+l)%l);startHeroAutoplay();}
+function goNextSlide(){var l=document.getElementById("heroTrack").children.length;goSlide((sIdx+1)%l);startHeroAutoplay();}
+function startHeroAutoplay(){
+  if(sTimer)clearInterval(sTimer);
+  var tr=document.getElementById("heroTrack");
+  if(!tr||tr.children.length<=1)return;
+  sTimer=setInterval(function(){
+    var l=document.getElementById("heroTrack");
+    if(!l)return;
+    goSlide((sIdx+1)%l.children.length);
+  },4000);
+}
 
 /* 랭킹 */
 function pdRange(){
@@ -1663,6 +1675,16 @@ function viewEv(id){
     var vcMap=JSON.parse(localStorage.getItem('snr_vc')||'{}');
     vcMap[id]=(vcMap[id]||0)+1;
     localStorage.setItem('snr_vc',JSON.stringify(vcMap));
+    // GA4 맞춤 이벤트: 공연 클릭
+    if(typeof gtag==='function'){
+      gtag('event','performance_click',{
+        event_id:String(e.id),
+        event_title:e.t,
+        event_category:e.ct||'',
+        event_location:e.lo||'',
+        from_page:curPage||''
+      });
+    }
   }
   // 페이지 전환 후 즉시 렌더 (딜레이 없음)
   if(sTimer){clearInterval(sTimer);sTimer=null;}
@@ -1883,8 +1905,10 @@ function _buildDetailHTML(id,e,kd){
   // 하단 고정 예매 버튼 — ticket URL 있을 때만 표시
   var ticketLk=allLks.find(function(l){return l.type==='ticket';});
   if(ticketLk){
+    var _gaEvId=id, _gaEvTitle=e.t, _gaEvCat=e.ct||'';
     h+='<div class="booking-bar">'
-      +'<a href="'+ticketLk.url+'" target="_blank" rel="noopener" class="booking-btn-main">'
+      +'<a href="'+ticketLk.url+'" target="_blank" rel="noopener" class="booking-btn-main"'
+        +' onclick="if(typeof gtag===\'function\'){gtag(\'event\',\'booking_click\',{event_id:\''+id+'\',event_title:'+JSON.stringify(e.t)+',event_category:\''+( e.ct||'')+'\',ticket_url:\''+ticketLk.url+'\'});}">'
         +'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         +'예매하기'
       +'</a>'
@@ -2080,7 +2104,14 @@ function renderSBody(q){
   h+='</div>';body.innerHTML=h;
 }
 function doS(q){document.getElementById("sInput").value=q;document.getElementById("sClr").style.display="flex";saveSH(q);renderSBody(q);}
-function saveSH(q){sHist=[q].concat(sHist.filter(function(x){return x!==q;})).slice(0,10);localStorage.setItem("snr_sh",JSON.stringify(sHist));}
+function saveSH(q){
+  sHist=[q].concat(sHist.filter(function(x){return x!==q;})).slice(0,10);
+  localStorage.setItem("snr_sh",JSON.stringify(sHist));
+  // GA4 맞춤 이벤트: 검색어
+  if(typeof gtag==='function'){
+    gtag('event','search',{search_term:q});
+  }
+}
 function delSH(i){sHist.splice(i,1);localStorage.setItem("snr_sh",JSON.stringify(sHist));renderSBody("");}
 function clrSH(){sHist=[];localStorage.setItem("snr_sh","[]");renderSBody("");}
 
