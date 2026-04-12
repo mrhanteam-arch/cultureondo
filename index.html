@@ -487,6 +487,28 @@ a{color:inherit;text-decoration:none}
 .form-msg{text-align:center;font-size:13px;padding:12px;border-radius:10px;margin-top:12px}
 .msg-ok{background:rgba(46,204,113,0.1);color:#2ecc71;border:1px solid rgba(46,204,113,0.2)}
 .msg-err{background:rgba(255,94,58,0.1);color:var(--hot);border:1px solid rgba(255,94,58,0.2)}
+/* ── 온도지수 안내 바텀시트 ── */
+.tg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:400;display:none;align-items:flex-end;justify-content:center}
+.tg-overlay.show{display:flex;animation:fi 0.2s}
+.tg-sheet{background:var(--sf);border:1px solid var(--bd);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:slideUp 0.32s cubic-bezier(0.32,0.72,0,1);-webkit-overflow-scrolling:touch}
+.tg-handle{width:36px;height:4px;border-radius:2px;background:var(--bd);margin:14px auto 0}
+.tg-header{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 20px 14px}
+.tg-intro{margin:0 20px 20px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--bdL);border-radius:14px}
+.tg-temp-scale{display:flex;gap:6px;flex-wrap:wrap}
+.tg-temp-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.04)}
+.tg-temp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tg-temp-tag{font-size:10px;font-weight:500;opacity:0.75}
+.tg-items{padding:0 20px;display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.tg-item{background:var(--card);border:1px solid var(--bdL);border-radius:14px;padding:14px}
+.tg-item-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.tg-item-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tg-item-title{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.tg-item-max{font-size:10px;font-weight:600;color:var(--mu);background:rgba(255,255,255,0.04);padding:2px 7px;border-radius:6px}
+.tg-item-bar-wrap{height:3px;border-radius:2px;background:rgba(255,255,255,0.05);overflow:hidden;margin-bottom:10px}
+.tg-item-bar{height:100%;border-radius:2px;opacity:0.7}
+.tg-item-desc{font-size:12.5px;color:var(--sub);line-height:1.7;word-break:keep-all;margin-bottom:8px}
+.tg-item-source{font-size:10.5px;color:var(--mu);padding:6px 9px;background:rgba(255,255,255,0.03);border-radius:6px}
+.tg-footer{display:flex;align-items:center;gap:8px;margin:0 20px 16px;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--bdL);border-radius:12px;font-size:11.5px;color:var(--mu);line-height:1.6}
 </style>
 </head>
 <body>
@@ -820,32 +842,57 @@ function scDetail(e,allEv){
   var d=dd(e.ed);
   if(e.st==='ended'||d<0)return{total:0,s1:0,s2:0,s3:0,s4:0,s5:0,s6:0,s7:0,d:d,br:0};
   var arr=allEv||ev;
-  // ① 네이버 검색량 (max 30점)
-  var s1=Math.round((Number(e.naver_score)||0)*0.3);
-  // ② 예매순위 (max 40점) — 최고 배점, 1위=40점, 2위=38점...
+
+  // ① 네이버 검색량 (max 35점) — 실제 대중 관심도 지표
+  // naver_score는 0~100 정규화 값 기준
+  var s1=Math.round((Number(e.naver_score)||0)*0.35);
+  s1=Math.min(s1,35);
+
+  // ② 예매순위 (max 45점) — 최고 배점: 실제 예매처에서 검증된 인기
+  // 1위=45, 2위=43, ... 23위=1, 24위=0
+  // 예매 데이터 없는 공연(전시·무료공연 등)은 패널티 없이 중간값 12점 부여
   var br=Number(e.boxoffice_rank)||0;
-  var s2=br>0?Math.max(0,42-(br*2)):0;
-  // ③ 마감 임박 (max 25점)
-  var s3=d<=3?25:d<=7?15:d<=14?7:0;
-  // ④ 신규 오픈 (max 10점)
+  var s2=br>0?Math.max(0,47-(br*2)):12;
+
+  // ③ 마감 임박 (max 20점) — 긴박성 신호: 곧 끝나는 공연에 관심 집중
+  // D-0=20, D-3이내=15, D-7이내=8, D-14이내=3, 이후=0
+  var s3=d===0?20:d<=3?15:d<=7?8:d<=14?3:0;
+
+  // ④ 신규 오픈 (max 10점) — 새로 시작한 공연 부스트
+  // 7일 이내 선형 감소 (절벽 효과 방지): 1일차≈10점 → 7일차≈4점
   var s4=0;
-  if(e.ca){var a=Math.ceil((NOW-new Date(e.ca))/864e5);if(a<=7)s4=10;}
-  // ⑤ 희소성 (max 12점)
+  if(e.ca){
+    var daysOpen=Math.ceil((NOW-new Date(e.ca))/864e5);
+    if(daysOpen>=0&&daysOpen<=7)s4=Math.round(10-daysOpen*0.85);
+    if(s4<0)s4=0;
+  }
+
+  // ⑤ 희소성(공연기간) (max 7점) — 단기 공연의 희소 가치
+  // ③+⑤ 합산 상한 22점 — 마감임박·희소성 이중 보너스 제한
   var s5=0;
-  if(e.sd&&e.ed){var span=Math.ceil((new Date(e.ed)-new Date(e.sd))/864e5);s5=span<=7?12:span<=14?6:0;}
-  // ⑥ 무료입장 (8점)
-  var s6=(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))?8:0;
-  // ⑦ 사용자 반응 (max 20점) — 로그 스케일로 소수점 쏠림 방지
+  if(e.sd&&e.ed){
+    var span=Math.ceil((new Date(e.ed)-new Date(e.sd))/864e5);
+    s5=span<=7?7:span<=14?3:0;
+  }
+  // 합산 상한 적용
+  if(s3+s5>22)s5=Math.max(0,22-s3);
+
+  // ⑥ 무료입장 (5점) — 접근성 보너스 (인기 지표 아닌 속성)
+  var s6=(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))?5:0;
+
+  // ⑦ 사용자 반응 (max 3점) — 로그 스케일 (서버 집계 전 임시 보조)
   var maxVL=1,maxLL=1,maxBL=1;
   arr.forEach(function(x){
     var vl=Math.log1p(x.vc||0),ll=Math.log1p(x.lc||0),bl=Math.log1p(x.bc||0);
     if(vl>maxVL)maxVL=vl;if(ll>maxLL)maxLL=ll;if(bl>maxBL)maxBL=bl;
   });
   var s7=Math.round(
-    Math.log1p(e.vc||0)/maxVL*8+
-    Math.log1p(e.lc||0)/maxLL*8+
-    Math.log1p(e.bc||0)/maxBL*4
+    Math.log1p(e.vc||0)/maxVL*1.2+
+    Math.log1p(e.lc||0)/maxLL*1.2+
+    Math.log1p(e.bc||0)/maxBL*0.6
   );
+  if(s7>3)s7=3;
+
   var total=s1+s2+s3+s4+s5+s6+s7;
   return{total:total,s1:s1,s2:s2,s3:s3,s4:s4,s5:s5,s6:s6,s7:s7,d:d,br:br};
 }
@@ -853,7 +900,7 @@ function sc(e,allEv){return scDetail(e,allEv).total;}
 function tc(s,mx){return s;}  // 원점수 그대로 사용
 function tC(t){if(t>=80)return"#ff5e3a";if(t>=55)return"#ff9500";if(t>=25)return"#4fc3f7";return"#90a4ae";}
 function tB(t){if(t>=80)return"rgba(255,94,58,0.15)";if(t>=55)return"rgba(255,149,0,0.15)";if(t>=25)return"rgba(79,195,247,0.12)";return"rgba(144,164,174,0.12)";}
-var SCORE_MAX=135; // 전체 점수 최대 (40+25+30+10+12+8+20)
+var SCORE_MAX=122; // 전체 점수 최대 (45+35+20+10+7+5+3 — 실질적 상한)
 function gauge(t,sz){sz=sz||46;var c=tC(t),pct=Math.min(t/SCORE_MAX*100,100),r=(sz-6)/2,ci=2*Math.PI*r,of=ci-(ci*pct/100);return'<div class="gauge" style="width:'+sz+'px;height:'+sz+'px"><svg viewBox="0 0 '+sz+' '+sz+'"><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="#2a2a38" stroke-width="3"/><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="'+c+'" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="'+ci+'" stroke-dashoffset="'+of+'" transform="rotate(-90 '+sz/2+' '+sz/2+')"/></svg><div class="gauge-val"><span class="gauge-num" style="color:'+c+'">'+t+'°</span></div></div>';}
 function thermo(t,ev_obj,mx){
   var c=tC(t);
@@ -1775,13 +1822,13 @@ function _buildDetailHTML(id,e,kd){
   // ── 온도 카드: 요약 + hover 브레이크다운 ──
   var rank=all.findIndex(function(x){return x.id===id;})+1;
   var bdRows2=[
-    {l:'예매순위',   v:sd2.s2,max:40,hint:sd2.br>0?sd2.br+'위':'미집계'},
-    {l:'마감 임박',  v:sd2.s3,max:25,hint:sd2.d>=0?'D-'+sd2.d:'종료'},
-    {l:'네이버 검색',v:sd2.s1,max:30,hint:e.naver_score||0},
+    {l:'예매순위',   v:sd2.s2,max:45,hint:sd2.br>0?sd2.br+'위':(sd2.s2>0?'기본점수':'미집계')},
+    {l:'마감 임박',  v:sd2.s3,max:20,hint:sd2.d>=0?'D-'+sd2.d:'종료'},
+    {l:'네이버 검색',v:sd2.s1,max:35,hint:e.naver_score||0},
     {l:'신규 오픈',  v:sd2.s4,max:10,hint:sd2.s4?'7일 이내':''},
-    {l:'희소성(기간)',v:sd2.s5,max:12,hint:''},
-    {l:'무료입장',   v:sd2.s6,max:8, hint:sd2.s6?'무료':''},
-    {l:'사용자 반응',v:sd2.s7,max:20,hint:'조회/좋아요/저장'},
+    {l:'희소성(기간)',v:sd2.s5,max:7, hint:''},
+    {l:'무료입장',   v:sd2.s6,max:5,  hint:sd2.s6?'무료':''},
+    {l:'사용자 반응',v:sd2.s7,max:3,  hint:'조회/좋아요/저장'},
   ];
   var bdHtml2='';
   bdRows2.forEach(function(r){
@@ -1801,9 +1848,15 @@ function _buildDetailHTML(id,e,kd){
       // 라벨
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
         +'<div style="font-size:10px;font-weight:700;color:#505068;text-transform:uppercase;letter-spacing:0.07em">컬처온도</div>'
-        +'<div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#3a3a52">'
-          +'<svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round"/></svg>'
-          +'hover로 상세보기'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+          +'<button onclick="openTempGuide()" style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:3px 8px;cursor:pointer;font-family:inherit">'
+            +'<svg width="11" height="11" fill="none" stroke="#505068" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            +'<span style="font-size:9.5px;color:#505068;font-weight:600">온도지수 안내</span>'
+          +'</button>'
+          +'<div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#3a3a52">'
+            +'<svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round"/></svg>'
+            +'hover로 상세보기'
+          +'</div>'
         +'</div>'
       +'</div>'
       // 온도 수치 + 바
@@ -2210,11 +2263,149 @@ initApp();
   <button class="poster-modal-close" onclick="event.stopPropagation();closePoster()">✕</button>
   <img id="posterModalImg" src="" alt="포스터" onclick="event.stopPropagation()">
 </div>
+
+<!-- ── 온도지수 안내 바텀시트 ── -->
+<div class="tg-overlay" id="tgOverlay" onclick="closeTempGuide()">
+  <div class="tg-sheet" onclick="event.stopPropagation()">
+    <div class="tg-handle"></div>
+    <div class="tg-header">
+      <div>
+        <div style="font-size:17px;font-weight:900;letter-spacing:-0.03em">컬처온도 지수란?</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:3px">Culture Temperature Index</div>
+      </div>
+      <button onclick="closeTempGuide()" style="width:32px;height:32px;border-radius:50%;background:var(--card);border:1px solid var(--bd);color:var(--sub);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+
+    <!-- 개요 -->
+    <div class="tg-intro">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#ff5e3a,#ff2d55);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" fill="rgba(255,255,255,0.25)" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.5" cy="17.5" r="1.9" fill="white"/></svg>
+        </div>
+        <div style="flex:1;font-size:13px;color:var(--sub);line-height:1.65;word-break:keep-all">
+          뮤지컬·콘서트·전시 등 공연·문화 행사의 <strong style="color:var(--tx)">실시간 인기도</strong>를 예매순위, 검색량, 마감 임박 등 다양한 지표를 종합해 <strong style="color:var(--tx)">0~100+점</strong> 온도로 표현합니다.
+        </div>
+      </div>
+      <div class="tg-temp-scale">
+        <div class="tg-temp-item" style="color:#ff5e3a"><span class="tg-temp-dot" style="background:#ff5e3a"></span>80°+ <span class="tg-temp-tag">🔥 극열</span></div>
+        <div class="tg-temp-item" style="color:#ff9500"><span class="tg-temp-dot" style="background:#ff9500"></span>55~79° <span class="tg-temp-tag">🌡️ 뜨거움</span></div>
+        <div class="tg-temp-item" style="color:#4fc3f7"><span class="tg-temp-dot" style="background:#4fc3f7"></span>25~54° <span class="tg-temp-tag">💧 보통</span></div>
+        <div class="tg-temp-item" style="color:#90a4ae"><span class="tg-temp-dot" style="background:#90a4ae"></span>~24° <span class="tg-temp-tag">❄️ 차가움</span></div>
+      </div>
+    </div>
+
+    <!-- 항목별 설명 -->
+    <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;padding:0 20px;margin-bottom:10px">점수 항목</div>
+    <div class="tg-items">
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(255,94,58,0.15)">
+            <svg width="16" height="16" fill="none" stroke="#ff5e3a" stroke-width="1.8" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="tg-item-title">예매순위 <span class="tg-item-max">최대 45점</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:100%;background:#ff5e3a"></div></div>
+        <div class="tg-item-desc">KOPIS(공연예술통합전산망) 박스오피스 순위를 기반으로 산출합니다. 1위=45점, 2위=43점… 순으로 감소합니다. 전시·무료공연처럼 <strong>예매 데이터가 없는 공연은 패널티 없이 기본 12점</strong>이 부여되어 구조적 불이익을 방지합니다.</div>
+        <div class="tg-item-source">📡 출처: KOPIS 박스오피스 순위 (주 1회 이상 갱신)</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(255,149,0,0.15)">
+            <svg width="16" height="16" fill="none" stroke="#ff9500" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/></svg>
+          </div>
+          <div class="tg-item-title">네이버 검색량 <span class="tg-item-max">최대 35점</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:77.8%;background:#ff9500"></div></div>
+        <div class="tg-item-desc">네이버 검색 API를 통해 수집한 공연명 검색량을 0~100으로 정규화한 뒤 0.35를 곱해 산출합니다. 예매 없이 입소문으로 알려진 전시·무료공연을 <strong>공정하게 평가</strong>할 수 있는 핵심 보완 지표입니다.</div>
+        <div class="tg-item-source">📡 출처: 네이버 DataLab / 검색 API (주 1회 이상 갱신)</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(79,195,247,0.15)">
+            <svg width="16" height="16" fill="none" stroke="#4fc3f7" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="tg-item-title">마감 임박 <span class="tg-item-max">최대 20점</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:44.4%;background:#4fc3f7"></div></div>
+        <div class="tg-item-desc">종료일까지 남은 일수에 따라 점수가 부여됩니다. <strong>D-0(오늘 마감)=20점, D-3이내=15점, D-7이내=8점, D-14이내=3점</strong>. 종료가 가까울수록 관심이 집중되는 현상을 반영합니다.</div>
+        <div class="tg-item-source">📐 기준: 공연 종료일 기준 D-Day 계산</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(191,90,242,0.15)">
+            <svg width="16" height="16" fill="none" stroke="#bf5af2" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="tg-item-title">신규 오픈 <span class="tg-item-max">최대 10점</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:22.2%;background:#bf5af2"></div></div>
+        <div class="tg-item-desc">데이터 등록 후 7일 이내 공연에 부여합니다. 1일차≈10점에서 7일차≈4점으로 <strong>선형 감소</strong>하여 갑자기 0점이 되는 절벽 효과를 없앴습니다. 새로운 공연이 초기에 노출될 기회를 확보합니다.</div>
+        <div class="tg-item-source">📐 기준: 컬처온도 DB 최초 등록일 기준</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(48,209,88,0.12)">
+            <svg width="16" height="16" fill="none" stroke="#30d158" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="tg-item-title">희소성(공연기간) <span class="tg-item-max">최대 7점</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:15.6%;background:#30d158"></div></div>
+        <div class="tg-item-desc">공연 전체 기간이 짧을수록 점수가 높습니다. <strong>7일 이내=7점, 14일 이내=3점</strong>. 단, 마감임박(③)과 합산 상한 22점을 두어 단기 공연이 두 항목에서 동시에 과도한 보너스를 받지 않도록 제한합니다.</div>
+        <div class="tg-item-source">📐 기준: 공연 시작일~종료일 전체 기간</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(46,204,113,0.12)">
+            <svg width="16" height="16" fill="none" stroke="#2ecc71" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-linecap="round"/><path d="M8 12h8M12 8v8" stroke-linecap="round"/></svg>
+          </div>
+          <div class="tg-item-title">무료입장 <span class="tg-item-max">5점 (접근성 보너스)</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:11.1%;background:#2ecc71"></div></div>
+        <div class="tg-item-desc">무료 공연·전시에 부여하는 <strong>접근성 보너스</strong>입니다. 인기 지표가 아닌 속성 값이므로 배점을 낮게 유지합니다. 가격 부담 없이 즐길 수 있는 문화 행사가 소외되지 않도록 소폭 우대합니다.</div>
+        <div class="tg-item-source">📐 기준: 가격 정보 "무료" 포함 또는 관리자 설정</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(255,214,10,0.12)">
+            <svg width="16" height="16" fill="none" stroke="#ffd60a" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round"/></svg>
+          </div>
+          <div class="tg-item-title">사용자 반응 <span class="tg-item-max">최대 3점 (보조)</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:6.7%;background:#ffd60a"></div></div>
+        <div class="tg-item-desc">앱 내 조회수·좋아요·저장 수를 로그 스케일로 종합합니다. 현재는 서버 공유 집계 전 단계로 <strong>보조 지표(최대 3점)</strong>로 운용됩니다. 향후 서버 기반 집계가 도입되면 배점이 확대될 예정입니다.</div>
+        <div class="tg-item-source">📐 기준: 앱 내 행동 데이터 (로컬 집계 중)</div>
+      </div>
+
+    </div>
+
+    <!-- 업데이트 주기 -->
+    <div class="tg-footer">
+      <svg width="13" height="13" fill="none" stroke="var(--mu)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>점수는 <strong style="color:var(--sub)">매일 자동 갱신</strong>되며, 예매순위·검색량 데이터는 주 1회 이상 업데이트됩니다.</span>
+    </div>
+
+    <div style="height:calc(24px + env(safe-area-inset-bottom))"></div>
+  </div>
+</div>
 <script>
 function showPoster(url){
   document.getElementById('posterModalImg').src=url;
   document.getElementById('posterModal').classList.add('on');
   document.body.style.overflow='hidden';
+}
+function openTempGuide(){
+  document.getElementById('tgOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeTempGuide(){
+  document.getElementById('tgOverlay').classList.remove('show');
+  document.body.style.overflow='';
 }
 // ── 온도 툴팁 — body 직접 하위 단일 div, overflow 문제 완전 해결 ──
 (function(){
@@ -2245,13 +2436,13 @@ function showPoster(url){
     var sd=scDetail(evObj,ev);
     var c=tC(tc(sd.total));
     var rows=[
-      {l:'예매순위',   v:sd.s2,max:40,hint:sd.br>0?sd.br+'위':'미집계'},
-      {l:'마감 임박',  v:sd.s3,max:25,hint:sd.d>=0?'D-'+sd.d:'종료'},
-      {l:'네이버 검색',v:sd.s1,max:30,hint:evObj.naver_score||0},
+      {l:'예매순위',   v:sd.s2,max:45,hint:sd.br>0?sd.br+'위':(sd.s2>0?'기본':'미집계')},
+      {l:'마감 임박',  v:sd.s3,max:20,hint:sd.d>=0?'D-'+sd.d:'종료'},
+      {l:'네이버 검색',v:sd.s1,max:35,hint:evObj.naver_score||0},
       {l:'신규 오픈',  v:sd.s4,max:10,hint:sd.s4?'7일 이내':''},
-      {l:'희소성(기간)',v:sd.s5,max:12,hint:''},
-      {l:'무료입장',   v:sd.s6,max:8, hint:sd.s6?'무료':''},
-      {l:'사용자 반응',v:sd.s7,max:20,hint:'조회/좋아요/저장'},
+      {l:'희소성(기간)',v:sd.s5,max:7, hint:''},
+      {l:'무료입장',   v:sd.s6,max:5,  hint:sd.s6?'무료':''},
+      {l:'사용자 반응',v:sd.s7,max:3,  hint:'조회/좋아요/저장'},
     ];
 
     // 헤더: 온도 수치
