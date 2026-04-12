@@ -1148,10 +1148,20 @@ function renderHome(){
       +'</div>';
   });
   h+='</div>';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px"><div style="font-size:15px;font-weight:800">HOT NOW</div><button style="font-size:12px;color:#505068;font-weight:500;background:none;border:none;cursor:pointer" onclick="curNav=\'ranking\';go(\'ranking\')">전체보기 ›</button></div>';
-  h+='<div class="h-scroll">'+hot5.map(function(e){var t=tc(e._s,mx),c=tC(t);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:'+tB(t)+';color:'+c+'">'+t+'°C</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';
-  if(closing.length){h+='<div style="padding:0 20px;margin-bottom:12px"><div style="font-size:15px;font-weight:800">곧 종료</div></div><div class="dl-list">';closing.forEach(function(e){h+='<div class="dl-item" onclick="viewEv(\''+e.id+'\')"><div class="dl-thumb" style="'+(getPoster(e)?'background-image:url('+getPoster(e)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(e)?IC[e.ct]:'')+' </div><div class="dl-info"><div class="dl-title">'+e.t+'</div><div class="dl-meta">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div></div><div class="dl-dday">D-'+dd(e.ed)+'</div></div>';});h+='</div>';}
-  if(upcoming.length){h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px;margin-top:4px"><div style="font-size:15px;font-weight:800">오픈 예정</div></div><div class="h-scroll">'+upcoming.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:rgba(79,195,247,0.15);color:#4fc3f7">D-'+Math.max(s,0)+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';}
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px"><div style="font-size:15px;font-weight:800">HOT NOW</div><button style="font-size:12px;color:#505068;font-weight:500;background:none;border:none;cursor:pointer" onclick="go(\'tag\',\'hotNow::HOT NOW\')">전체보기 ›</button></div>';
+  h+='<div class="h-scroll">'+hot5.map(function(e){
+    var t=tc(e._s,mx),c=tC(t);
+    var dS=dd(e.sd),dE=dd(e.ed);
+    var badgeTxt,badgeBg,badgeColor;
+    if(dE<0){badgeTxt='마감';badgeBg='rgba(80,80,104,0.5)';badgeColor='#8d8da0';}
+    else if(dE===0){badgeTxt='오늘마감';badgeBg='rgba(255,94,58,0.2)';badgeColor='#ff5e3a';}
+    else if(dS>3){badgeTxt='진행예정';badgeBg='rgba(79,195,247,0.15)';badgeColor='#4fc3f7';}
+    else if(dS>0){badgeTxt='D-'+dS;badgeBg='rgba(255,149,0,0.2)';badgeColor='#ff9500';}
+    else{badgeTxt=t+'°C';badgeBg=tB(t);badgeColor=c;}
+    return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:'+badgeBg+';color:'+badgeColor+'">'+badgeTxt+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';
+  }).join('')+'</div>';
+  var openSoon=ranked.filter(function(e){var dS=dd(e.sd);return dS>0&&dS<=3;}).slice(0,6);
+  if(openSoon.length){h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px;margin-top:4px"><div style="font-size:15px;font-weight:800">오픈 예정</div><button style="font-size:12px;color:#505068;font-weight:500;background:none;border:none;cursor:pointer" onclick="go(\'tag\',\'openSoon::오픈 예정\')">전체보기 ›</button></div><div class="h-scroll">'+openSoon.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:rgba(255,149,0,0.2);color:#ff9500">D-'+s+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';}
   document.getElementById("page-home").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div></div>';
 }
 function goSlide(i){sIdx=i;var tr=document.getElementById("heroTrack");if(!tr)return;tr.style.transform="translateX(-"+(i*100)+"%)";document.querySelectorAll(".hero-dot").forEach(function(d,j){d.classList.toggle("on",j===i);});}
@@ -1922,7 +1932,13 @@ function renderTagPage(key){
   var typeCls={district:"tag-district",vibe:"tag-vibe",keyword:"tag-keyword",curation:"tag-vibe",__closing__:"tag-keyword",catTop:"tag-district",hotOndo:"tag-district"};
   var typeLabel={district:"지역",vibe:"분위기",keyword:"키워드",curation:"테마",__closing__:"테마",catTop:"컬처 핫온도",hotOndo:"컬처 핫온도"};
   var matched,pageTitle=val;
-  if(type==="hotOndo"){
+  if(type==="openSoon"){
+    pageTitle="오픈 예정";
+    matched=ev.filter(function(e){var dS=dd(e.sd);return dS>0&&dS<=3;}).sort(function(a,b){return dd(a.sd)-dd(b.sd);});
+  } else if(type==="hotNow"){
+    pageTitle="HOT NOW";
+    matched=getScoredEvents().slice(0,20);
+  } else if(type==="hotOndo"){
     // 카테고리별 1위만 추출해서 온도순 정렬
     pageTitle="컬처 핫온도";
     var _catTops={};
