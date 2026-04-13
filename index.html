@@ -940,8 +940,8 @@ function thermo(t,ev_obj,mx){
   '</div>';
 }
 function pLinks(src){if(!src)return[];if(src.includes("|"))return src.split(",").map(function(s){var p=s.trim().split("|");return{type:p[0].trim(),url:p.slice(1).join("|").trim()};}).filter(function(l){return l.url;});var tp="homepage";if(src.includes("instagram"))tp="instagram";else if(src.includes("interpark")||src.includes("weverse"))tp="ticket";return[{type:tp,url:src}];}
-function fmt(d){var p=d.split("-");return p[1].replace(/^0/,"")+"."+p[2].replace(/^0/,"");}
-function fmtRange(sd,ed){return fmt(sd)+" ~ "+fmt(ed);}
+function fmt(d){if(!d||typeof d!=='string')return '';var p=d.split("-");if(p.length<3)return d;return p[1].replace(/^0/,"")+"."+p[2].replace(/^0/,"");}
+function fmtRange(sd,ed){if(!sd)return '';if(!ed)return fmt(sd)+' ~';return fmt(sd)+" ~ "+fmt(ed);}
 function R(n,fn){var a=[];for(var i=0;i<n;i++)a.push(fn(i));return a.join("");}
 
 /* 스켈레톤 */
