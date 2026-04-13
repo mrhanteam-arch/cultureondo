@@ -1932,7 +1932,30 @@ function _buildDetailHTML(id,e,kd){
   }
   h+='</div></div>';
 
-  h+='<div class="quick-bar">'  +'<button class="quick-btn'+(ilk?' active':'')+'\" onclick="likeEv(\''+e.id+'\')" style="gap:5px">'    +'<svg width="24" height="24" viewBox="0 0 24 24" fill="'+(ilk?'var(--hot)':'none')+'" stroke="'+(ilk?'var(--hot)':'currentColor')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'      +'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'    +'</svg>'    +'<span class="qb-label">좋아요</span>'    +'<span class="qb-count">'+(e.lc>0?e.lc.toLocaleString():'')+'</span>'  +'</button>'  +'<button class="quick-btn'+(ibm?' active':'')+'\" onclick="toggleBm(\''+e.id+'\')" style="gap:5px">'    +'<svg width="24" height="24" viewBox="0 0 24 24" fill="'+(ibm?'var(--hot)':'none')+'" stroke="'+(ibm?'var(--hot)':'currentColor')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'      +'<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>'    +'</svg>'    +'<span class="qb-label">'+(ibm?'저장됨':'저장')+'</span>'    +'<span class="qb-count"> </span>'  +'</button>'+'</div>';
+  h+='<div class="quick-bar">'
+    +'<button class="quick-btn'+(ilk?' active':'')+'\" onclick="likeEv(\''+e.id+'\')" style="gap:5px">'
+      +'<svg width="24" height="24" viewBox="0 0 24 24" fill="'+(ilk?'var(--hot)':'none')+'" stroke="'+(ilk?'var(--hot)':'currentColor')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'
+        +'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'
+      +'</svg>'
+      +'<span class="qb-label">좋아요</span>'
+      +'<span class="qb-count">'+(e.lc>0?e.lc.toLocaleString():'')+'</span>'
+    +'</button>'
+    +'<button class="quick-btn'+(ibm?' active':'')+'\" onclick="toggleBm(\''+e.id+'\')" style="gap:5px">'
+      +'<svg width="24" height="24" viewBox="0 0 24 24" fill="'+(ibm?'var(--hot)':'none')+'" stroke="'+(ibm?'var(--hot)':'currentColor')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'
+        +'<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>'
+      +'</svg>'
+      +'<span class="qb-label">'+(ibm?'저장됨':'저장')+'</span>'
+      +'<span class="qb-count"> </span>'
+    +'</button>'
+    +'<button class="quick-btn" onclick="shareEv(\''+e.id+'\',\''+e.t.replace(/'/g,"\\'")+'\')" style="gap:5px">'
+      +'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'
+        +'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>'
+        +'<path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>'
+      +'</svg>'
+      +'<span class="qb-label">공유</span>'
+      +'<span class="qb-count"> </span>'
+    +'</button>'
+  +'</div>';
 
   // 공연 정보 카드
   h+='<div class="info-card">';
@@ -2267,7 +2290,42 @@ function renderTagPage(key){
   }
   document.getElementById("page-tag").innerHTML=h;
 }
-function likeEv(id){
+function shareEv(id, title) {
+  var url = 'https://cultureondo.com/?id=' + id;
+  var text = title + ' — 컬처온도에서 확인해보세요!';
+  if (navigator.share) {
+    navigator.share({ title: title, text: text, url: url })
+      .catch(function() {}); // 사용자 취소 무시
+  } else {
+    // Web Share API 미지원 → 링크 복사
+    var ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast('링크가 복사됐어요 🔗');
+    } catch(e) {
+      showToast('링크: ' + url);
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#1e1e28;border:1px solid #2a2a38;color:#ededf0;font-size:13px;font-weight:600;padding:10px 20px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.4)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() { t.style.opacity = '0'; }, 2000);
+}
   if(liked.has(id))return;
   liked.add(id);
   localStorage.setItem('snr_lk',JSON.stringify(Array.from(liked)));
