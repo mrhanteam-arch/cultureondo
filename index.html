@@ -7,9 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="컬처온도">
+<meta name="apple-mobile-web-app-title" content="CULTURE°">
 <meta name="theme-color" content="#111114">
-<title>컬처온도 - 문화생활 온도 랭킹</title>
+<title>CULTURE° - 문화생활 온도 큐레이션 컬처온도</title>
 <!-- SEO -->
 <meta name="description" content="뮤지컬, 콘서트, 연극, 전시 등 문화 행사의 실시간 인기 온도를 한눈에. 예매순위·네이버 검색량·마감 임박 지수를 종합한 컬처온도 랭킹.">
 <meta name="keywords" content="뮤지컬, 콘서트, 연극, 전시, 문화생활, 문화랭킹, 예매순위, 컬처온도">
@@ -17,9 +17,9 @@
 <link rel="canonical" href="https://cultureondo.com/">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="컬처온도">
-<meta property="og:title" content="컬처온도 - 문화생활 온도 랭킹">
-<meta property="og:description" content="뮤지컬, 콘서트, 연극, 전시 등 문화 행사의 실시간 인기 온도를 한눈에. 예매순위·네이버 검색량·마감 임박 지수를 종합한 컬처온도 랭킹.">
+<meta property="og:site_name" content="CULTURE°">
+<meta property="og:title" content="CULTURE° - 문화생활 온도 큐레이션 컬처온도">
+<meta property="og:description" content="뮤지컬, 콘서트, 연극, 전시, 영화 등 문화생활의 실시간 인기 온도를 한눈에. 예매순위·네이버 검색량·마감 임박 지수를 종합한 컬처온도 랭킹.">
 <meta property="og:url" content="https://cultureondo.com/">
 <meta property="og:image" content="https://cultureondo.com/og-image.png">
 <meta property="og:image:width" content="1200">
@@ -27,8 +27,8 @@
 <meta property="og:locale" content="ko_KR">
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="컬처온도 - 문화생활 온도 랭킹">
-<meta name="twitter:description" content="뮤지컬, 콘서트, 연극, 전시 등 문화 행사의 실시간 인기 온도를 한눈에.">
+<meta name="twitter:title" content="CULTURE° - 문화생활 온도 큐레이션 컬처온도">
+<meta name="twitter:description" content="뮤지컬, 콘서트, 연극, 전시, 영화 등 문화생활의 실시간 인기 온도를 한눈에.">
 <meta name="twitter:image" content="https://cultureondo.com/og-image.png">
 <!-- 네이버 서치어드바이저 소유권 인증 (발급 후 content 값 교체) -->
 <meta name="naver-site-verification" content="NAVER_VERIFICATION_CODE">
@@ -74,22 +74,25 @@ a{color:inherit;text-decoration:none}
   padding-bottom:calc(16px + env(safe-area-inset-bottom));
   z-index:100;gap:0;
 }
-.credit-block{
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.credit-marquee-wrap{width:100%;overflow:hidden;padding:10px 0;border-top:1px solid var(--bdL);border-bottom:1px solid var(--bdL);margin-bottom:16px}
+.credit-marquee-track{display:flex;white-space:nowrap;animation:marquee 18s linear infinite}
+.credit-marquee-track:hover{animation-play-state:paused}
+.credit-marquee-item{display:inline-flex;align-items:center;gap:6px;padding:0 20px;font-size:10px;color:rgba(255,255,255,0.25);font-weight:500;white-space:nowrap;flex-shrink:0}
+.credit-marquee-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0}
   padding:20px 20px 80px;
   display:flex;flex-direction:column;align-items:center;gap:0;
   border-top:1px solid var(--bdL);
   margin-top:8px;
 }
 .credit-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:0;
+  display:flex;align-items:center;justify-content:center;
+  flex-wrap:wrap;gap:6px 14px;
   width:100%;
-  max-width:340px;
 }
 .credit-cell{
   display:flex;align-items:center;justify-content:center;
-  padding:10px 8px;
+  padding:4px 0;
 }
 /* KOPIS 출처 */
 .kopis-credit-link{
@@ -187,7 +190,7 @@ a{color:inherit;text-decoration:none}
 .hdr h1{font-size:18px;font-weight:800}
 .hdr-btn{background:none;border:none;color:var(--sub);padding:0}
 /* 히어로 슬라이더 */
-.hero-slider{position:relative;margin:0 20px 20px;border-radius:16px;overflow:hidden;height:180px;background:var(--card)}
+.hero-slider{position:relative;margin:0 20px 20px;border-radius:16px;overflow:hidden;height:210px;background:var(--card)}
 .hero-track{display:flex;width:100%;height:100%;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1)}
 .hero-slide{flex:0 0 100%;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:64px}
 .hero-ov{position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(17,17,20,0.93));display:flex;flex-direction:column;justify-content:flex-end;padding:18px}
@@ -195,8 +198,8 @@ a{color:inherit;text-decoration:none}
 .hero-title{font-size:17px;font-weight:800;line-height:1.3}
 .hero-sub{font-size:12px;color:rgba(255,255,255,0.7);margin-top:3px}
 .hero-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2}
-.hero-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.4);transition:all 0.3s;cursor:pointer}
-.hero-dot.on{width:20px;border-radius:3px;background:#fff}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.35);transition:all 0.3s;cursor:pointer}
+.hero-dot.on{width:22px;border-radius:3px;background:#fff}
 /* 큐레이션 테마 그리드 */
 .curation-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 16px;margin-bottom:24px}
 .curation-card{position:relative;border-radius:16px;overflow:hidden;cursor:pointer;height:110px;display:flex;align-items:flex-end;padding:14px 14px;border:1px solid rgba(255,255,255,0.06);transition:transform 0.15s}
@@ -552,12 +555,8 @@ a{color:inherit;text-decoration:none}
           </svg>
         </div>
         <div>
-          <div style="font-size:34px;font-weight:900;letter-spacing:-0.05em;background:linear-gradient(95deg,#ff6b4a 0%,#ff2d55 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;margin-bottom:6px">컬처온도</div>
-          <div style="display:flex;align-items:center;gap:5px">
-            <span style="font-size:11.5px;font-weight:600;color:#52526a">문화큐레이션 플랫폼</span>
-            <span style="width:2px;height:2px;border-radius:50%;background:#333350;display:inline-block"></span>
-            <span style="font-size:11.5px;font-weight:600;color:#52526a">트렌드 온도랭킹</span>
-          </div>
+          <div style="font-size:34px;font-weight:900;letter-spacing:0.01em;background:linear-gradient(95deg,#ff6b4a 0%,#ff2d55 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;margin-bottom:6px">CULTURE°</div>
+          <div style="font-size:11.5px;font-weight:600;color:#52526a;letter-spacing:0.04em">문화생활 온도 큐레이션</div>
         </div>
       </div>
 
@@ -829,12 +828,12 @@ function getPoster(e){
   url=url.replace('http://','https://');
   // KOPIS 이미지는 프록시로 우회
   if(url.indexOf('kopis.or.kr')>=0){
-    return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=200&output=webp&q=75';
+    return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
   }
   // 한국문화정보원 이미지 프록시
-  if(url.indexOf('culture.go.kr')>=0)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=200&output=jpg&q=75';
+  if(url.indexOf('culture.go.kr')>=0)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
   // http였던 외부 이미지 — Mixed Content 방지
-  if(wasHttp)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=200&output=jpg&q=75';
+  if(wasHttp)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
   return url;
 }
 function rkThumb(e){
@@ -1059,61 +1058,78 @@ function renderHome(){
   var upcoming=ranked.filter(function(e){return e.st==="upcoming";}).slice(0,6),slides=ranked.slice(0,4);
   var h=''
   // ── 헤더 ──
-  +'<div style="padding:16px 20px 14px;display:flex;align-items:center;justify-content:space-between">'
-    +'<div style="display:flex;align-items:center;gap:11px">'
-      +'<div style="width:40px;height:40px;border-radius:14px;background:linear-gradient(145deg,#ff5e3a,#ff2d55);box-shadow:0 4px 16px rgba(255,60,40,0.38);display:flex;align-items:center;justify-content:center;flex-shrink:0">'
-        +'<svg width="21" height="21" viewBox="0 0 24 24" fill="none">'
+  +'<div style="padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between">'
+    +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,#ff5e3a,#ff2d55);box-shadow:0 3px 12px rgba(255,60,40,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none">'
           +'<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" fill="rgba(255,255,255,0.22)" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'
           +'<circle cx="11.5" cy="17.5" r="1.9" fill="white"/>'
           +'<rect x="10.3" y="8.5" width="2.4" height="7" rx="1.2" fill="white"/>'
         +'</svg>'
       +'</div>'
-      +'<div style="display:flex;flex-direction:column;gap:0">'
-        +'<div style="font-size:19px;font-weight:900;background:linear-gradient(95deg,#ff6b4a 0%,#ff2d55 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.04em;line-height:1.1">컬처온도</div>'
-        +'<div style="display:flex;align-items:center;gap:5px;margin-top:4px">'
-          +'<span style="font-size:10px;font-weight:600;color:#48485e;letter-spacing:0.01em">문화큐레이션 플랫폼</span>'
-          +'<span style="width:2px;height:2px;border-radius:50%;background:#323248;display:inline-block;flex-shrink:0"></span>'
-          +'<span style="font-size:10px;font-weight:600;color:#48485e;letter-spacing:0.01em">트렌드 온도랭킹</span>'
-        +'</div>'
+      +'<div>'
+        +'<div style="font-size:24px;font-weight:900;background:linear-gradient(95deg,#ff6b4a 0%,#ff2d55 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.01em;line-height:1">CULTURE°</div>'
+        +'<div style="font-size:10px;font-weight:600;color:#5a5a72;letter-spacing:0.06em;margin-top:4px">문화생활 온도 큐레이션 &nbsp;·&nbsp; 컬처온도</div>'
       +'</div>'
     +'</div>'
-    +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<button class="hdr-btn" onclick="openSearch()" style="width:36px;height:36px;border-radius:10px;background:#1a1a20;border:1px solid #252530;display:flex;align-items:center;justify-content:center">'
-        +'<svg width="17" height="17" fill="none" stroke="#8d8da0" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<button onclick="openSearch()" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer">'
+        +'<svg width="16" height="16" fill="none" stroke="#8d8da0" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
       +'</button>'
       +(user
         ?'<div onclick="go(\'my\')" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#ff5e3a,#ff9500);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(255,94,58,0.35)">'+user.avatar+'</div>'
-        :'<button onclick="go(\'login\')" style="height:36px;padding:0 14px;border-radius:10px;border:1px solid #252530;background:#1a1a20;color:#8d8da0;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-0.01em">로그인</button>'
+        :'<button onclick="go(\'login\')" style="height:34px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#8d8da0;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:-0.01em">로그인</button>'
       )
     +'</div>'
   +'</div>';
   if(slides.length){
     h+='<div class="hero-slider"><div class="hero-track" id="heroTrack">';
-    var gradients=['linear-gradient(135deg,#1a1228,#2d1535)','linear-gradient(135deg,#0d1a2d,#1a2d42)','linear-gradient(135deg,#1a1a10,#2d2d14)','linear-gradient(135deg,#1a0d1a,#2d1a2d)'];
     slides.forEach(function(e,i){
       var t=tc(e._s,mx);
       var _p=getPoster(e);
-      var bg=gradients[i%gradients.length];
-      h+='<div class="hero-slide" style="background:'+bg+';cursor:pointer;display:flex;align-items:center;padding:0 16px;gap:14px" onclick="viewEv(\''+e.id+'\')">'
-        +'<div style="flex-shrink:0;width:86px;height:114px;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.5);background:#2a2a38;display:flex;align-items:center;justify-content:center;font-size:32px">'
-        +(_p?'<img src="'+_p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="lazy">':IC[e.ct])
-        +'</div>'
-        +'<div style="flex:1;min-width:0;padding-bottom:20px">'
-          +'<div class="hero-badge" style="margin-bottom:8px">HOT '+t+'°C</div>'
-          +'<div class="hero-title">'+e.t+'</div>'
-          +'<div class="hero-sub">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div>'
+      var c=tC(t);
+      // 포스터 있으면 배경으로 꽉 채움, 없으면 그라디언트
+      var bgStyle=_p
+        ?'background:linear-gradient(135deg,#111114,#1a1a28);background-image:url('+_p+');background-size:cover;background-position:center top'
+        :'background:linear-gradient(135deg,#1a1228,#2d1535)';
+      h+='<div class="hero-slide" style="'+bgStyle+';cursor:pointer;position:relative;overflow:hidden" onclick="viewEv(\''+e.id+'\')">'
+        // 포스터 있을 때 블러 오버레이
+        +(_p?'<div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,14,0.82) 0%,rgba(10,10,14,0.3) 60%,rgba(10,10,14,0.1) 100%)"></div>':'')
+        // 하단 그라디언트
+        +'<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,14,0.95) 0%,rgba(10,10,14,0.4) 45%,transparent 100%)"></div>'
+        // 컨텐츠
+        +'<div style="position:absolute;inset:0;display:flex;align-items:flex-end;padding:20px 20px 36px;gap:14px">'
+          // 포스터 썸네일 (작게)
+          +'<div style="flex-shrink:0;width:64px;height:86px;border-radius:8px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.6);background:#2a2a38;display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid rgba(255,255,255,0.1)">'
+          +(_p?'<img src="'+_p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center">':IC[e.ct])
+          +'</div>'
+          // 텍스트
+          +'<div style="flex:1;min-width:0">'
+            +'<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:'+c+'22;border:1px solid '+c+'55;margin-bottom:6px">'
+              +'<span style="font-size:10px;font-weight:800;color:'+c+';letter-spacing:0.04em">HOT '+t+'°C</span>'
+            +'</div>'
+            +'<div style="font-size:17px;font-weight:800;color:#fff;line-height:1.25;letter-spacing:-0.02em;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.t+'</div>'
+            +'<div style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div>'
+          +'</div>'
         +'</div>'
         +'</div>';
     });
     h+='</div>';
     if(slides.length>1){
-      // 좌우 화살표
-      // 화살표 + dots 하단 중앙에 나란히
-      h+='<div style="position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:8px;z-index:10">'
-        +'<button onclick="event.stopPropagation();goPrevSlide()" style="width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">‹</button>'
-        +'<div style="display:flex;gap:5px;align-items:center">'+slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'" onclick="event.stopPropagation();goSlide('+i+')" style="cursor:pointer"></div>';}).join('')+'</div>'
-        +'<button onclick="event.stopPropagation();goNextSlide()" style="width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">›</button>'
-        +'</div>';
+      // 좌우 클릭 영역 (넓은 투명 버튼)
+      h+='<div style="position:absolute;inset:0;display:flex;z-index:9;pointer-events:none">'
+        +'<div onclick="event.stopPropagation();goPrevSlide()" style="width:40%;height:100%;cursor:pointer;pointer-events:all;display:flex;align-items:center;justify-content:flex-start;padding-left:12px">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;opacity:0.7">‹</div>'
+        +'</div>'
+        +'<div style="flex:1"></div>'
+        +'<div onclick="event.stopPropagation();goNextSlide()" style="width:40%;height:100%;cursor:pointer;pointer-events:all;display:flex;align-items:center;justify-content:flex-end;padding-right:12px">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;opacity:0.7">›</div>'
+        +'</div>'
+      +'</div>';
+      // dots
+      h+='<div style="position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:5px;z-index:10">'
+        +slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'" onclick="event.stopPropagation();goSlide('+i+')" style="cursor:pointer"></div>';}).join('')
+      +'</div>';
     }
     h+='</div>';
     sTimer=setInterval(function(){sIdx=(sIdx+1)%slides.length;goSlide(sIdx);},3500);
@@ -1266,22 +1282,32 @@ function renderHome(){
       +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
     +'</button>'
   +'</div>'+'<div class="h-scroll">'+openSoon.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:rgba(255,149,0,0.2);color:#ff9500">D-'+s+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div><div class="h-card-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div>';}).join('')+'</div>';}
-  document.getElementById("page-home").innerHTML=h+'<div class="credit-block"><div class="credit-row"><div class="credit-cell"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a></div><div class="credit-cell"><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div><div class="credit-cell"><a href="https://www.kcisa.kr" target="_blank" rel="noopener" class="kcisa-credit-link">🏛️ 한국문화정보원</a></div><div class="credit-cell"><a href="https://www.kobis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link">🎬 영화진흥위원회 KOBIS</a></div></div>'
-  +'<div style="width:100%;margin-top:8px;border-top:1px solid rgba(255,255,255,0.05);padding-top:16px">'
-    +'<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.2);letter-spacing:0.05em;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'grid\':\'none\'">'
-      +'컬처온도 사업자 정보'
-      +'<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  document.getElementById("page-home").innerHTML=h+'<div class="credit-block"><div class="credit-marquee-wrap"><div class="credit-marquee-track"><span class="credit-marquee-item"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">Powered by NAVER OpenAPI</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🏛️ 한국문화정보원</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🎬 영화진흥위원회 KOBIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">Powered by NAVER OpenAPI</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🏛️ 한국문화정보원</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🎬 영화진흥위원회 KOBIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">Powered by NAVER OpenAPI</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🏛️ 한국문화정보원</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🎬 영화진흥위원회 KOBIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">Powered by NAVER OpenAPI</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🏛️ 한국문화정보원</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🎬 영화진흥위원회 KOBIS</span><span class="credit-marquee-dot"></span></div></div>'
+  +'<div style="display:flex;align-items:center;justify-content:center;gap:0;padding:12px 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)"><a href="#" style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-decoration:none;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap">서비스 소개</a><a href="#" style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-decoration:none;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap">이용약관</a><a href="#" style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-decoration:none;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap">개인정보처리방침</a><a href="mailto:hello@cultureondo.com" style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-decoration:none;padding:0 14px;white-space:nowrap">1:1 문의하기</a></div>'
+  +'<div style="width:100%;margin-top:0;border-top:none;padding-top:20px;padding-bottom:8px">'
+    // 로고 + 토글 헤더
+    +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:14px">'
+      +'<div style="width:18px;height:18px;border-radius:5px;background:linear-gradient(145deg,#ff5e3a,#ff2d55);display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" fill="rgba(255,255,255,0.3)" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.5" cy="17.5" r="2" fill="white"/></svg>'
+      +'</div>'
+      +'<span style="font-size:13px;font-weight:800;background:linear-gradient(95deg,#ff6b4a,#ff2d55);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.03em">CULTURE°</span>'
+      +'<span style="font-size:10px;font-weight:500;color:rgba(255,255,255,0.2)">사업자정보</span>'
     +'</div>'
-    +'<div style="display:none;grid-template-columns:1fr 1fr;gap:0">'
-      +'<div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.04);font-size:9.5px;color:rgba(255,255,255,0.18);line-height:1.7"><span style="display:block;color:rgba(255,255,255,0.1);font-size:8.5px;margin-bottom:2px">상호명</span>컬처온도</div>'
-      +'<div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.04);font-size:9.5px;color:rgba(255,255,255,0.18);line-height:1.7"><span style="display:block;color:rgba(255,255,255,0.1);font-size:8.5px;margin-bottom:2px">대표자</span>홍길동</div>'
-      +'<div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.04);font-size:9.5px;color:rgba(255,255,255,0.18);line-height:1.7"><span style="display:block;color:rgba(255,255,255,0.1);font-size:8.5px;margin-bottom:2px">사업자등록번호</span>000-00-00000 <span style="font-size:8.5px;color:rgba(255,255,255,0.15);cursor:pointer;text-decoration:underline" onclick="window.open(\'https://www.ftc.go.kr/bizCommPop.do?wrkr_no=0000000000\')">확인</span></div>'
-      +'<div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.04);font-size:9.5px;color:rgba(255,255,255,0.18);line-height:1.7"><span style="display:block;color:rgba(255,255,255,0.1);font-size:8.5px;margin-bottom:2px">통신판매업신고</span>제0000-서울강남-00000호</div>'
-      +'<div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.04);font-size:9.5px;color:rgba(255,255,255,0.18);line-height:1.7;grid-column:span 2"><span style="display:block;color:rgba(255,255,255,0.1);font-size:8.5px;margin-bottom:2px">사업장 소재지</span>서울특별시 강남구 테헤란로 000</div>'
-      +'<div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.04);font-size:9.5px;color:rgba(255,255,255,0.18);line-height:1.7"><span style="display:block;color:rgba(255,255,255,0.1);font-size:8.5px;margin-bottom:2px">공용메일</span>hello@cultureondo.com</div>'
-      +'<div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.04);font-size:9.5px;color:rgba(255,255,255,0.18);line-height:1.7"><span style="display:block;color:rgba(255,255,255,0.1);font-size:8.5px;margin-bottom:2px">고객센터 운영시간</span>평일 10:00 ~ 18:00</div>'
-      +'<div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.04);font-size:9.5px;color:rgba(255,255,255,0.18);line-height:1.7;grid-column:span 2"><span style="display:block;color:rgba(255,255,255,0.1);font-size:8.5px;margin-bottom:2px">개인정보보호책임자</span>홍길동 / hello@cultureondo.com</div>'
-    +'</div>'
+    +'<div>'
+      +'<div style="font-size:10.5px;color:rgba(255,255,255,0.3);line-height:2;letter-spacing:0.01em">'
+        +'상호명 : 컬처온도 &nbsp;|&nbsp; 대표자 : 홍길동<br>'
+        +'사업자등록번호 : 000-00-00000 &nbsp;<span style="font-size:10px;color:rgba(255,255,255,0.2);text-decoration:underline;cursor:pointer" onclick="window.open(\'https://www.ftc.go.kr/bizCommPop.do?wrkr_no=0000000000\')">[사업자정보확인]</span><br>'
+        +'통신판매업신고번호 : 제0000-서울강남-00000호<br>'
+        +'사업장 소재지 : 서울특별시 강남구 테헤란로 000<br>'
+        +'공용메일 : hello@cultureondo.com<br>'
+        +'개인정보보호책임자 : 홍길동 / hello@cultureondo.com'
+      +'</div>'
+      +'<div style="font-size:10.5px;color:rgba(255,255,255,0.3);line-height:2;letter-spacing:0.01em;margin-top:12px">'
+        +'고객센터 : <span style="color:rgba(255,255,255,0.45);font-weight:600">hello@cultureondo.com</span><br>'
+        +'공용메일 : hello@cultureondo.com<br>'
+        +'평일 10:00 ~ 18:00 (주말·공휴일 휴무)'
+      +'</div>'
+      +'<div style="font-size:9.5px;color:rgba(255,255,255,0.15);margin-top:14px;letter-spacing:0.01em">© 2025 CULTURE° All rights reserved.</div>'
   +'</div>'
   +'</div>';
 }
@@ -1330,7 +1356,7 @@ function renderRanking(){
       +'<div style="font-size:17px;font-weight:800;color:var(--tx);margin-bottom:8px">팝업스토어</div>'
       +'<div style="font-size:13.5px;color:var(--sub);line-height:1.7">팝업스토어 데이터를 준비 중이에요.<br>곧 만나보실 수 있어요!</div>'
     +'</div>';
-    document.getElementById("page-ranking").innerHTML=h+'<div class="credit-block"><div class="credit-row"><div class="credit-cell"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a></div><div class="credit-cell"><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div><div class="credit-cell"><a href="https://www.kcisa.kr" target="_blank" rel="noopener" class="kcisa-credit-link">🏛️ 한국문화정보원</a></div><div class="credit-cell"><a href="https://www.kobis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link">🎬 영화진흥위원회 KOBIS</a></div></div></div>';
+    document.getElementById("page-ranking").innerHTML=h+'';
     requestAnimationFrame(function(){
       var tabs=document.querySelector('#page-ranking .rk-cat-tabs');
       var active=tabs&&tabs.querySelector('.rk-cat-tab.on');
@@ -1396,7 +1422,7 @@ function renderRanking(){
       +'<div class="rk-sub-date">'+(e.ct==='박스오피스'?('개봉 '+e.sd+(e.boxoffice_rank>0?' · 박스오피스 '+e.boxoffice_rank+'위':'')):e.lo+' · '+fmtRange(e.sd,e.ed))+'</div></div></div>'
       +thermo(t,e,mx)+'</div>';
   });}
-  document.getElementById("page-ranking").innerHTML=h+'<div class="credit-block"><div class="credit-row"><div class="credit-cell"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a></div><div class="credit-cell"><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div><div class="credit-cell"><a href="https://www.kcisa.kr" target="_blank" rel="noopener" class="kcisa-credit-link">🏛️ 한국문화정보원</a></div><div class="credit-cell"><a href="https://www.kobis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link">🎬 영화진흥위원회 KOBIS</a></div></div></div>';
+  document.getElementById("page-ranking").innerHTML=h+'';
   // 활성 카테고리 탭 자동 스크롤 (탭이 잘려 안 보이는 문제 해결)
   requestAnimationFrame(function(){
     var tabs=document.querySelector('#page-ranking .rk-cat-tabs');
@@ -1687,7 +1713,7 @@ function renderExplore(){
     h+='</div>';
   }
 
-  document.getElementById("page-explore").innerHTML=h+'<div class="credit-block"><div class="credit-row"><div class="credit-cell"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a></div><div class="credit-cell"><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div><div class="credit-cell"><a href="https://www.kcisa.kr" target="_blank" rel="noopener" class="kcisa-credit-link">🏛️ 한국문화정보원</a></div><div class="credit-cell"><a href="https://www.kobis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link">🎬 영화진흥위원회 KOBIS</a></div></div></div>';
+  document.getElementById("page-explore").innerHTML=h+'';
 }
 
 /* 마이페이지 */
@@ -1799,7 +1825,7 @@ function renderMy(){
     });
   }
 
-  var credit='<div class="credit-block"><div class="credit-row"><div class="credit-cell"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a></div><div class="credit-cell"><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div><div class="credit-cell"><a href="https://www.kcisa.kr" target="_blank" rel="noopener" class="kcisa-credit-link">🏛️ 한국문화정보원</a></div><div class="credit-cell"><a href="https://www.kobis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link">🎬 영화진흥위원회 KOBIS</a></div></div></div>';
+  var credit='';
   document.getElementById("page-my").innerHTML=H.join('')+credit;
 }
 
@@ -2123,7 +2149,7 @@ function _buildDetailHTML(id,e,kd){
     +'</div>';
   }
 
-  return h+'<div class="credit-block"><div class="credit-row"><div class="credit-cell"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a></div><div class="credit-cell"><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a></div><div class="credit-cell"><a href="https://www.kcisa.kr" target="_blank" rel="noopener" class="kcisa-credit-link">🏛️ 한국문화정보원</a></div><div class="credit-cell"><a href="https://www.kobis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link">🎬 영화진흥위원회 KOBIS</a></div></div></div>';
+  return h+'';
 }
 
 function renderDetail(id){
