@@ -1097,8 +1097,8 @@ function renderHome(){
         +(_p?'<div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,14,0.82) 0%,rgba(10,10,14,0.3) 60%,rgba(10,10,14,0.1) 100%)"></div>':'')
         // 하단 그라디언트
         +'<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,14,0.95) 0%,rgba(10,10,14,0.4) 45%,transparent 100%)"></div>'
-        // 컨텐츠
-        +'<div style="position:absolute;inset:0;display:flex;align-items:flex-end;padding:20px 20px 36px;gap:14px">'
+        // 컨텐츠 - 하단에 dots 공간 확보
+        +'<div style="position:absolute;inset:0;display:flex;align-items:flex-end;padding:20px 20px 48px;gap:14px">'
           // 포스터 썸네일 (작게)
           +'<div style="flex-shrink:0;width:64px;height:86px;border-radius:8px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.6);background:#2a2a38;display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid rgba(255,255,255,0.1)">'
           +(_p?'<img src="'+_p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center">':IC[e.ct])
@@ -1116,23 +1116,34 @@ function renderHome(){
     });
     h+='</div>';
     if(slides.length>1){
-      // 좌우 클릭 영역 (넓은 투명 버튼)
-      h+='<div style="position:absolute;inset:0;display:flex;z-index:9;pointer-events:none">'
-        +'<div onclick="event.stopPropagation();goPrevSlide()" style="width:40%;height:100%;cursor:pointer;pointer-events:all;display:flex;align-items:center;justify-content:flex-start;padding-left:12px">'
-          +'<div style="width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;opacity:0.7">‹</div>'
+      // dots + 좌우 화살표 한 줄에
+      h+='<div style="position:absolute;bottom:14px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:8px;z-index:10">'
+        +'<div onclick="event.stopPropagation();goPrevSlide()" style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.55);border:1.5px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;cursor:pointer;flex-shrink:0">‹</div>'
+        +'<div style="display:flex;align-items:center;gap:5px">'
+          +slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'" onclick="event.stopPropagation();goSlide('+i+')" style="cursor:pointer"></div>';}).join('')
         +'</div>'
-        +'<div style="flex:1"></div>'
-        +'<div onclick="event.stopPropagation();goNextSlide()" style="width:40%;height:100%;cursor:pointer;pointer-events:all;display:flex;align-items:center;justify-content:flex-end;padding-right:12px">'
-          +'<div style="width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;opacity:0.7">›</div>'
-        +'</div>'
-      +'</div>';
-      // dots
-      h+='<div style="position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:5px;z-index:10">'
-        +slides.map(function(_,i){return'<div class="hero-dot'+(i===0?' on':'')+'" onclick="event.stopPropagation();goSlide('+i+')" style="cursor:pointer"></div>';}).join('')
+        +'<div onclick="event.stopPropagation();goNextSlide()" style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.55);border:1.5px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;cursor:pointer;flex-shrink:0">›</div>'
       +'</div>';
     }
     h+='</div>';
-    sTimer=setInterval(function(){sIdx=(sIdx+1)%slides.length;goSlide(sIdx);},3500);
+    // 터치 스와이프 지원
+    (function(){
+      var el=null,sx=0,sy=0;
+      setTimeout(function(){
+        el=document.getElementById('heroTrack');
+        if(!el)return;
+        var wrap=el.parentElement;
+        wrap.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+        wrap.addEventListener('touchend',function(e){
+          var dx=e.changedTouches[0].clientX-sx;
+          var dy=e.changedTouches[0].clientY-sy;
+          if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){
+            if(dx<0)goNextSlide();else goPrevSlide();
+          }
+        },{passive:true});
+      },100);
+    })();
+    sTimer=setInterval(function(){sIdx=(sIdx+1)%slides.length;goSlide(sIdx);},5000);
   }
   // 큐레이션 테마 카드
   var curations=getCurations();
