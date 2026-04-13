@@ -689,7 +689,7 @@ var sHist=JSON.parse(localStorage.getItem('snr_sh')||'[]');
 var rvId=null,rvRating=0,rvDB=JSON.parse(localStorage.getItem('snr_rv')||'{}');
 var user=JSON.parse(localStorage.getItem('snr_user')||'null');
 var eMode='login';
-var CATS=["전체","박스오피스","뮤지컬","콘서트/페스티벌","연극","클래식/무용","전시/미술","복합","팝업스토어"];
+var CATS=["전체","뮤지컬","콘서트/페스티벌","연극","클래식/무용","전시/미술","복합","박스오피스","팝업스토어"];
 var IC={"전체":"🔥","박스오피스":"🎬","뮤지컬":"🎭","연극":"🎬","콘서트/페스티벌":"🎤","클래식/무용":"🎻","전시/미술":"🖼️","복합":"✨","팝업스토어":"🏪"};
 var REG=["전국","서울","경기","인천","부산","대구","대전","광주","강원","충청","경상","전라","제주"];
 
@@ -1445,7 +1445,7 @@ function renderCalendar(){
     +'<button onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}calSel=null;renderCalendar()">›</button>'
   +'</div>';
   // 카테고리 필터 탭
-  var calCats=["전체","박스오피스","뮤지컬","연극","콘서트/페스티벌","클래식/무용","전시/미술","복합"];
+  var calCats=["전체","뮤지컬","연극","콘서트/페스티벌","클래식/무용","전시/미술","복합","박스오피스"];
   h+='<div style="display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none">';
   calCats.forEach(function(cat){
     var on=(calCat===cat);
@@ -1862,8 +1862,7 @@ function _buildDetailHTML(id,e,kd){
   var price=kd&&kd.pcseguidance?kd.pcseguidance:(e.pr||'');
   var schedule=kd&&kd.dtguidance?kd.dtguidance:(e.ct==='전시/미술'||isBoxoffice?'':(e.ds||''));
   var synopsis=kd&&kd.sty?kd.sty:(e.sty||'');
-  // 박스오피스: ds에 관객수 요약 저장됨 → synopsis로 활용
-  if(isBoxoffice&&!synopsis&&e.ds)synopsis=e.ds;
+  // 박스오피스: KMDB 줄거리(synopsis)만 표시, ds(관객수)는 소개에 노출 안 함
   var introImgs=[];
   if(kd&&kd.styurls){
     var imgs=Array.isArray(kd.styurls)?kd.styurls:[kd.styurls];
@@ -2034,7 +2033,7 @@ function _buildDetailHTML(id,e,kd){
       +'</div></div>';
   }
 
-  // 줄거리 (KOPIS sty 우선, 없으면 ds) — 박스오피스는 ds가 관객수 요약이므로 소개에 표시 안 함
+  // 줄거리 — 박스오피스는 KMDB synopsis만, ds(관객수)는 절대 표시 안 함
   var descText=isBoxoffice?synopsis:(synopsis||(e.ds||''));
   // descText 내 img src http:// → 프록시 치환 (Mixed Content 방지)
   if(descText){
