@@ -2326,6 +2326,7 @@ function showToast(msg) {
   clearTimeout(t._timer);
   t._timer = setTimeout(function() { t.style.opacity = '0'; }, 2000);
 }
+function likeEv(id){
   if(liked.has(id))return;
   liked.add(id);
   localStorage.setItem('snr_lk',JSON.stringify(Array.from(liked)));
