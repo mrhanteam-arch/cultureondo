@@ -682,8 +682,8 @@ var sHist=JSON.parse(localStorage.getItem('snr_sh')||'[]');
 var rvId=null,rvRating=0,rvDB=JSON.parse(localStorage.getItem('snr_rv')||'{}');
 var user=JSON.parse(localStorage.getItem('snr_user')||'null');
 var eMode='login';
-var CATS=["전체","뮤지컬","콘서트/페스티벌","연극","클래식/무용","전시/미술","복합","팝업스토어"];
-var IC={"전체":"🔥","뮤지컬":"🎭","연극":"🎬","콘서트/페스티벌":"🎤","클래식/무용":"🎻","전시/미술":"🖼️","복합":"✨","팝업스토어":"🏪"};
+var CATS=["전체","박스오피스","뮤지컬","콘서트/페스티벌","연극","클래식/무용","전시/미술","복합","팝업스토어"];
+var IC={"전체":"🔥","박스오피스":"🎬","뮤지컬":"🎭","연극":"🎬","콘서트/페스티벌":"🎤","클래식/무용":"🎻","전시/미술":"🖼️","복합":"✨","팝업스토어":"🏪"};
 var REG=["전국","서울","경기","인천","부산","대구","대전","광주","강원","충청","경상","전라","제주"];
 
 // ── 캐시 — 30분 유지 (static JSON은 더 오래 써도 OK) ──────────
@@ -750,6 +750,7 @@ function applyLocalReactions(events){
   liked=new Set(JSON.parse(localStorage.getItem('snr_lk')||'[]'));
   // 카테고리 정규화 — 구 데이터 호환
   var ctMap={
+    '영화':'박스오피스',
     '콘서트':'콘서트/페스티벌','페스티벌':'콘서트/페스티벌',
     '클래식':'클래식/무용','국악':'클래식/무용','무용':'클래식/무용',
     '서양음악':'클래식/무용','한국음악':'클래식/무용',
@@ -874,7 +875,10 @@ function gr(e){
 }
 function scDetail(e,allEv){
   var d=dd(e.ed);
-  if(e.st==='ended'||d<0)return{total:0,s1:0,s2:0,s3:0,s4:0,s5:0,s6:0,s7:0,d:d,br:0};
+  // 박스오피스는 ed 없음 → 종료 처리 안 함, d=999로 고정
+  var isBoxoffice=e.ct==='박스오피스';
+  if(isBoxoffice&&!e.ed)d=999;
+  if(e.st==='ended'||(!isBoxoffice&&d<0))return{total:0,s1:0,s2:0,s3:0,s4:0,s5:0,s6:0,s7:0,d:d,br:0};
   var arr=allEv||ev;
   // ① 네이버 검색량 (max 30점)
   var s1=Math.round((Number(e.naver_score)||0)*0.3);
@@ -1044,7 +1048,7 @@ function renderHome(){
   curNav="home";
   var ranked=getScoredEvents();
   var mx=ranked.length?ranked[0]._s:1;
-  var hot5=ranked.slice(0,6),closing=ranked.filter(function(e){return dd(e.ed)>=0&&dd(e.ed)<=7&&e.st==="ongoing";}).sort(function(a,b){return dd(a.ed)-dd(b.ed);}).slice(0,4);
+  var hot5=ranked.slice(0,6),closing=ranked.filter(function(e){return dd(e.ed)>=0&&dd(e.ed)<=7&&e.st==="ongoing"&&e.ct!=='박스오피스';}).sort(function(a,b){return dd(a.ed)-dd(b.ed);}).slice(0,4);
   var upcoming=ranked.filter(function(e){return e.st==="upcoming";}).slice(0,6),slides=ranked.slice(0,4);
   var h=''
   // ── 헤더 ──
@@ -1090,7 +1094,7 @@ function renderHome(){
         +'<div style="flex:1;min-width:0;padding-bottom:20px">'
           +'<div class="hero-badge" style="margin-bottom:8px">HOT '+t+'°C</div>'
           +'<div class="hero-title">'+e.t+'</div>'
-          +'<div class="hero-sub">'+e.ct+' · '+e.lo+'</div>'
+          +'<div class="hero-sub">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div>'
         +'</div>'
         +'</div>';
     });
@@ -1242,7 +1246,7 @@ function renderHome(){
     else if(dS>3){badgeTxt='진행예정';badgeBg='rgba(79,195,247,0.15)';badgeColor='#4fc3f7';}
     else if(dS>0){badgeTxt='D-'+dS;badgeBg='rgba(255,149,0,0.2)';badgeColor='#ff9500';}
     else{badgeTxt=t+'°C';badgeBg=tB(t);badgeColor=c;}
-    return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:'+badgeBg+';color:'+badgeColor+'">'+badgeTxt+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';
+    return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:'+badgeBg+';color:'+badgeColor+'">'+badgeTxt+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div><div class="h-card-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div>';
   }).join('')+'</div>';
   var openSoon=ranked.filter(function(e){var dS=dd(e.sd);return dS>0&&dS<=3;}).slice(0,6);
   if(openSoon.length){h+='<div style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 20px;margin-bottom:14px;margin-top:8px">'
@@ -1254,7 +1258,7 @@ function renderHome(){
       +'전체보기'
       +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
     +'</button>'
-  +'</div>'+'<div class="h-scroll">'+openSoon.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:rgba(255,149,0,0.2);color:#ff9500">D-'+s+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+e.lo+'</div><div class="h-card-date">'+fmtRange(e.sd,e.ed)+'</div></div>';}).join('')+'</div>';}
+  +'</div>'+'<div class="h-scroll">'+openSoon.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:rgba(255,149,0,0.2);color:#ff9500">D-'+s+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div><div class="h-card-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div>';}).join('')+'</div>';}
   document.getElementById("page-home").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a><div class="credit-divider"></div><a href="https://www.kcisa.kr" target="_blank" rel="noopener" class="kcisa-credit-link">🏛️ 한국문화정보원</a></div></div>';
 }
 function goSlide(i){sIdx=i;var tr=document.getElementById("heroTrack");if(!tr)return;tr.style.transform="translateX(-"+(i*100)+"%)";document.querySelectorAll(".hero-dot").forEach(function(d,j){d.classList.toggle("on",j===i);});}
@@ -1323,6 +1327,8 @@ function renderRanking(){
     if(e.st==="ended")return false;
     if(cCat!=="전체"&&e.ct!==cCat)return false;
     if(cRegion!=="전국"&&gr(e)!==cRegion)return false;
+    // 박스오피스는 ed 없으므로 기간 필터 패스
+    if(e.ct==='박스오피스')return true;
     if(e.sd&&e.ed){
       var esd=new Date(e.sd),eed=new Date(e.ed);
       if(eed<rng.s||esd>rng.e)return false;
@@ -1362,8 +1368,8 @@ function renderRanking(){
       +'<div class="rk-n"><div class="rk-n-v">'+rk+'</div><div class="rk-ch '+cc+'">'+ct+'</div></div>'
       +rkThumb(e)
       +'<div class="rk-info"><div class="rk-title">'+e.t+'</div>'
-      +'<div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+gr(e)+'</div>'
-      +'<div class="rk-sub-date">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div></div></div>'
+      +'<div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':gr(e))+'</div>'
+      +'<div class="rk-sub-date">'+(e.ct==='박스오피스'?('개봉 '+e.sd+(e.boxoffice_rank>0?' · 박스오피스 '+e.boxoffice_rank+'위':'')):e.lo+' · '+fmtRange(e.sd,e.ed))+'</div></div></div>'
       +thermo(t,e,mx)+'</div>';
   });}
   document.getElementById("page-ranking").innerHTML=h+'<div class="credit-block"><div class="credit-row"><a href="https://www.kopis.or.kr" target="_blank" rel="noopener" class="kopis-credit-link"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</a><div class="credit-divider"></div><a href="https://developers.naver.com" target="_blank" rel="noopener" class="naver-credit"><span class="naver-credit-powered">Powered by</span><span class="naver-credit-n">&nbsp;NAVER</span><span class="naver-credit-api">&nbsp;OpenAPI</span></a><div class="credit-divider"></div><a href="https://www.kcisa.kr" target="_blank" rel="noopener" class="kcisa-credit-link">🏛️ 한국문화정보원</a></div></div>';
@@ -1403,15 +1409,22 @@ function renderCalendar(){
   }
   var yr=calYear,mo=calMonth;
   var fd=new Date(yr,mo,1).getDay(),dm=new Date(yr,mo+1,0).getDate(),pd=new Date(yr,mo,0).getDate();
-  var cc={"뮤지컬":"#bf5af2","연극":"#ffd60a","콘서트/페스티벌":"#ff5e3a","클래식/무용":"#4fc3f7","전시/미술":"#ff6b9d","복합":"#30d158","팝업스토어":"#ff9500"};
+  var cc={"박스오피스":"#facc15","뮤지컬":"#bf5af2","연극":"#ffd60a","콘서트/페스티벌":"#ff5e3a","클래식/무용":"#4fc3f7","전시/미술":"#ff6b9d","복합":"#30d158","팝업스토어":"#ff9500"};
   var mn=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
   function eod(d){
     var dt=new Date(yr,mo,d);
     dt.setHours(0,0,0,0);
     return ev.filter(function(e){
-      if(!e.sd||!e.ed)return false;
+      if(!e.sd)return false;
       if(calCat!=='전체'&&e.ct!==calCat)return false;
+      // 박스오피스: ed 없음 → 개봉일 이후 한 달간 표시
+      if(e.ct==='박스오피스'){
+        var s=new Date(e.sd);s.setHours(0,0,0,0);
+        var limit=new Date(s.getTime()+30*864e5);
+        return dt>=s&&dt<=limit;
+      }
+      if(!e.ed)return false;
       var s=new Date(e.sd);s.setHours(0,0,0,0);
       var en=new Date(e.ed);en.setHours(0,0,0,0);
       return dt>=s&&dt<=en;
@@ -1425,7 +1438,7 @@ function renderCalendar(){
     +'<button onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}calSel=null;renderCalendar()">›</button>'
   +'</div>';
   // 카테고리 필터 탭
-  var calCats=["전체","뮤지컬","연극","콘서트/페스티벌","클래식/무용","전시/미술","복합"];
+  var calCats=["전체","박스오피스","뮤지컬","연극","콘서트/페스티벌","클래식/무용","전시/미술","복합"];
   h+='<div style="display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none">';
   calCats.forEach(function(cat){
     var on=(calCat===cat);
@@ -1511,7 +1524,7 @@ function renderCalendar(){
             +(isBm?'<span style="font-size:11px;color:#ffd60a">★</span>':'')
             +e.t
           +'</div>'
-          +'<div class="cal-ev-meta">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div>'
+          +'<div class="cal-ev-meta">'+(e.ct==='박스오피스'?('개봉 '+e.sd+(e.boxoffice_rank>0?' · '+e.boxoffice_rank+'위':'')):e.lo+' · '+fmtRange(e.sd,e.ed))+'</div>'
         +'</div>'
         +'<div class="cal-ev-cat">'+e.ct+'</div>'
       +'</div>';
@@ -1629,8 +1642,7 @@ function renderExplore(){
       h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdL);cursor:pointer" onclick="viewEv(\''+e.id+'\')">'
         +'<div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px;'+(getPoster(e)?'background-image:url('+getPoster(e)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(e)?IC[e.ct]:'')+'</div>'
         +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.t+'</div>'
-        +'<div style="font-size:11px;color:var(--sub);margin-top:2px">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div></div>'
-        +'<span style="padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(46,204,113,0.12);color:#2ecc71;flex-shrink:0">무료</span>'
+        +'<div style="font-size:11px;color:var(--sub);margin-top:2px">'+(e.ct==='박스오피스'?'개봉 '+e.sd:e.lo+' · '+fmtRange(e.sd,e.ed))+'</div></div>'
         +'</div>';
     });
     h+='</div>';
@@ -1644,7 +1656,7 @@ function renderExplore(){
       h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdL);cursor:pointer" onclick="viewEv(\''+e.id+'\')">'
         +'<div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px;'+(getPoster(e)?'background-image:url('+getPoster(e)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(e)?IC[e.ct]:'')+'</div>'
         +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.t+'</div>'
-        +'<div style="font-size:11px;color:var(--sub);margin-top:2px">'+e.ct+' · '+fmtRange(e.sd,e.ed)+'</div></div>'
+        +'<div style="font-size:11px;color:var(--sub);margin-top:2px">'+e.ct+' · '+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div>'
         +'<span style="padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(191,90,242,0.12);color:#bf5af2;flex-shrink:0">NEW</span>'
         +'</div>';
     });
@@ -1756,7 +1768,7 @@ function renderMy(){
       H.push('<div style="flex:1;min-width:0;margin-right:10px">');
       H.push('<div style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">'+e.t+'</div>');
       H.push('<div style="font-size:11.5px;color:var(--sub)">'+e.ct+' · '+gr(e)+'</div>');
-      H.push('<div style="font-size:10.5px;color:var(--mu)">'+e.lo+' · '+fmtRange(e.sd,e.ed)+'</div>');
+      H.push('<div style="font-size:10.5px;color:var(--mu)">'+e.lo+' · '+(e.ct==='박스오피스'?e.sd:fmtRange(e.sd,e.ed))+'</div>');
       H.push('</div>');
       H.push(thermo(t,e,mx));
       H.push('</div>');
@@ -1816,10 +1828,14 @@ function viewEv(id){
 function _buildDetailHTML(id,e,kd){
   var all=getScoredEvents();
   var mx=all.length?all[0]._s:1,t=tc(sc(e),mx),c=tC(t),d=dd(e.ed);
-  var sd2=scDetail(e,ev); // 온도 breakdown
+  var isBoxoffice=e.ct==='박스오피스';
+  // 박스오피스는 ed 없으므로 d를 999로 재설정
+  if(isBoxoffice&&!e.ed)d=999;
+  var sd2=scDetail(e,ev);
   var dt="진행중",dc="#2ecc71";
   var dStart=dd(e.sd);
-  if(e.st==="ended"||d<0){dt="마감";dc="#505068";}
+  if(isBoxoffice){dt="상영중";dc="#facc15";}
+  else if(e.st==="ended"||d<0){dt="마감";dc="#505068";}
   else if(d===0){dt="오늘마감";dc="#ff5e3a";}
   else if(dStart>3){dt="진행예정";dc="#4fc3f7";}
   else if(dStart>0){dt="D-"+dStart;dc=dStart===1?"#ff5e3a":"#ff9500";}
@@ -1832,11 +1848,14 @@ function _buildDetailHTML(id,e,kd){
 
   // KOPIS 상세 데이터 추출
   var cast=kd&&kd.prfcast?kd.prfcast:(e.prfcast||'');
+  if(cast==='-')cast=''; // enrich 완료 표시 '-' 제거
   var runtime=kd&&kd.prfruntime?kd.prfruntime:(e.prfruntime||'');
   var age=kd&&kd.prfage?kd.prfage:(e.prfage||'');
   var price=kd&&kd.pcseguidance?kd.pcseguidance:(e.pr||'');
-  var schedule=kd&&kd.dtguidance?kd.dtguidance:(e.ct==='전시/미술'?'':(e.ds||''));
+  var schedule=kd&&kd.dtguidance?kd.dtguidance:(e.ct==='전시/미술'||isBoxoffice?'':(e.ds||''));
   var synopsis=kd&&kd.sty?kd.sty:(e.sty||'');
+  // 박스오피스: ds에 관객수 요약 저장됨 → synopsis로 활용
+  if(isBoxoffice&&!synopsis&&e.ds)synopsis=e.ds;
   var introImgs=[];
   if(kd&&kd.styurls){
     var imgs=Array.isArray(kd.styurls)?kd.styurls:[kd.styurls];
@@ -1880,8 +1899,13 @@ function _buildDetailHTML(id,e,kd){
   h+='</div></div>';
 
   h+='<div class="det-title-sec"><div class="det-title">'+e.t+'</div>';
-  h+='<div class="det-sub"><span>'+e.lo+'</span><span class="dot"></span><span>'+fmtRange(e.sd,e.ed)+'</span>';
-  if(runtime)h+='<span class="dot"></span><span>'+runtime+'</span>';
+  if(isBoxoffice){
+    h+='<div class="det-sub"><span>'+(e.vibes||'영화')+'</span><span class="dot"></span><span>개봉 '+e.sd+'</span>';
+    if(runtime)h+='<span class="dot"></span><span>'+runtime+'</span>';
+  } else {
+    h+='<div class="det-sub"><span>'+e.lo+'</span><span class="dot"></span><span>'+fmtRange(e.sd,e.ed)+'</span>';
+    if(runtime)h+='<span class="dot"></span><span>'+runtime+'</span>';
+  }
   h+='</div></div>';
 
   h+='<div class="quick-bar">'  +'<button class="quick-btn'+(ilk?' active':'')+'\" onclick="likeEv(\''+e.id+'\')" style="gap:5px">'    +'<svg width="24" height="24" viewBox="0 0 24 24" fill="'+(ilk?'var(--hot)':'none')+'" stroke="'+(ilk?'var(--hot)':'currentColor')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'      +'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'    +'</svg>'    +'<span class="qb-label">좋아요</span>'    +'<span class="qb-count">'+(e.lc>0?e.lc.toLocaleString():'')+'</span>'  +'</button>'  +'<button class="quick-btn'+(ibm?' active':'')+'\" onclick="toggleBm(\''+e.id+'\')" style="gap:5px">'    +'<svg width="24" height="24" viewBox="0 0 24 24" fill="'+(ibm?'var(--hot)':'none')+'" stroke="'+(ibm?'var(--hot)':'currentColor')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'      +'<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>'    +'</svg>'    +'<span class="qb-label">'+(ibm?'저장됨':'저장')+'</span>'    +'<span class="qb-count"> </span>'  +'</button>'+'</div>';
@@ -1956,20 +1980,28 @@ function _buildDetailHTML(id,e,kd){
       +'</div>'
     +'</div>'
   +'</div>';
-  h+='<div class="info-row"><div class="info-body"><div class="info-l">기간</div><div class="info-v">'+fmtRange(e.sd,e.ed)+'</div>'+(d>=0&&e.st==="ongoing"?'<div style="font-size:12px;color:'+(d<=7?'#ff5e3a':'#8d8da0')+';margin-top:3px">'+(d===0?'오늘 마감':d+'일 남음')+'</div>':'')+'</div></div>';
-  h+='<div class="info-row"><div class="info-body"><div class="info-l">장소</div><div class="info-v">'+e.lo+'</div>'+(e.ad?'<div style="font-size:12px;color:#8d8da0;margin-top:3px">'+e.ad+'</div>':'')+'</div></div>';
-  if(price)h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="font-size:13px;line-height:1.5">'+price+'</div></div></div>';
-  else h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="color:#505068">정보 없음</div></div></div>';
-  if(age)h+='<div class="info-row"><div class="info-body"><div class="info-l">관람연령</div><div class="info-v">'+age+'</div></div></div>';
-  if(schedule&&e.ct!=='전시/미술')h+='<div class="info-row"><div class="info-body"><div class="info-l">공연시간</div><div class="info-v" style="font-size:13px;line-height:1.6">'+schedule+'</div></div></div>';
-  if(cast){var castLabel=e.ct==='전시/미술'?'문의':'출연진';h+='<div class="info-row"><div class="info-body"><div class="info-l">'+castLabel+'</div><div class="info-v" style="font-size:13px;line-height:1.5">'+cast+'</div></div></div>';}
+  if(isBoxoffice){
+    h+='<div class="info-row"><div class="info-body"><div class="info-l">개봉일</div><div class="info-v">'+e.sd+(e.boxoffice_rank>0?'<span style="margin-left:8px;font-size:12px;color:#facc15;font-weight:700">박스오피스 '+e.boxoffice_rank+'위</span>':'')+'</div></div></div>';
+    h+='<div class="info-row"><div class="info-body"><div class="info-l">배급사</div><div class="info-v">'+(e.entrpsnmP||'정보 없음')+'</div></div></div>';
+    if(age)h+='<div class="info-row"><div class="info-body"><div class="info-l">관람등급</div><div class="info-v">'+age+'</div></div></div>';
+    if(runtime)h+='<div class="info-row"><div class="info-body"><div class="info-l">상영시간</div><div class="info-v">'+runtime+'</div></div></div>';
+  } else {
+    h+='<div class="info-row"><div class="info-body"><div class="info-l">기간</div><div class="info-v">'+fmtRange(e.sd,e.ed)+'</div>'+(d>=0&&e.st==="ongoing"?'<div style="font-size:12px;color:'+(d<=7?'#ff5e3a':'#8d8da0')+';margin-top:3px">'+(d===0?'오늘 마감':d+'일 남음')+'</div>':'')+'</div></div>';
+    h+='<div class="info-row"><div class="info-body"><div class="info-l">장소</div><div class="info-v">'+(e.lo||'')+'</div>'+(e.ad?'<div style="font-size:12px;color:#8d8da0;margin-top:3px">'+e.ad+'</div>':'')+'</div></div>';
+    if(price)h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="font-size:13px;line-height:1.5">'+price+'</div></div></div>';
+    else h+='<div class="info-row"><div class="info-body"><div class="info-l">가격</div><div class="info-v" style="color:#505068">정보 없음</div></div></div>';
+    if(age)h+='<div class="info-row"><div class="info-body"><div class="info-l">관람연령</div><div class="info-v">'+age+'</div></div></div>';
+    if(schedule&&e.ct!=='전시/미술')h+='<div class="info-row"><div class="info-body"><div class="info-l">공연시간</div><div class="info-v" style="font-size:13px;line-height:1.6">'+schedule+'</div></div></div>';
+  }
+  if(cast){var castLabel=e.ct==='전시/미술'?'문의':e.ct==='박스오피스'?'감독/출연':'출연진';h+='<div class="info-row"><div class="info-body"><div class="info-l">'+castLabel+'</div><div class="info-v" style="font-size:13px;line-height:1.5">'+cast+'</div></div></div>';}
   h+='</div>';
 
   // 바로가기 링크 — ticket/instagram/shop만 어드민에서, 나머지 자동
   var allLks=lks.filter(function(l){return l.type==='ticket'||l.type==='instagram'||l.type==='shop';});
   var hasTicket=allLks.some(function(l){return l.type==='ticket';});
-  // 네이버 검색은 항상 추가
-  allLks.push({type:'naver',url:getNaverSearchLink(e.t)});
+  // 네이버 검색은 항상 추가 (박스오피스는 '영화' 키워드 포함)
+  var naverQ=isBoxoffice?e.t+' 영화':e.t+' 예매';
+  allLks.push({type:'naver',url:'https://search.naver.com/search.naver?query='+encodeURIComponent(naverQ)});
 
   // 네이버 SVG 로고 버튼 렌더러
   function naverLinkBtn(url){
@@ -2032,7 +2064,7 @@ function _buildDetailHTML(id,e,kd){
   h+='<div class="det-sec"><div class="det-sec-title">리뷰'+(rvl.length?' ('+rvl.length+')':'')+(Number(rva)>0?' · '+rva+'점':'')+'</div><button onclick="openRv(\''+id+'\')" style="width:100%;padding:12px;border-radius:10px;border:1px dashed #2a2a38;background:var(--sf);color:#8d8da0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px">리뷰 작성하기</button>';
   if(rvl.length){h+='<div class="rv-list">'+rvl.slice(0,3).map(function(r){var dots='';for(var i=1;i<=5;i++)dots+='<span style="color:'+(i<=r.rating?'#ffd60a':'#2a2a38')+';font-size:10px">●</span>';return'<div class="rv-item"><div class="rv-item-hdr"><div class="rv-avatar">'+r.avatar+'</div><div><div class="rv-name">'+r.name+'</div><div class="rv-date" style="display:flex;align-items:center;gap:6px"><span>'+r.date+'</span><span style="display:flex;gap:1px">'+dots+'</span></div></div></div><div class="rv-body">'+r.text+'</div></div>';}).join('')+'</div>';}
   h+='</div>';
-  if(related.length){h+='<div class="det-sec"><div class="det-sec-title">비슷한 '+e.ct+'</div><div class="related">'+related.map(function(r){var rt=tc(r._s,mx),rc=tC(rt);return'<div class="related-item" onclick="viewEv(\''+r.id+'\')"><div class="related-img" style="'+(getPoster(r)?'background-image:url('+getPoster(r)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(r)?IC[r.ct]:'')+' <div class="related-temp" style="background:'+tB(rt)+';color:'+rc+'">'+rt+'°</div></div><div class="related-title">'+r.t+'</div><div style="font-size:10.5px;color:#8d8da0;margin-top:2px">'+r.lo+'</div></div>';}).join('')+'</div></div>';}
+  if(related.length){h+='<div class="det-sec"><div class="det-sec-title">비슷한 '+e.ct+'</div><div class="related">'+related.map(function(r){var rt=tc(r._s,mx),rc=tC(rt);return'<div class="related-item" onclick="viewEv(\''+r.id+'\')"><div class="related-img" style="'+(getPoster(r)?'background-image:url('+getPoster(r)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(r)?IC[r.ct]:'')+' <div class="related-temp" style="background:'+tB(rt)+';color:'+rc+'">'+rt+'°</div></div><div class="related-title">'+r.t+'</div><div style="font-size:10.5px;color:#8d8da0;margin-top:2px">'+(r.ct==='박스오피스'?(r.vibes||'영화'):r.lo)+'</div></div>';}).join('')+'</div></div>';}
   // 하단 고정 예매 버튼 — ticket URL 있을 때만 표시
   var ticketLk=allLks.find(function(l){return l.type==='ticket';});
   if(ticketLk){
@@ -2064,6 +2096,9 @@ function renderDetail(id){
   }
   var pg=document.getElementById("page-detail");
   var isKopis=id&&id.match(/^PF/i);
+  var isBoxofficeItem=e.ct==='박스오피스'||id.match(/^MV/i);
+  // 박스오피스(MV...)는 KOBIS 상세 API 불필요 — events.json 데이터로 즉시 렌더
+  if(isBoxofficeItem){pg.innerHTML=_buildDetailHTML(id,e,null);return;}
   // events.json 데이터로 즉시 렌더 (fetchKopisDetail 호출 없음)
   pg.innerHTML=_buildDetailHTML(id,e,null);
 }
@@ -2203,7 +2238,7 @@ function renderTagPage(key){
     if(isCuration) displayList=displayList.slice(0,20);
     displayList.forEach(function(e,i){
       var t=tc(e._s,mx);
-      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.district||gr(e))+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+thermo(t,e,mx)+'</div>';
+      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':(e.district||gr(e)))+'</div><div class="rk-sub-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div></div>'+thermo(t,e,mx)+'</div>';
     });
   }
   document.getElementById("page-tag").innerHTML=h;
@@ -2253,7 +2288,7 @@ function renderSBody(q){
   function hl(txt){return txt.replace(new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")",'gi'),'<span class="s-hl">$1</span>');}
   var h='<div class="s-section"><div class="s-sec-title">🔍 검색 결과 · '+res.length+'건</div>';
   if(!res.length){h+='<div style="text-align:center;padding:50px 0"><div style="font-size:44px;opacity:0.5;margin-bottom:12px">🔍</div><p style="font-size:14px;color:#8d8da0">"'+q+'"에 대한 결과가 없어요</p></div>';}
-  else{res.forEach(function(e){var t=tc(sc(e),mx);h+='<div class="rk" style="padding:12px 0" onclick="doS(\''+q.replace(/'/g,"\\'")+'\')+closeSearch();viewEv(\''+e.id+'\')">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+hl(e.t)+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+e.lo+'</div><div class="rk-sub-date">'+fmtRange(e.sd,e.ed)+'</div></div></div>'+gauge(t,40)+'</div>';});}
+  else{res.forEach(function(e){var t=tc(sc(e),mx);h+='<div class="rk" style="padding:12px 0" onclick="doS(\''+q.replace(/'/g,"\\'")+'\')+closeSearch();viewEv(\''+e.id+'\')">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+hl(e.t)+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':e.lo)+'</div><div class="rk-sub-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div></div>'+gauge(t,40)+'</div>';});}
   h+='</div>';body.innerHTML=h;
 }
 function doS(q){document.getElementById("sInput").value=q;document.getElementById("sClr").style.display="flex";saveSH(q);renderSBody(q);}
