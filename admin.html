@@ -2,994 +2,1011 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>컬처온도 어드민</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CULTURE° 어드민</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:#0d0d10;color:#ededf0;font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;-webkit-font-smoothing:antialiased}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#1a1a20}::-webkit-scrollbar-thumb{background:#2a2a38;border-radius:2px}
-button,input,select,textarea{font-family:inherit}
+:root{
+  --bg:#0d0d10;--sf:#141418;--card:#1a1a22;--bd:#252530;
+  --tx:#ededf0;--sub:#8d8da0;--mu:#505068;
+  --hot:#ff5e3a;--warm:#ff9500;--cool:#4fc3f7;--ok:#30d158;--danger:#ff3b30;
+}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;min-height:100vh}
 a{color:inherit;text-decoration:none}
-:root{--bg:#0d0d10;--sf:#1a1a20;--card:#1e1e28;--bd:#2a2a38;--bdL:#21212e;--tx:#ededf0;--sub:#8d8da0;--mu:#505068;--hot:#ff5e3a;--green:#2ecc71;--blue:#4fc3f7;--purple:#bf5af2;}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+
+/* ── 로그인 화면 ── */
+#loginWrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:40px 32px;width:100%;max-width:360px}
+.login-logo{font-size:28px;font-weight:900;background:linear-gradient(95deg,#ff6b4a,#ff2d55);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--mu);font-weight:600;letter-spacing:0.06em;margin-bottom:32px}
+.login-label{font-size:12px;font-weight:700;color:var(--sub);margin-bottom:6px;display:block}
+.login-input{width:100%;padding:12px 14px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;color:var(--tx);font-size:14px;outline:none;transition:border 0.2s}
+.login-input:focus{border-color:var(--hot)}
+.login-btn{width:100%;height:48px;border-radius:12px;border:none;background:linear-gradient(135deg,#ff5e3a,#ff2d55);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:20px;transition:opacity 0.2s}
+.login-btn:hover{opacity:0.9}
+.login-err{font-size:12px;color:var(--danger);margin-top:10px;min-height:18px}
 
 /* ── 레이아웃 ── */
-.layout{display:flex;min-height:100vh}
-.sidebar{width:220px;background:var(--sf);border-right:1px solid var(--bdL);padding:0;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.main{flex:1;padding:32px;max-width:900px}
+#adminWrap{display:none;flex-direction:column;min-height:100vh}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:18px;font-weight:900;background:linear-gradient(95deg,#ff6b4a,#ff2d55);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:8px}
+.topbar-logo span{font-size:11px;font-weight:600;color:var(--mu);-webkit-text-fill-color:var(--mu);background:none}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.admin-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,94,58,0.15);color:var(--hot);border:1px solid rgba(255,94,58,0.3)}
+.logout-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--bd);background:none;color:var(--mu);font-size:12px;font-weight:600}
+
+.main-layout{display:flex;flex:1}
 
 /* ── 사이드바 ── */
-.sb-logo{padding:20px 20px 16px;border-bottom:1px solid var(--bdL)}
-.sb-logo-title{font-size:15px;font-weight:800;color:var(--hot)}
-.sb-logo-sub{font-size:10px;color:var(--mu);margin-top:2px}
-.sb-section{padding:12px 12px 4px;font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em}
-.sb-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;margin:2px 8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--sub);transition:all 0.15s}
-.sb-item:hover{background:var(--card);color:var(--tx)}
-.sb-item.on{background:rgba(255,94,58,0.12);color:var(--hot);font-weight:700}
-.sb-item svg{width:16px;height:16px;flex-shrink:0}
+.sidebar{width:220px;background:var(--sf);border-right:1px solid var(--bd);padding:16px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;flex-shrink:0}
+.nav-section{padding:0 12px;margin-bottom:8px}
+.nav-label{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:0.08em;text-transform:uppercase;padding:8px 10px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--sub);cursor:pointer;transition:all 0.15s;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--tx)}
+.nav-item.on{background:rgba(255,94,58,0.12);color:var(--hot);font-weight:700}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
 
-/* ── 공통 ── */
-.page-section{display:none}.page-section.active{display:block}
-.section-title{font-size:20px;font-weight:800;margin-bottom:4px}
+/* ── 콘텐츠 ── */
+.content{flex:1;padding:28px;overflow-x:hidden}
+.page-section{display:none}
+.page-section.on{display:block}
+.section-title{font-size:20px;font-weight:900;margin-bottom:4px}
 .section-sub{font-size:13px;color:var(--sub);margin-bottom:24px}
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:16px}
-.card-title{font-size:13px;font-weight:700;margin-bottom:16px;color:var(--sub);text-transform:uppercase;letter-spacing:0.05em}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.form-row.full{grid-template-columns:1fr}
-label{display:block;font-size:11px;font-weight:600;color:var(--mu);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em}
-input[type=text],input[type=number],input[type=date],input[type=color],select,textarea{width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid var(--bd);background:var(--card);color:var(--tx);font-size:13.5px;outline:none;transition:border-color 0.15s}
-input:focus,select:focus,textarea:focus{border-color:var(--hot)}
-input[type=color]{height:40px;padding:4px 8px;cursor:pointer}
-textarea{min-height:80px;resize:vertical}
-.btn{padding:10px 18px;border-radius:9px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px}
-.btn-primary{background:var(--hot);color:#fff}
-.btn-primary:hover{background:#e84e2a}
-.btn-ghost{background:var(--card);color:var(--sub);border:1px solid var(--bd)}
-.btn-ghost:hover{color:var(--tx);border-color:var(--sub)}
-.btn-danger{background:rgba(231,76,60,0.15);color:#e74c3c;border:1px solid rgba(231,76,60,0.3)}
-.btn-danger:hover{background:rgba(231,76,60,0.25)}
-.btn-sm{padding:6px 12px;font-size:12px}
-.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
-.badge-green{background:rgba(46,204,113,0.15);color:#2ecc71}
-.badge-blue{background:rgba(79,195,247,0.15);color:#4fc3f7}
-.badge-orange{background:rgba(255,94,58,0.15);color:#ff5e3a}
-.toast{position:fixed;bottom:24px;right:24px;background:#2ecc71;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:999;transform:translateY(80px);opacity:0;transition:all 0.3s}
-.toast.show{transform:translateY(0);opacity:1}
-.divider{height:1px;background:var(--bdL);margin:16px 0}
 
-/* ── 큐레이션 목록 ── */
-.curation-list{display:flex;flex-direction:column;gap:10px}
-.curation-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--bd);border-radius:12px;transition:all 0.15s}
-.curation-item:hover{border-color:var(--sub)}
-.curation-preview{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.curation-info{flex:1;min-width:0}
-.curation-name{font-size:14px;font-weight:800;margin-bottom:3px}
-.curation-tags{font-size:11.5px;color:var(--mu)}
-.curation-actions{display:flex;gap:6px;flex-shrink:0}
-.drag-handle{cursor:grab;color:var(--mu);padding:4px;opacity:0.5}
-.drag-handle:hover{opacity:1}
+/* ── 스탯 카드 ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px}
+.stat-card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px 20px}
+.stat-label{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:900;letter-spacing:-0.03em;line-height:1}
+.stat-sub{font-size:11px;color:var(--sub);margin-top:5px}
 
-/* ── 색상 프리셋 ── */
-.color-presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.color-preset{width:28px;height:28px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:all 0.15s}
-.color-preset:hover,.color-preset.on{border-color:#fff;transform:scale(1.1)}
+/* ── 테이블 ── */
+.table-wrap{background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd);gap:10px;flex-wrap:wrap}
+.table-toolbar-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tbl-search{padding:8px 12px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none;width:200px}
+.tbl-search:focus{border-color:var(--hot)}
+.tbl-filter{padding:8px 10px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:12px;outline:none}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;padding:11px 16px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap;background:var(--sf)}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-ok{background:rgba(48,209,88,0.12);color:var(--ok);border:1px solid rgba(48,209,88,0.25)}
+.badge-warn{background:rgba(255,149,0,0.12);color:var(--warm);border:1px solid rgba(255,149,0,0.25)}
+.badge-danger{background:rgba(255,59,48,0.12);color:var(--danger);border:1px solid rgba(255,59,48,0.25)}
+.badge-hot{background:rgba(255,94,58,0.12);color:var(--hot);border:1px solid rgba(255,94,58,0.25)}
+.badge-cool{background:rgba(79,195,247,0.12);color:var(--cool);border:1px solid rgba(79,195,247,0.25)}
+.badge-mu{background:rgba(255,255,255,0.06);color:var(--sub);border:1px solid rgba(255,255,255,0.1)}
+.tbl-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--bd);background:none;color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.tbl-btn:hover{border-color:var(--hot);color:var(--hot)}
+.tbl-btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px}
+.pg-btn{padding:6px 12px;border-radius:8px;border:1px solid var(--bd);background:none;color:var(--sub);font-size:12px;font-weight:600;cursor:pointer}
+.pg-btn.on{background:var(--hot);border-color:var(--hot);color:#fff}
+.empty-row{text-align:center;padding:40px;color:var(--mu);font-size:13px}
 
-/* ── 통계 카드 ── */
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.stat-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px}
-.stat-num{font-size:26px;font-weight:800;color:var(--hot);margin-bottom:2px}
-.stat-label{font-size:11px;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+/* ── 버튼들 ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all 0.15s}
+.btn-primary{background:linear-gradient(135deg,#ff5e3a,#ff2d55);color:#fff}
+.btn-primary:hover{opacity:0.88}
+.btn-secondary{background:var(--card);border:1px solid var(--bd);color:var(--sub)}
+.btn-secondary:hover{border-color:var(--hot);color:var(--hot)}
+.btn-ok{background:rgba(48,209,88,0.15);border:1px solid rgba(48,209,88,0.3);color:var(--ok)}
+.btn-danger{background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.3);color:var(--danger)}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
 
-/* ── 이미지 업로드 ── */
-.img-upload-area{border:2px dashed var(--bd);border-radius:12px;background:var(--card);cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
-.img-upload-area:hover{border-color:var(--hot);background:rgba(255,94,58,0.04)}
-.img-upload-area.drag{border-color:var(--hot);background:rgba(255,94,58,0.08)}
-.img-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.img-upload-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;pointer-events:none}
-.img-upload-inner svg{opacity:0.3}
-.img-upload-label{font-size:12px;color:var(--mu);font-weight:600;text-align:center}
-.img-preview{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.img-del{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;z-index:2}
-.status-auto-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;background:rgba(79,195,247,0.12);color:#4fc3f7;margin-top:6px}
-.toggle{width:42px;height:24px;border-radius:12px;background:var(--bd);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
-.toggle.on{background:var(--green)}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left 0.2s}
-.toggle.on::after{left:21px}
+/* ── 트리거 콘솔 ── */
+.trigger-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px}
+.trigger-card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px 20px}
+.trigger-name{font-size:14px;font-weight:800;margin-bottom:3px}
+.trigger-desc{font-size:11px;color:var(--sub);margin-bottom:14px;line-height:1.5}
+.trigger-time{font-size:10px;color:var(--mu);font-weight:700;margin-bottom:12px}
+.trigger-run-btn{width:100%;height:38px;border-radius:9px;border:none;background:rgba(255,94,58,0.1);border:1px solid rgba(255,94,58,0.25);color:var(--hot);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:inherit}
+.trigger-run-btn:hover{background:rgba(255,94,58,0.2)}
+.trigger-run-btn:disabled{opacity:0.4;cursor:not-allowed}
+.trigger-log{margin-top:10px;font-size:11px;color:var(--sub);min-height:16px}
+
+/* ── 팝업스토어 폼 ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:12px;font-weight:700;color:var(--sub)}
+.form-input{padding:10px 13px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none;transition:border 0.2s}
+.form-input:focus{border-color:var(--hot)}
+textarea.form-input{resize:vertical;min-height:80px}
+.form-card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:20px}
+.form-card-title{font-size:14px;font-weight:800;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+
+/* ── 스냅샷 ── */
+.snapshot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.snapshot-card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px}
+
+/* ── 로그 ── */
+.log-box{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px;font-size:12px;color:var(--sub);line-height:1.8;max-height:200px;overflow-y:auto;margin-top:10px;font-family:'Courier New',monospace}
+
+/* ── 모달 ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:28px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--bd)}
+
+/* ── 토스트 ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--bd);color:var(--tx);font-size:13px;font-weight:600;padding:10px 22px;border-radius:20px;z-index:9999;pointer-events:none;opacity:0;transition:opacity 0.3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+
+/* ── 로딩 ── */
+.loading{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.15);border-top-color:var(--hot);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{background:linear-gradient(90deg,#1a1a22 0%,#22222e 50%,#1a1a22 100%);background-size:200px 100%;animation:skl 1.3s ease-in-out infinite;border-radius:6px}
+@keyframes skl{0%{background-position:-200px 0}100%{background-position:calc(200px + 100%) 0}}
+
+/* ── 반응형 ── */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .form-grid{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
-<div class="layout">
 
-<!-- 사이드바 -->
-<div class="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-title">🌡️ 컬처온도</div>
-    <div class="sb-logo-sub">어드민 대시보드</div>
-  </div>
-  <div class="sb-section">콘텐츠</div>
-  <div class="sb-item on" onclick="nav('curation')" id="nav-curation">
-    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h8M4 18h8" stroke-linecap="round"/></svg>
-    큐레이션 관리
-  </div>
-  <div class="sb-item" onclick="nav('events')" id="nav-events">
-    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round"/></svg>
-    이벤트 관리
-  </div>
-  <div class="sb-section">설정</div>
-  <div class="sb-item" onclick="nav('preview')" id="nav-preview">
-    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-linecap="round"/><circle cx="12" cy="12" r="3"/></svg>
-    미리보기
+<!-- ── 로그인 ── -->
+<div id="loginWrap">
+  <div class="login-box">
+    <div class="login-logo">CULTURE°</div>
+    <div class="login-sub">ADMIN PANEL</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label class="login-label">이메일</label>
+        <input class="login-input" type="email" id="loginEmail" placeholder="admin@cultureondo.com" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div>
+        <label class="login-label">비밀번호</label>
+        <input class="login-input" type="password" id="loginPw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+    <button class="login-btn" onclick="doLogin()" id="loginBtn">로그인</button>
+    <div class="login-err" id="loginErr"></div>
   </div>
 </div>
 
-<!-- 메인 -->
-<div class="main">
-
-  <!-- ── 큐레이션 관리 ── -->
-  <div class="page-section active" id="page-curation">
-    <div class="section-title">큐레이션 관리</div>
-    <div class="section-sub">홈 화면에 표시되는 테마 카드를 관리합니다. 태그와 연결하면 자동으로 이벤트가 모입니다.</div>
-
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="font-size:13px;color:var(--sub)" id="curationCount"></div>
-      <button class="btn btn-primary" onclick="openCurationForm()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
-        새 큐레이션
-      </button>
+<!-- ── 어드민 ── -->
+<div id="adminWrap">
+  <!-- 탑바 -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      CULTURE° <span>ADMIN</span>
     </div>
-
-    <div class="curation-list" id="curationList"></div>
-
-    <!-- 큐레이션 폼 -->
-    <div class="card" id="curationForm" style="display:none;margin-top:20px;border-color:var(--hot)">
-      <div class="card-title" id="curationFormTitle">새 큐레이션</div>
-      <div class="form-row">
-        <div>
-          <label>제목</label>
-          <input type="text" id="fTitle" placeholder="데이트, 나들이, 무료입장...">
-        </div>
-        <div>
-          <label>아이콘 (이모지)</label>
-          <input type="text" id="fIcon" placeholder="💑" maxlength="4">
-        </div>
-      </div>
-      <div class="form-row full">
-        <div>
-          <label>연결 태그 (쉼표로 구분, vibes/keyword 값)</label>
-          <input type="text" id="fTags" placeholder="데이트, 인스타감성, 무료입장">
-          <div style="font-size:11px;color:var(--mu);margin-top:5px">동행: 데이트, 친구랑, 가족, 혼자도OK, 단체/모임 | 가격: 무료입장, 가성비, 럭셔리 | 분위기: 인스타감성, 힙한, 아늑한, 웅장한, 감성적인, 유니크한, 레트로, 아트 | 장소: 야외공연, 실내, 팝업, 전시, 공연장 | 시간: 주말추천, 나들이, 반나절, 야간추천 | 특징: 굿즈있음, 포토존, 체험형, 한정판, 예매필수, 반려동물, 키즈존 | 특수: __closing__ (종료임박)</div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div>
-          <label>시작 색상</label>
-          <input type="color" id="fColor1" value="#ff5e3a">
-          <div class="color-presets" id="presets1"></div>
-        </div>
-        <div>
-          <label>끝 색상</label>
-          <input type="color" id="fColor2" value="#c0392b">
-          <div class="color-presets" id="presets2"></div>
-        </div>
-      </div>
-      <!-- 미리보기 -->
-      <div style="margin-bottom:16px">
-        <label>카드 미리보기</label>
-        <div id="cardPreview" style="width:160px;height:90px;border-radius:16px;position:relative;display:flex;align-items:flex-end;padding:12px 14px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)">
-          <div id="pvBg" style="position:absolute;inset:0"></div>
-          <div id="pvIcon" style="position:absolute;top:10px;right:12px;font-size:28px;z-index:1">💑</div>
-          <div style="position:relative;z-index:1">
-            <div id="pvTitle" style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px">데이트</div>
-            <div style="font-size:10.5px;color:rgba(255,255,255,0.65)">N개 이벤트</div>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="saveCuration()">저장</button>
-        <button class="btn btn-ghost" onclick="closeCurationForm()">취소</button>
-      </div>
+    <div class="topbar-right">
+      <span class="admin-badge" id="adminBadge">관리자</span>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
     </div>
   </div>
 
-  <!-- ── 이벤트 관리 ── -->
-  <div class="page-section" id="page-events">
-    <div class="section-title">이벤트 관리</div>
-    <div class="section-sub">이벤트를 등록·수정·삭제합니다. 저장하면 앱에 즉시 반영됩니다.</div>
-    <div class="stat-grid" id="evStats"></div>
-
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="text" id="evSearch" placeholder="이벤트 검색..." style="width:200px;padding:8px 12px;font-size:13px" oninput="renderEventList()">
-        <select id="evFilter" style="width:120px;padding:8px 12px;font-size:13px" onchange="renderEventList()">
-          <option value="">전체 상태</option>
-          <option value="ongoing">진행중</option>
-          <option value="upcoming">오픈예정</option>
-          <option value="ended">종료</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" onclick="openEventForm()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
-        이벤트 등록
-      </button>
-    </div>
-
-    <!-- 이벤트 목록 -->
-    <div class="card" style="padding:0;overflow:hidden">
-      <div id="evList"></div>
-    </div>
-
-    <!-- 이벤트 등록/편집 폼 -->
-    <div class="card" id="eventForm" style="display:none;margin-top:20px;border-color:var(--hot)">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div class="card-title" id="eventFormTitle" style="margin-bottom:0">이벤트 등록</div>
-        <button class="btn btn-ghost btn-sm" onclick="closeEventForm()">✕ 닫기</button>
-      </div>
-
-      <!-- 기본 정보 -->
-      <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">기본 정보</div>
-      <div class="form-row full">
-        <div><label>이벤트명 *</label><input type="text" id="ef-title" placeholder="이벤트 제목을 입력하세요"></div>
-      </div>
-      <div class="form-row">
-        <div>
-          <label>카테고리 *</label>
-          <select id="ef-ct">
-            <option value="">선택</option>
-            <option value="뮤지컬">뮤지컬</option>
-            <option value="콘서트">콘서트</option>
-            <option value="페스티벌">페스티벌</option>
-            <option value="팝업스토어">팝업스토어</option>
-            <option value="전시/행사">전시/행사</option>
-            <option value="연극">연극</option>
-          </select>
-        </div>
-        <div>
-          <label>상태</label>
-          <div style="padding:10px 12px;border-radius:9px;border:1.5px solid var(--bd);background:var(--card);font-size:13px;color:var(--mu)">날짜 입력 시 자동 계산</div>
-          <div id="ef-st-preview" class="status-auto-badge" style="display:none"></div>
+  <div class="main-layout">
+    <!-- 사이드바 -->
+    <div class="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">대시보드</div>
+        <div class="nav-item on" onclick="showSection('dashboard')" data-sec="dashboard">
+          <svg fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          개요
         </div>
       </div>
-      <div class="form-row full">
-        <div><label>소개 설명</label><textarea id="ef-ds" placeholder="이벤트 소개를 입력하세요"></textarea></div>
+      <div class="nav-section">
+        <div class="nav-label">회원</div>
+        <div class="nav-item" onclick="showSection('members')" data-sec="members">
+          <svg fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          회원 관리
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">이벤트</div>
+        <div class="nav-item" onclick="showSection('events')" data-sec="events">
+          <svg fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          이벤트 조회
+        </div>
+        <div class="nav-item" onclick="showSection('popup')" data-sec="popup">
+          <svg fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          팝업스토어 입력
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">수집</div>
+        <div class="nav-item" onclick="showSection('triggers')" data-sec="triggers">
+          <svg fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          트리거 콘솔
+        </div>
+        <div class="nav-item" onclick="showSection('snapshot')" data-sec="snapshot">
+          <svg fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          랭킹 스냅샷
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">로그</div>
+        <div class="nav-item" onclick="showSection('logs')" data-sec="logs">
+          <svg fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          어드민 로그
+        </div>
+      </div>
+    </div>
+
+    <!-- 콘텐츠 -->
+    <div class="content">
+
+      <!-- ── 대시보드 ── -->
+      <div class="page-section on" id="sec-dashboard">
+        <div class="section-title">개요</div>
+        <div class="section-sub">CULTURE° 서비스 현황</div>
+        <div class="stat-grid" id="statGrid">
+          <div class="stat-card"><div class="stat-label">전체 회원</div><div class="stat-value skeleton" style="width:60px;height:36px"> </div></div>
+          <div class="stat-card"><div class="stat-label">오늘 가입</div><div class="stat-value skeleton" style="width:40px;height:36px"> </div></div>
+          <div class="stat-card"><div class="stat-label">이벤트 수</div><div class="stat-value skeleton" style="width:60px;height:36px"> </div></div>
+          <div class="stat-card"><div class="stat-label">총 좋아요</div><div class="stat-value skeleton" style="width:50px;height:36px"> </div></div>
+          <div class="stat-card"><div class="stat-label">총 저장</div><div class="stat-value skeleton" style="width:50px;height:36px"> </div></div>
+          <div class="stat-card"><div class="stat-label">총 조회</div><div class="stat-value skeleton" style="width:50px;height:36px"> </div></div>
+        </div>
+        <div class="form-card">
+          <div class="form-card-title">최근 가입 회원</div>
+          <table id="recentMembersTable">
+            <thead><tr><th>이메일</th><th>닉네임</th><th>가입일</th><th>권한</th></tr></thead>
+            <tbody id="recentMembersBody"><tr><td colspan="4" class="empty-row"><span class="loading"></span></td></tr></tbody>
+          </table>
+        </div>
+        <div class="form-card">
+          <div class="form-card-title">최근 어드민 로그</div>
+          <table>
+            <thead><tr><th>시각</th><th>액션</th><th>대상</th></tr></thead>
+            <tbody id="recentLogsBody"><tr><td colspan="3" class="empty-row"><span class="loading"></span></td></tr></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="divider"></div>
-      <!-- 이미지 업로드 -->
-      <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">이미지</div>
-      <div class="form-row">
-        <div>
-          <label>포스터 이미지</label>
-          <div class="img-upload-area" id="posterArea" style="height:180px" ondragover="onDrag(event,'poster')" ondragleave="offDrag('poster')" ondrop="onDrop(event,'poster')">
-            <input type="file" accept="image/*" onchange="onFileChange(event,'poster')">
-            <div class="img-upload-inner" id="posterInner">
-              <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 16l5-5 4 4 3-3 5 5"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
-              <div class="img-upload-label">클릭하거나 이미지를 드래그하세요<br><span style="color:var(--mu);font-weight:400">포스터/썸네일 (세로형 권장)</span></div>
+      <!-- ── 회원 관리 ── -->
+      <div class="page-section" id="sec-members">
+        <div class="section-title">회원 관리</div>
+        <div class="section-sub">가입 회원 목록 · 권한 변경 · 정지 처리</div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <div class="table-toolbar-left">
+              <input class="tbl-search" type="text" placeholder="이메일, 닉네임 검색..." id="memberSearch" oninput="filterMembers()">
+              <select class="tbl-filter" id="roleFilter" onchange="filterMembers()">
+                <option value="">전체 권한</option>
+                <option value="admin">관리자</option>
+                <option value="user">일반</option>
+                <option value="banned">정지</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadMembers()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              새로고침
+            </button>
+          </div>
+          <table>
+            <thead><tr><th>이메일</th><th>닉네임</th><th>지역</th><th>권한</th><th>가입일</th><th>관리</th></tr></thead>
+            <tbody id="membersBody"><tr><td colspan="6" class="empty-row"><span class="loading"></span></td></tr></tbody>
+          </table>
+          <div class="pagination" id="memberPagination"></div>
+        </div>
+      </div>
+
+      <!-- ── 이벤트 조회 ── -->
+      <div class="page-section" id="sec-events">
+        <div class="section-title">이벤트 조회</div>
+        <div class="section-sub">events.json 기준 — 상태 확인 및 온도 미리보기</div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <div class="table-toolbar-left">
+              <input class="tbl-search" type="text" placeholder="공연명 검색..." id="eventSearch" oninput="filterEvents()">
+              <select class="tbl-filter" id="catFilter" onchange="filterEvents()">
+                <option value="">전체 카테고리</option>
+                <option>뮤지컬</option><option>콘서트/페스티벌</option><option>연극</option>
+                <option>클래식/무용</option><option>전시/미술</option><option>복합</option>
+                <option>박스오피스</option><option>팝업스토어</option>
+              </select>
+              <select class="tbl-filter" id="stFilter" onchange="filterEvents()">
+                <option value="">전체 상태</option>
+                <option value="ongoing">진행중</option>
+                <option value="upcoming">예정</option>
+                <option value="ended">종료</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadEvents()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              새로고침
+            </button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>공연명</th><th>카테고리</th><th>장소</th><th>기간</th><th>상태</th><th>온도</th></tr></thead>
+            <tbody id="eventsBody"><tr><td colspan="7" class="empty-row"><span class="loading"></span></td></tr></tbody>
+          </table>
+          <div class="pagination" id="eventPagination"></div>
+        </div>
+      </div>
+
+      <!-- ── 팝업스토어 입력 ── -->
+      <div class="page-section" id="sec-popup">
+        <div class="section-title">팝업스토어 입력</div>
+        <div class="section-sub">수동으로 팝업스토어 데이터를 Apps Script를 통해 시트에 저장합니다</div>
+        <div class="form-card">
+          <div class="form-card-title">새 팝업스토어 등록</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">공연/팝업 이름 *</label>
+              <input class="form-input" id="pu_t" placeholder="예) 무신사 팝업스토어">
+            </div>
+            <div class="form-group">
+              <label class="form-label">장소명 *</label>
+              <input class="form-input" id="pu_lo" placeholder="예) 성수 언더스탠드에비뉴">
+            </div>
+            <div class="form-group">
+              <label class="form-label">시작일 *</label>
+              <input class="form-input" type="date" id="pu_sd">
+            </div>
+            <div class="form-group">
+              <label class="form-label">종료일 *</label>
+              <input class="form-input" type="date" id="pu_ed">
+            </div>
+            <div class="form-group">
+              <label class="form-label">지역 (area)</label>
+              <select class="form-input" id="pu_area">
+                <option value="">선택</option>
+                <option>서울</option><option>경기</option><option>인천</option>
+                <option>부산</option><option>대구</option><option>대전</option><option>광주</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">구역 (district)</label>
+              <select class="form-input" id="pu_district">
+                <option value="">선택</option>
+                <option>강남</option><option>잠실</option><option>홍대</option><option>한남</option>
+                <option>성수</option><option>명동</option><option>대학로</option><option>여의도</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">입장료</label>
+              <input class="form-input" id="pu_pr" placeholder="예) 무료 / 10,000원">
+            </div>
+            <div class="form-group">
+              <label class="form-label">무료 여부</label>
+              <select class="form-input" id="pu_fr">
+                <option value="0">유료</option>
+                <option value="1">무료</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">주소</label>
+              <input class="form-input" id="pu_ad" placeholder="예) 서울시 성동구 성수이로 77">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">포스터 이미지 URL</label>
+              <input class="form-input" id="pu_sr" placeholder="https://...">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">태그 (쉼표 구분)</label>
+              <input class="form-input" id="pu_tags" placeholder="예) 패션, 한정판, 굿즈">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">소개</label>
+              <textarea class="form-input" id="pu_ds" placeholder="팝업스토어 소개글..."></textarea>
             </div>
           </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn btn-primary" onclick="submitPopup()" id="popupSubmitBtn">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              시트에 저장
+            </button>
+            <button class="btn btn-secondary" onclick="clearPopupForm()">초기화</button>
+            <div id="popupMsg" style="font-size:12px;color:var(--sub)"></div>
+          </div>
         </div>
-        <div>
-          <label>배경 이미지</label>
-          <div class="img-upload-area" id="bgArea" style="height:180px" ondragover="onDrag(event,'bg')" ondragleave="offDrag('bg')" ondrop="onDrop(event,'bg')">
-            <input type="file" accept="image/*" onchange="onFileChange(event,'bg')">
-            <div class="img-upload-inner" id="bgInner">
-              <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 16l5-5 4 4 3-3 5 5"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
-              <div class="img-upload-label">클릭하거나 이미지를 드래그하세요<br><span style="color:var(--mu);font-weight:400">히어로/배경 (가로형 권장)</span></div>
+
+        <!-- 기존 팝업스토어 목록 -->
+        <div class="form-card">
+          <div class="form-card-title">등록된 팝업스토어</div>
+          <table>
+            <thead><tr><th>ID</th><th>이름</th><th>장소</th><th>기간</th><th>상태</th></tr></thead>
+            <tbody id="popupListBody"><tr><td colspan="5" class="empty-row">이벤트를 불러오는 중...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── 트리거 콘솔 ── -->
+      <div class="page-section" id="sec-triggers">
+        <div class="section-title">트리거 콘솔</div>
+        <div class="section-sub">Apps Script 수집 함수 수동 실행 — 실행 후 완료까지 수 분 소요될 수 있습니다</div>
+        <div class="trigger-grid">
+          <div class="trigger-card">
+            <div class="trigger-name">KOPIS 박스오피스 업데이트</div>
+            <div class="trigger-desc">장르별 공연 예매 순위를 수집하고 시트의 boxoffice_rank를 갱신합니다</div>
+            <div class="trigger-time">⏰ 매일 06:00 자동 실행 (KopisFetch.gs)</div>
+            <button class="trigger-run-btn" onclick="runTrigger('fetchBoxofficeAndUpdate',this)">▶ 지금 실행</button>
+            <div class="trigger-log" id="log_fetchBoxofficeAndUpdate"></div>
+          </div>
+          <div class="trigger-card">
+            <div class="trigger-name">KOBIS 영화 박스오피스</div>
+            <div class="trigger-desc">일별 + 주간 박스오피스를 병합하여 박스오피스 카테고리 데이터를 갱신합니다</div>
+            <div class="trigger-time">⏰ 매일 06:30 자동 실행 (KobisFetch.gs)</div>
+            <button class="trigger-run-btn" onclick="runTrigger('fetchKobisMovies',this)">▶ 지금 실행</button>
+            <div class="trigger-log" id="log_fetchKobisMovies"></div>
+          </div>
+          <div class="trigger-card">
+            <div class="trigger-name">네이버 검색량 수집</div>
+            <div class="trigger-desc">뮤지컬·콘서트 카테고리의 네이버 검색 트렌드를 수집합니다 (1회 최대 1,000건)</div>
+            <div class="trigger-time">⏰ 매일 07:00 자동 실행 (NaverTrend.gs)</div>
+            <button class="trigger-run-btn" onclick="runTrigger('fetchNaverTrendAll',this)">▶ 지금 실행</button>
+            <div class="trigger-log" id="log_fetchNaverTrendAll"></div>
+          </div>
+          <div class="trigger-card">
+            <div class="trigger-name">전시/미술 수집</div>
+            <div class="trigger-desc">한국문화정보원 API에서 전시·미술 데이터를 수집합니다 (최대 20페이지)</div>
+            <div class="trigger-time">⏰ 매일 05:00 자동 실행 (KcisaFetch.gs)</div>
+            <button class="trigger-run-btn" onclick="runTrigger('fetch전시미술',this)">▶ 지금 실행</button>
+            <div class="trigger-log" id="log_fetch전시미술"></div>
+          </div>
+          <div class="trigger-card">
+            <div class="trigger-name">GitHub events.json 푸시</div>
+            <div class="trigger-desc">시트 데이터를 events.json으로 빌드하여 GitHub Pages에 배포합니다</div>
+            <div class="trigger-time">⏰ 매일 08:00 자동 실행 (GitHubPush.gs)</div>
+            <button class="trigger-run-btn" onclick="runTrigger('pushEventsToGitHub',this)">▶ 지금 실행</button>
+            <div class="trigger-log" id="log_pushEventsToGitHub"></div>
+          </div>
+          <div class="trigger-card">
+            <div class="trigger-name">랭킹 스냅샷 저장</div>
+            <div class="trigger-desc">오늘 날짜 기준 순위를 RankSnapshot 시트에 저장합니다 (중복 방지)</div>
+            <div class="trigger-time">⏰ 매일 00:00 자동 실행 (Code.gs)</div>
+            <button class="trigger-run-btn" onclick="runTrigger('saveRankSnapshot',this)">▶ 지금 실행</button>
+            <div class="trigger-log" id="log_saveRankSnapshot"></div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="form-card-title">Apps Script 엔드포인트 설정</div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Apps Script Web App URL</label>
+            <input class="form-input" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:12px">
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="saveAppsScriptUrl()">저장</button>
+          <div style="font-size:11px;color:var(--mu);margin-top:10px;line-height:1.6">
+            ⚠ Code.gs에 <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px">doGet(?action=trigger&fn=함수명&key=ADMIN_KEY)</code> 라우터를 추가해야 실행됩니다
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 랭킹 스냅샷 ── -->
+      <div class="page-section" id="sec-snapshot">
+        <div class="section-title">랭킹 스냅샷</div>
+        <div class="section-sub">RankSnapshot 시트 상태 확인 — GitHubPush.gs의 prev_rank 기준</div>
+        <div class="snapshot-grid" id="snapshotStats">
+          <div class="stat-card"><div class="stat-label">스냅샷 날짜 수</div><div class="stat-value" id="snapDateCnt">-</div></div>
+          <div class="stat-card"><div class="stat-label">최신 스냅샷</div><div class="stat-value" id="snapLatest" style="font-size:16px;padding-top:4px">-</div></div>
+          <div class="stat-card"><div class="stat-label">최신 기준 이벤트 수</div><div class="stat-value" id="snapEvCnt">-</div></div>
+        </div>
+        <div class="form-card">
+          <div class="form-card-title">스냅샷 날짜별 현황</div>
+          <div id="snapshotDates" style="font-size:13px;color:var(--sub);line-height:2">불러오는 중...</div>
+        </div>
+        <div class="form-card" style="border-color:rgba(255,59,48,0.2)">
+          <div class="form-card-title" style="color:var(--danger)">⚠ 위험 구역</div>
+          <div style="font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.6">
+            Properties 스냅샷을 초기화합니다. RankSnapshot 시트 데이터는 유지됩니다.<br>
+            다음 GitHubPush 실행 시 시트 기준으로 자동 복구됩니다.
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="resetSnapshot()">Properties 스냅샷 초기화</button>
+        </div>
+      </div>
+
+      <!-- ── 어드민 로그 ── -->
+      <div class="page-section" id="sec-logs">
+        <div class="section-title">어드민 로그</div>
+        <div class="section-sub">관리자 액션 기록</div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <div class="table-toolbar-left">
+              <select class="tbl-filter" id="logActionFilter" onchange="filterLogs()">
+                <option value="">전체 액션</option>
+                <option value="ban_user">회원 정지</option>
+                <option value="unban_user">정지 해제</option>
+                <option value="change_role">권한 변경</option>
+                <option value="popup_add">팝업 추가</option>
+                <option value="trigger_run">트리거 실행</option>
+                <option value="snapshot_reset">스냅샷 초기화</option>
+              </select>
             </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadLogs()">새로고침</button>
           </div>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--mu);margin-top:-6px;margin-bottom:12px">이미지는 Base64로 변환되어 저장됩니다. 파일 크기가 크면 로컬스토리지 용량 초과가 발생할 수 있어요.</div>
-
-      <div class="divider"></div>
-      <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">장소 · 일정 · 가격</div>
-      <div class="form-row">
-        <div><label>장소명 *</label><input type="text" id="ef-lo" placeholder="서울 성수동"></div>
-        <div>
-          <label>세부 지역 (district)</label>
-          <select id="ef-district">
-            <option value="">선택</option>
-            <option value="강남">강남</option><option value="홍대">홍대</option>
-            <option value="성수">성수</option><option value="한남">한남</option>
-            <option value="이태원">이태원</option><option value="잠실">잠실</option>
-            <option value="명동">명동</option><option value="동대문">동대문</option>
-            <option value="송파">송파</option><option value="여의도">여의도</option>
-            <option value="강북">강북</option><option value="기타">기타</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row full">
-        <div><label>상세 주소</label><input type="text" id="ef-ad" placeholder="서울 성동구 왕십리로2길 20"></div>
-      </div>
-      <div class="form-row">
-        <div><label>시작일 *</label><input type="date" id="ef-sd"></div>
-        <div><label>종료일 *</label><input type="date" id="ef-ed"></div>
-      </div>
-      <div class="form-row">
-        <div>
-          <label>가격</label>
-          <input type="text" id="ef-pr" placeholder="무료 / R석 50,000원">
-        </div>
-        <div style="display:flex;align-items:flex-end;gap:12px;padding-bottom:2px">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:0">
-            <input type="checkbox" id="ef-fr" style="width:16px;height:16px;cursor:pointer">
-            <span style="font-size:13px;font-weight:600;color:var(--sub)">무료 입장</span>
-          </label>
+          <table>
+            <thead><tr><th>시각</th><th>관리자</th><th>액션</th><th>대상</th><th>상세</th></tr></thead>
+            <tbody id="logsBody"><tr><td colspan="5" class="empty-row"><span class="loading"></span></td></tr></tbody>
+          </table>
+          <div class="pagination" id="logPagination"></div>
         </div>
       </div>
 
-      <div class="divider"></div>
-      <!-- 온도지수 섹션 -->
-      <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">🌡️ 온도지수</div>
-      <div class="form-row">
-        <div>
-          <label>네이버 검색량 지수 (0~100)</label>
-          <input type="number" id="ef-naver" placeholder="0~100" min="0" max="100" style="width:100%">
-          <div style="font-size:11px;color:var(--mu);margin-top:4px">네이버 데이터랩 검색 트렌드 최고값 기준 상대값</div>
-        </div>
-        <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px">
-          <div style="font-size:11px;font-weight:700;color:var(--mu);margin-bottom:8px">온도 구성 미리보기</div>
-          <div id="tempPreviewRows" style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--sub)">
-            <div>입력값을 채우면 자동 계산됩니다</div>
-          </div>
-          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bdL);display:flex;align-items:center;gap:8px">
-            <span style="font-size:12px;color:var(--mu)">예상 온도</span>
-            <span id="tempPreviewVal" style="font-size:20px;font-weight:800;color:var(--hot)">—°C</span>
-          </div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">태그 설정</div>
-      <div class="form-row full">
-        <div>
-          <label>분위기 태그 (vibes) — 큐레이션 연결에 사용</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="vibeCheckboxes"></div>
-        </div>
-      </div>
-      <div class="form-row full">
-        <div>
-          <label>키워드 태그 (쉼표 구분)</label>
-          <input type="text" id="ef-tags" placeholder="굿즈, 포토존, 한정판">
-        </div>
-      </div>
-      <div class="form-row full">
-        <div>
-          <label>편의시설</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="amenityCheckboxes"></div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-      <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">링크</div>
-      <div class="form-row">
-        <div><label>홈페이지 URL</label><input type="text" id="ef-url-hp" placeholder="https://"></div>
-        <div><label>인스타그램 URL</label><input type="text" id="ef-url-ig" placeholder="https://instagram.com/"></div>
-      </div>
-      <div class="form-row">
-        <div><label>예매 URL</label><input type="text" id="ef-url-tk" placeholder="https://ticket.interpark.com/"></div>
-        <div><label>스토어 URL</label><input type="text" id="ef-url-sh" placeholder="https://"></div>
-      </div>
-
-      <div style="display:flex;gap:10px;margin-top:8px">
-        <button class="btn btn-primary" onclick="saveEvent()">저장</button>
-        <button class="btn btn-ghost" onclick="closeEventForm()">취소</button>
-      </div>
     </div>
   </div>
+</div>
 
-  <!-- ── 미리보기 ── -->
-  <div class="page-section" id="page-preview">
-    <div class="section-title">미리보기</div>
-    <div class="section-sub">현재 큐레이션 카드가 앱에서 어떻게 보이는지 확인합니다.</div>
-    <div style="max-width:390px">
-      <div style="background:#111114;border-radius:24px;padding:20px;border:1px solid #2a2a38">
-        <div style="font-size:13px;font-weight:800;margin-bottom:14px;color:#ff7a5a">컬처온도</div>
-        <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:#ededf0">테마별 보기</div>
-        <div id="previewGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px"></div>
-      </div>
+<!-- 회원 상세 모달 -->
+<div class="modal-overlay" id="memberModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>회원 상세</span>
+      <button class="modal-close" onclick="closeMemberModal()">✕</button>
+    </div>
+    <div id="memberModalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeMemberModal()">닫기</button>
+      <button class="btn btn-danger btn-sm" id="banBtn" onclick="toggleBan()">정지</button>
+      <button class="btn btn-primary btn-sm" id="roleBtn" onclick="toggleAdmin()">관리자 지정</button>
     </div>
   </div>
+</div>
 
-</div><!-- /main -->
-</div><!-- /layout -->
-
-<div class="toast" id="toast"></div>
+<div id="toast"></div>
 
 <script>
-var STORAGE_KEY='co_curations';
-var COLOR_PRESETS=[
-  ["#ff5e3a","#c0392b"],["#e74c3c","#922b21"],
-  ["#f39c12","#b7770d"],["#2ecc71","#1a7a43"],
-  ["#27ae60","#1a6640"],["#2980b9","#1a5276"],
-  ["#8e44ad","#5b2c6f"],["#bf5af2","#7e35aa"],
-  ["#1abc9c","#148f77"],["#2c3e50","#1a252f"],
-];
+// ── Supabase ──────────────────────────────────────────────────
+const SUPA_URL='https://rffbqjwvzxpxxzcrbiza.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmZmJxand2enhweHh6Y3JiaXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNDkzMDMsImV4cCI6MjA5MTcyNTMwM30.Je8fhcjZE2b8RAB1DYVcP3-xu9qJjHoCwqlYf4Aj_CQ';
+const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
 
-var DEFAULT_CURATIONS=[
-  {id:"c1",title:"데이트",icon:"💑",color1:"#ff5e3a",color2:"#c0392b",tags:["데이트"]},
-  {id:"c2",title:"나들이",icon:"🌿",color1:"#2ecc71",color2:"#1a7a43",tags:["야외공연","가족","주말추천"]},
-  {id:"c3",title:"무료 입장",icon:"🎟",color1:"#f39c12",color2:"#b7770d",tags:["무료입장"]},
-  {id:"c4",title:"인스타 감성",icon:"📸",color1:"#8e44ad",color2:"#5b2c6f",tags:["인스타감성"]},
-  {id:"c5",title:"혼자 즐기기",icon:"🎧",color1:"#2980b9",color2:"#1a5276",tags:["혼자도OK"]},
-  {id:"c6",title:"이번 주 마감",icon:"⏳",color1:"#e74c3c",color2:"#922b21",tags:["__closing__"]},
-];
+var currentAdmin=null;
+var allMembers=[], allEvents=[], allLogs=[];
+var memberPage=1, eventPage=1, logPage=1;
+var PAGE_SIZE=20;
+var selectedMember=null;
 
-var SAMPLE_EVENTS=[
-  {id:"1",t:"시몬스 그로서리 스토어 성수",ct:"팝업스토어",district:"성수",vibes:["데이트","인스타감성","무료입장"],tags:["굿즈","F&B"],st:"ongoing",ed:"2026-04-20"},
-  {id:"2",t:"나이키 에어맥스 팝업",ct:"팝업스토어",district:"강남",vibes:["무료입장","힙한","데이트"],tags:["한정판"],st:"ongoing",ed:"2026-04-12"},
-  {id:"3",t:"서울재즈페스티벌 2026",ct:"페스티벌",district:"송파",vibes:["야외공연","데이트","가족","주말추천"],tags:["재즈"],st:"upcoming",ed:"2026-05-25"},
-  {id:"4",t:"디올 뷰티 가든 팝업",ct:"팝업스토어",district:"한남",vibes:["데이트","인스타감성","럭셔리"],tags:["뷰티"],st:"ongoing",ed:"2026-04-08"},
-  {id:"5",t:"레고 어른의 밤",ct:"팝업스토어",district:"잠실",vibes:["데이트","혼자도OK","힙한"],tags:["레고"],st:"ongoing",ed:"2026-04-07"},
-  {id:"6",t:"IU 콘서트",ct:"콘서트",district:"잠실",vibes:["주말추천","데이트"],tags:["IU"],st:"upcoming",ed:"2026-04-20"},
-  {id:"7",t:"바스키아 회고전",ct:"전시/행사",district:"동대문",vibes:["혼자도OK","인스타감성"],tags:["전시"],st:"ongoing",ed:"2026-06-30"},
-  {id:"8",t:"뮤지컬 '웃는 남자'",ct:"뮤지컬",district:"잠실",vibes:["데이트","주말추천"],tags:["뮤지컬"],st:"ongoing",ed:"2026-06-30"},
-  {id:"9",t:"연극 '고도를 기다리며'",ct:"연극",district:"명동",vibes:["혼자도OK"],tags:["연극"],st:"upcoming",ed:"2026-05-10"},
-  {id:"10",t:"포켓몬 팝업스토어",ct:"팝업스토어",district:"강남",vibes:["무료입장","가족","인스타감성"],tags:["포켓몬"],st:"ongoing",ed:"2026-04-13"},
-];
-
-function getCurations(){
-  try{var s=localStorage.getItem(STORAGE_KEY);return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_CURATIONS));}
-  catch(e){return JSON.parse(JSON.stringify(DEFAULT_CURATIONS));}
-}
-function saveCurations(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr));}
-
-// 네비
-function nav(page){
-  document.querySelectorAll('.page-section').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.sb-item').forEach(function(i){i.classList.remove('on');});
-  document.getElementById('page-'+page).classList.add('active');
-  document.getElementById('nav-'+page).classList.add('on');
-  if(page==='events')renderEvents();
-  if(page==='preview')renderPreview();
+// ── 앱스크립트 URL (localStorage 저장) ──────────────────────
+var APPS_URL=localStorage.getItem('admin_apps_url')||'';
+function saveAppsScriptUrl(){
+  APPS_URL=document.getElementById('appsScriptUrl').value.trim();
+  localStorage.setItem('admin_apps_url',APPS_URL);
+  toast('Apps Script URL 저장됨');
 }
 
-// ── 큐레이션 목록 렌더 ──
-function renderCurationList(){
-  var curations=getCurations();
-  document.getElementById('curationCount').textContent=curations.length+'개 테마 카드';
-  var html='';
-  curations.forEach(function(c,i){
-    var tagStr=c.tags.map(function(t){return t==='__closing__'?'종료임박':t;}).join(', ');
-    html+='<div class="curation-item" id="ci-'+c.id+'">'
-      +'<div class="drag-handle">⠿</div>'
-      +'<div class="curation-preview" style="background:linear-gradient(135deg,'+c.color1+','+c.color2+')">'+c.icon+'</div>'
-      +'<div class="curation-info">'
-      +'<div class="curation-name">'+c.title+'</div>'
-      +'<div class="curation-tags">'+tagStr+'</div>'
-      +'</div>'
-      +'<div class="curation-actions">'
-      +(i>0?'<button class="btn btn-ghost btn-sm" onclick="moveCuration(\''+c.id+'\',-1)" title="위로">↑</button>':'')
-      +(i<curations.length-1?'<button class="btn btn-ghost btn-sm" onclick="moveCuration(\''+c.id+'\',1)" title="아래로">↓</button>':'')
-      +'<button class="btn btn-ghost btn-sm" onclick="editCuration(\''+c.id+'\')">편집</button>'
-      +'<button class="btn btn-danger btn-sm" onclick="deleteCuration(\''+c.id+'\')">삭제</button>'
-      +'</div>'
-      +'</div>';
+// ── 로그인 ────────────────────────────────────────────────────
+async function doLogin(){
+  var email=document.getElementById('loginEmail').value.trim();
+  var pw=document.getElementById('loginPw').value;
+  var err=document.getElementById('loginErr');
+  var btn=document.getElementById('loginBtn');
+  if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요';return;}
+  btn.textContent='로그인 중...';btn.disabled=true;
+  var {data,error}=await supa.auth.signInWithPassword({email,password:pw});
+  if(error){err.textContent='로그인 실패: '+error.message;btn.textContent='로그인';btn.disabled=false;return;}
+  var {data:profile}=await supa.from('profiles').select('*').eq('id',data.user.id).single();
+  if(!profile||profile.role!=='admin'){
+    await supa.auth.signOut();
+    err.textContent='관리자 권한이 없습니다';btn.textContent='로그인';btn.disabled=false;return;
+  }
+  currentAdmin=profile;
+  showAdmin();
+}
+
+async function doLogout(){
+  await supa.auth.signOut();
+  currentAdmin=null;
+  document.getElementById('adminWrap').style.display='none';
+  document.getElementById('loginWrap').style.display='flex';
+}
+
+// ── 세션 복원 ────────────────────────────────────────────────
+(async function(){
+  var {data:{session}}=await supa.auth.getSession();
+  if(session){
+    var {data:profile}=await supa.from('profiles').select('*').eq('id',session.user.id).single();
+    if(profile&&profile.role==='admin'){currentAdmin=profile;showAdmin();return;}
+  }
+  document.getElementById('loginWrap').style.display='flex';
+})();
+
+function showAdmin(){
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('adminWrap').style.display='flex';
+  document.getElementById('adminBadge').textContent=currentAdmin.nickname||currentAdmin.email;
+  document.getElementById('appsScriptUrl').value=APPS_URL;
+  loadDashboard();
+  loadEvents();
+}
+
+// ── 섹션 전환 ────────────────────────────────────────────────
+function showSection(sec){
+  document.querySelectorAll('.page-section').forEach(function(el){el.classList.remove('on');});
+  document.querySelectorAll('.nav-item').forEach(function(el){el.classList.remove('on');});
+  document.getElementById('sec-'+sec).classList.add('on');
+  document.querySelector('[data-sec="'+sec+'"]').classList.add('on');
+  if(sec==='members')loadMembers();
+  if(sec==='events')filterEvents();
+  if(sec==='popup')renderPopupList();
+  if(sec==='snapshot')loadSnapshot();
+  if(sec==='logs')loadLogs();
+}
+
+// ── 대시보드 ──────────────────────────────────────────────────
+async function loadDashboard(){
+  var today=new Date().toISOString().split('T')[0];
+  var [{data:members},{data:likes},{data:bookmarks},{data:views},{data:recentLogs}]=await Promise.all([
+    supa.from('profiles').select('id,nickname,email,role,created_at').order('created_at',{ascending:false}),
+    supa.from('user_events').select('id',{count:'exact'}).eq('action','like'),
+    supa.from('user_events').select('id',{count:'exact'}).eq('action','bookmark'),
+    supa.from('user_events').select('id',{count:'exact'}).eq('action','view'),
+    supa.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(5)
+  ]);
+  var todayMembers=(members||[]).filter(function(m){return m.created_at&&m.created_at.startsWith(today);});
+  var evCount=allEvents.length;
+  document.getElementById('statGrid').innerHTML=
+    statCard('전체 회원',(members||[]).length,'명','var(--hot)')+
+    statCard('오늘 가입',todayMembers.length,'명','var(--warm)')+
+    statCard('이벤트 수',evCount,'건','var(--cool)')+
+    statCard('총 좋아요',(likes||[]).length,'건','#bf5af2')+
+    statCard('총 저장',(bookmarks||[]).length,'건','#ffd60a')+
+    statCard('총 조회',(views||[]).length,'건','var(--ok)');
+  var recentMembers=(members||[]).slice(0,5);
+  document.getElementById('recentMembersBody').innerHTML=recentMembers.length
+    ?recentMembers.map(function(m){return'<tr><td style="font-size:12px">'+m.email+'</td><td>'+esc(m.nickname||'-')+'</td><td style="font-size:11px;color:var(--sub)">'+fmtDate(m.created_at)+'</td><td>'+roleBadge(m.role)+'</td></tr>';}).join('')
+    :'<tr><td colspan="4" class="empty-row">회원 없음</td></tr>';
+  document.getElementById('recentLogsBody').innerHTML=(recentLogs&&recentLogs.length)
+    ?recentLogs.map(function(l){return'<tr><td style="font-size:11px;color:var(--sub)">'+fmtDate(l.created_at)+'</td><td style="font-size:12px">'+esc(l.action)+'</td><td style="font-size:12px">'+esc(l.target||'-')+'</td></tr>';}).join('')
+    :'<tr><td colspan="3" class="empty-row">로그 없음</td></tr>';
+}
+
+function statCard(label,val,unit,color){
+  return'<div class="stat-card"><div class="stat-label">'+label+'</div><div class="stat-value" style="color:'+color+'">'+val+'<span style="font-size:14px;font-weight:600;color:var(--sub);margin-left:3px">'+unit+'</span></div></div>';
+}
+
+// ── 회원 관리 ────────────────────────────────────────────────
+async function loadMembers(){
+  document.getElementById('membersBody').innerHTML='<tr><td colspan="6" class="empty-row"><span class="loading"></span></td></tr>';
+  var {data}=await supa.from('profiles').select('*').order('created_at',{ascending:false});
+  allMembers=data||[];
+  filterMembers();
+}
+
+function filterMembers(){
+  var q=(document.getElementById('memberSearch').value||'').toLowerCase();
+  var role=document.getElementById('roleFilter').value;
+  var filtered=allMembers.filter(function(m){
+    var matchQ=!q||(m.email||'').toLowerCase().includes(q)||(m.nickname||'').toLowerCase().includes(q);
+    var matchR=!role||m.role===role;
+    return matchQ&&matchR;
   });
-  document.getElementById('curationList').innerHTML=html;
+  memberPage=1;
+  renderMembersTable(filtered);
 }
 
-// 폼 열기
-var editingId=null;
-function openCurationForm(id){
-  editingId=id||null;
-  var form=document.getElementById('curationForm');
-  document.getElementById('curationFormTitle').textContent=id?'큐레이션 편집':'새 큐레이션';
-  if(id){
-    var c=getCurations().find(function(x){return x.id===id;});
-    document.getElementById('fTitle').value=c.title;
-    document.getElementById('fIcon').value=c.icon;
-    document.getElementById('fTags').value=c.tags.join(', ');
-    document.getElementById('fColor1').value=c.color1;
-    document.getElementById('fColor2').value=c.color2;
-  } else {
-    document.getElementById('fTitle').value='';
-    document.getElementById('fIcon').value='';
-    document.getElementById('fTags').value='';
-    document.getElementById('fColor1').value='#ff5e3a';
-    document.getElementById('fColor2').value='#c0392b';
-  }
-  form.style.display='block';
-  renderColorPresets();
-  updatePreview();
-  form.scrollIntoView({behavior:'smooth'});
-}
-function editCuration(id){openCurationForm(id);}
-function closeCurationForm(){document.getElementById('curationForm').style.display='none';editingId=null;}
-
-// 색상 프리셋
-function renderColorPresets(){
-  var p1='',p2='';
-  COLOR_PRESETS.forEach(function(pair,i){
-    p1+='<div class="color-preset" style="background:'+pair[0]+'" onclick="applyPreset('+i+')" title="'+pair[0]+'"></div>';
-    p2+='<div class="color-preset" style="background:'+pair[1]+'" title="'+pair[1]+'"></div>';
-  });
-  document.getElementById('presets1').innerHTML=p1;
-  document.getElementById('presets2').innerHTML=p2;
-}
-function applyPreset(i){
-  document.getElementById('fColor1').value=COLOR_PRESETS[i][0];
-  document.getElementById('fColor2').value=COLOR_PRESETS[i][1];
-  updatePreview();
+function renderMembersTable(list){
+  var total=list.length,pages=Math.ceil(total/PAGE_SIZE)||1;
+  var slice=list.slice((memberPage-1)*PAGE_SIZE,memberPage*PAGE_SIZE);
+  document.getElementById('membersBody').innerHTML=slice.length
+    ?slice.map(function(m){
+      return'<tr onclick="openMemberModal(\''+m.id+'\')" style="cursor:pointer">'
+        +'<td style="font-size:12px">'+esc(m.email||'-')+'</td>'
+        +'<td>'+esc(m.nickname||'-')+'</td>'
+        +'<td style="font-size:12px;color:var(--sub)">'+esc(m.region||'-')+'</td>'
+        +'<td>'+roleBadge(m.role)+'</td>'
+        +'<td style="font-size:11px;color:var(--sub)">'+fmtDate(m.created_at)+'</td>'
+        +'<td><button class="tbl-btn" onclick="event.stopPropagation();openMemberModal(\''+m.id+'\')">관리</button></td>'
+      +'</tr>';
+    }).join('')
+    :'<tr><td colspan="6" class="empty-row">조건에 맞는 회원이 없습니다</td></tr>';
+  renderPagination('memberPagination',pages,memberPage,function(p){memberPage=p;renderMembersTable(list);});
 }
 
-// 미리보기 업데이트
-function updatePreview(){
-  var c1=document.getElementById('fColor1').value;
-  var c2=document.getElementById('fColor2').value;
-  var icon=document.getElementById('fIcon').value||'✨';
-  var title=document.getElementById('fTitle').value||'제목';
-  document.getElementById('pvBg').style.background='linear-gradient(135deg,'+c1+','+c2+')';
-  document.getElementById('pvIcon').textContent=icon;
-  document.getElementById('pvTitle').textContent=title;
-}
-document.getElementById('fTitle').addEventListener('input',updatePreview);
-document.getElementById('fIcon').addEventListener('input',updatePreview);
-document.getElementById('fColor1').addEventListener('input',updatePreview);
-document.getElementById('fColor2').addEventListener('input',updatePreview);
-
-// 저장
-function saveCuration(){
-  var title=document.getElementById('fTitle').value.trim();
-  var icon=document.getElementById('fIcon').value.trim();
-  var tagsRaw=document.getElementById('fTags').value.trim();
-  if(!title){alert('제목을 입력해주세요.');return;}
-  if(!icon){alert('아이콘을 입력해주세요.');return;}
-  if(!tagsRaw){alert('태그를 입력해주세요.');return;}
-  var tags=tagsRaw.split(',').map(function(t){return t.trim();}).filter(Boolean);
-  var color1=document.getElementById('fColor1').value;
-  var color2=document.getElementById('fColor2').value;
-  var curations=getCurations();
-  if(editingId){
-    var idx=curations.findIndex(function(x){return x.id===editingId;});
-    if(idx>=0)curations[idx]={id:editingId,title:title,icon:icon,color1:color1,color2:color2,tags:tags};
-  } else {
-    curations.push({id:'c'+Date.now(),title:title,icon:icon,color1:color1,color2:color2,tags:tags});
-  }
-  saveCurations(curations);
-  closeCurationForm();
-  renderCurationList();
-  showToast(editingId?'큐레이션이 수정되었습니다':'새 큐레이션이 추가되었습니다');
+// ── 회원 모달 ────────────────────────────────────────────────
+async function openMemberModal(id){
+  selectedMember=allMembers.find(function(m){return m.id===id;})||null;
+  if(!selectedMember)return;
+  var m=selectedMember;
+  var {data:actions}=await supa.from('user_events').select('action').eq('user_id',id);
+  var likes=(actions||[]).filter(function(a){return a.action==='like';}).length;
+  var bookmarks=(actions||[]).filter(function(a){return a.action==='bookmark';}).length;
+  var views=(actions||[]).filter(function(a){return a.action==='view';}).length;
+  document.getElementById('memberModalBody').innerHTML=
+    '<div style="display:grid;gap:12px">'
+    +'<div style="display:flex;gap:16px;align-items:center;padding:14px;background:var(--sf);border-radius:12px">'
+      +'<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ff5e3a,#ff9500);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;flex-shrink:0">'+(m.nickname||m.email||'?').charAt(0).toUpperCase()+'</div>'
+      +'<div><div style="font-size:15px;font-weight:800">'+esc(m.nickname||'-')+'</div><div style="font-size:12px;color:var(--sub);margin-top:2px">'+esc(m.email||'-')+'</div></div>'
+      +roleBadge(m.role)
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+      +miniStat('좋아요',likes)
+      +miniStat('저장',bookmarks)
+      +miniStat('조회',views)
+    +'</div>'
+    +infoRow('지역',m.region||'-')
+    +infoRow('가입일',fmtDate(m.created_at))
+    +infoRow('회원 ID',m.id)
+    +'</div>';
+  document.getElementById('banBtn').textContent=m.role==='banned'?'정지 해제':'정지';
+  document.getElementById('banBtn').className='btn btn-sm '+(m.role==='banned'?'btn-ok':'btn-danger');
+  document.getElementById('roleBtn').textContent=m.role==='admin'?'관리자 해제':'관리자 지정';
+  document.getElementById('memberModal').classList.add('show');
 }
 
-// 삭제
-function deleteCuration(id){
-  if(!confirm('삭제하시겠습니까?'))return;
-  var curations=getCurations().filter(function(c){return c.id!==id;});
-  saveCurations(curations);
-  renderCurationList();
-  showToast('삭제되었습니다');
+function closeMemberModal(){document.getElementById('memberModal').classList.remove('show');selectedMember=null;}
+
+async function toggleBan(){
+  if(!selectedMember)return;
+  var newRole=selectedMember.role==='banned'?'user':'banned';
+  var {error}=await supa.from('profiles').update({role:newRole}).eq('id',selectedMember.id);
+  if(error){toast('오류: '+error.message);return;}
+  await writeLog(newRole==='banned'?'ban_user':'unban_user',selectedMember.email);
+  selectedMember.role=newRole;
+  allMembers=allMembers.map(function(m){return m.id===selectedMember.id?Object.assign({},m,{role:newRole}):m;});
+  closeMemberModal();filterMembers();toast(newRole==='banned'?'회원 정지 처리됨':'정지 해제됨');
 }
 
-// 순서 변경
-function moveCuration(id,dir){
-  var curations=getCurations();
-  var idx=curations.findIndex(function(x){return x.id===id;});
-  var newIdx=idx+dir;
-  if(newIdx<0||newIdx>=curations.length)return;
-  var tmp=curations[idx];curations[idx]=curations[newIdx];curations[newIdx]=tmp;
-  saveCurations(curations);
-  renderCurationList();
+async function toggleAdmin(){
+  if(!selectedMember)return;
+  if(selectedMember.id===currentAdmin.id){toast('본인 권한은 변경할 수 없습니다');return;}
+  var newRole=selectedMember.role==='admin'?'user':'admin';
+  var {error}=await supa.from('profiles').update({role:newRole}).eq('id',selectedMember.id);
+  if(error){toast('오류: '+error.message);return;}
+  await writeLog('change_role',selectedMember.email,{role:newRole});
+  selectedMember.role=newRole;
+  allMembers=allMembers.map(function(m){return m.id===selectedMember.id?Object.assign({},m,{role:newRole}):m;});
+  closeMemberModal();filterMembers();toast(newRole==='admin'?'관리자로 지정됨':'일반 회원으로 변경됨');
 }
 
-// 기본값으로 초기화
-function resetToDefault(){
-  if(!confirm('기본 큐레이션으로 초기화하시겠습니까?'))return;
-  saveCurations(JSON.parse(JSON.stringify(DEFAULT_CURATIONS)));
-  renderCurationList();
-  showToast('초기화되었습니다');
-}
-
-// ── 날짜 기반 상태 자동 계산 ──
-var TODAY=new Date(); TODAY.setHours(0,0,0,0);
-function calcStatus(sd,ed){
-  if(!sd||!ed)return null;
-  var s=new Date(sd),e=new Date(ed);
-  s.setHours(0,0,0,0);e.setHours(0,0,0,0);
-  if(TODAY>e)return'ended';
-  if(TODAY<s)return'upcoming';
-  return'ongoing';
-}
-function updateTempPreview(){
-  var ns=Number(document.getElementById('ef-naver').value)||0;
-  var sd=document.getElementById('ef-sd').value;
-  var ed=document.getElementById('ef-ed').value;
-  var fr=document.getElementById('ef-fr').checked?1:0;
-  var score=0;
-  var rows=[];
-
-  // 네이버 검색량
-  var ns_pt=Math.round(ns*0.3);
-  score+=ns_pt;
-  rows.push('네이버 검색량 '+ns+' → <b>+'+ns_pt+'점</b>');
-
-  // 긴급도
-  if(sd&&ed){
-    var today=new Date();today.setHours(0,0,0,0);
-    var edD=new Date(ed);var sdD=new Date(sd);
-    var d=Math.ceil((edD-today)/864e5);
-    var span=Math.ceil((edD-sdD)/864e5);
-    var urgPt=0;
-    if(d<=3)urgPt=25;else if(d<=7)urgPt=15;else if(d<=14)urgPt=7;
-    if(urgPt){score+=urgPt;rows.push('마감 D-'+d+' → <b>+'+urgPt+'점</b>');}
-    var newPt=0;
-    var a=Math.ceil((today-sdD)/864e5);
-    if(a<=7&&a>=0){newPt=10;score+=newPt;rows.push('신규 오픈 → <b>+'+newPt+'점</b>');}
-    var spanPt=0;
-    if(span<=7)spanPt=12;else if(span<=14)spanPt=6;
-    if(spanPt){score+=spanPt;rows.push('단기 행사 '+span+'일 → <b>+'+spanPt+'점</b>');}
-  }
-  // 무료
-  if(fr){score+=8;rows.push('무료입장 → <b>+8점</b>');}
-
-  var pct=Math.min(100,Math.round(score/1.25));
-  var col=pct>=80?'#ff5e3a':pct>=60?'#ff9500':pct>=30?'#4fc3f7':'#90a4ae';
-  document.getElementById('tempPreviewRows').innerHTML=rows.length?rows.join('<br>'):'데이터 입력 시 계산됩니다';
-  document.getElementById('tempPreviewVal').textContent=pct+'°C';
-  document.getElementById('tempPreviewVal').style.color=col;
-}
-document.addEventListener('input',function(e){
-  if(['ef-naver','ef-sd','ef-ed'].indexOf(e.target.id)>=0)updateTempPreview();
-});
-document.addEventListener('change',function(e){
-  if(e.target.id==='ef-fr')updateTempPreview();
-});
-function updateStatusPreview(){
-  var sd=document.getElementById('ef-sd').value;
-  var ed=document.getElementById('ef-ed').value;
-  var pv=document.getElementById('ef-st-preview');
-  if(!pv)return;
-  var st=calcStatus(sd,ed);
-  if(!st){pv.style.display='none';return;}
-  var label={ongoing:'진행중',upcoming:'오픈예정',ended:'종료'}[st];
-  var color={ongoing:'#2ecc71',upcoming:'#4fc3f7',ended:'#505068'}[st];
-  pv.style.display='inline-flex';
-  pv.style.background=color+'22';
-  pv.style.color=color;
-  pv.textContent='자동 상태: '+label;
-}
-
-// ── 이미지 업로드 ──
-var imgData={poster:null,bg:null};
-
-function onFileChange(e,type){
-  var file=e.target.files[0];
-  if(!file)return;
-  readImg(file,type);
-}
-function onDrag(e,type){e.preventDefault();document.getElementById(type==='poster'?'posterArea':'bgArea').classList.add('drag');}
-function offDrag(type){document.getElementById(type==='poster'?'posterArea':'bgArea').classList.remove('drag');}
-function onDrop(e,type){
-  e.preventDefault();offDrag(type);
-  var file=e.dataTransfer.files[0];
-  if(!file||!file.type.startsWith('image/'))return;
-  readImg(file,type);
-}
-function readImg(file,type){
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    imgData[type]=ev.target.result;
-    renderImgPreview(type,ev.target.result);
-  };
-  reader.readAsDataURL(file);
-}
-function renderImgPreview(type,src){
-  var areaId=type==='poster'?'posterArea':'bgArea';
-  var innerId=type==='poster'?'posterInner':'bgInner';
-  var area=document.getElementById(areaId);
-  var inner=document.getElementById(innerId);
-  // 기존 preview 제거
-  var old=area.querySelector('.img-preview');if(old)old.remove();
-  var oldDel=area.querySelector('.img-del');if(oldDel)oldDel.remove();
-  // 새 preview
-  var img=document.createElement('img');
-  img.className='img-preview';img.src=src;
-  var del=document.createElement('button');
-  del.className='img-del';del.innerHTML='✕';
-  del.onclick=function(e){e.preventDefault();e.stopPropagation();clearImg(type);};
-  area.appendChild(img);area.appendChild(del);
-  inner.style.opacity='0';
-}
-function clearImg(type){
-  imgData[type]=null;
-  var areaId=type==='poster'?'posterArea':'bgArea';
-  var innerId=type==='poster'?'posterInner':'bgInner';
-  var area=document.getElementById(areaId);
-  var old=area.querySelector('.img-preview');if(old)old.remove();
-  var oldDel=area.querySelector('.img-del');if(oldDel)oldDel.remove();
-  document.getElementById(innerId).style.opacity='1';
-  // file input 초기화
-  var inp=area.querySelector('input[type=file]');if(inp)inp.value='';
-}
-function resetImgPreviews(){
-  clearImg('poster');clearImg('bg');
-}
-
-// ── 이벤트 CRUD ──
-var EV_KEY='co_events';
-var VIBES_ALL=[
-  // 👥 동행 유형
-  {v:"데이트",g:"동행"},
-  {v:"친구랑",g:"동행"},
-  {v:"가족",g:"동행"},
-  {v:"혼자도OK",g:"동행"},
-  {v:"단체/모임",g:"동행"},
-  // 💰 가격
-  {v:"무료입장",g:"가격"},
-  {v:"가성비",g:"가격"},
-  {v:"럭셔리",g:"가격"},
-  // 🎨 분위기
-  {v:"인스타감성",g:"분위기"},
-  {v:"힙한",g:"분위기"},
-  {v:"아늑한",g:"분위기"},
-  {v:"웅장한",g:"분위기"},
-  {v:"감성적인",g:"분위기"},
-  {v:"유니크한",g:"분위기"},
-  {v:"레트로",g:"분위기"},
-  {v:"아트",g:"분위기"},
-  // 📍 장소/형태
-  {v:"야외공연",g:"장소"},
-  {v:"실내",g:"장소"},
-  {v:"팝업",g:"장소"},
-  {v:"전시",g:"장소"},
-  {v:"공연장",g:"장소"},
-  // ⏰ 시간
-  {v:"주말추천",g:"시간"},
-  {v:"나들이",g:"시간"},
-  {v:"반나절",g:"시간"},
-  {v:"야간추천",g:"시간"},
-  // 🎯 특징
-  {v:"굿즈있음",g:"특징"},
-  {v:"포토존",g:"특징"},
-  {v:"체험형",g:"특징"},
-  {v:"한정판",g:"특징"},
-  {v:"예매필수",g:"특징"},
-  {v:"반려동물",g:"특징"},
-  {v:"키즈존",g:"특징"},
-];
-var AMENITIES_ALL=[{k:"parking",l:"주차"},{k:"wifi",l:"와이파이"},{k:"photo",l:"포토존"},{k:"kids",l:"아이동반"},{k:"wheelchair",l:"휠체어"}];
-var editingEvId=null;
-
-function getEvents(){
+// ── 이벤트 조회 ───────────────────────────────────────────────
+async function loadEvents(){
+  document.getElementById('eventsBody').innerHTML='<tr><td colspan="7" class="empty-row"><span class="loading"></span></td></tr>';
   try{
-    var s=localStorage.getItem(EV_KEY);
-    var events=s?JSON.parse(s):JSON.parse(JSON.stringify(SAMPLE_EVENTS));
-    // 모든 이벤트 상태 자동 갱신
-    return events.map(function(e){
-      var auto=calcStatus(e.sd,e.ed);
-      if(auto)e.st=auto;
-      return e;
-    });
-  }catch(ex){return JSON.parse(JSON.stringify(SAMPLE_EVENTS));}
-}
-function saveEvents(arr){
-  // 저장 전 상태 자동 계산 적용
-  arr=arr.map(function(e){var auto=calcStatus(e.sd,e.ed);if(auto)e.st=auto;return e;});
-  localStorage.setItem(EV_KEY,JSON.stringify(arr));
+    var res=await fetch('https://cultureondo.com/events.json');
+    var json=await res.json();
+    allEvents=(json.events||json)||[];
+  }catch(e){allEvents=[];}
+  filterEvents();
+  renderPopupList();
 }
 
-function renderEvents(){
-  var events=getEvents();
-  var q=(document.getElementById('evSearch')||{value:''}).value.toLowerCase();
-  var st=(document.getElementById('evFilter')||{value:''}).value;
-  var filtered=events.filter(function(e){
-    return(!q||(e.t||'').toLowerCase().includes(q)||(e.lo||'').toLowerCase().includes(q))
-      &&(!st||e.st===st);
+var NOW_E=new Date(); NOW_E.setHours(0,0,0,0);
+function calcTemp(e){
+  var ed=e.ed?new Date(e.ed):null;
+  if(ed&&ed<NOW_E)return 0;
+  var d=ed?Math.floor((ed-NOW_E)/864e5):999;
+  var s1=Math.min(Math.round((Number(e.naver_score)||0)*0.35),35);
+  var br=Number(e.boxoffice_rank)||0;
+  var s2=br>0?Math.max(0,47-br*2):12;
+  var s3=d===0?20:d<=3?15:d<=7?8:d<=14?3:0;
+  return Math.min(s1+s2+s3,99);
+}
+
+function filterEvents(){
+  var q=(document.getElementById('eventSearch').value||'').toLowerCase();
+  var cat=document.getElementById('catFilter').value;
+  var st=document.getElementById('stFilter').value;
+  var filtered=allEvents.filter(function(e){
+    var matchQ=!q||(e.t||'').toLowerCase().includes(q);
+    var matchC=!cat||e.ct===cat;
+    var matchS=!st||e.st===st;
+    return matchQ&&matchC&&matchS;
   });
-  var ongoing=events.filter(function(e){return e.st==='ongoing';}).length;
-  var upcoming=events.filter(function(e){return e.st==='upcoming';}).length;
-  var ended=events.filter(function(e){return e.st==='ended';}).length;
-  document.getElementById('evStats').innerHTML=
-    '<div class="stat-card"><div class="stat-num">'+events.length+'</div><div class="stat-label">전체</div></div>'
-    +'<div class="stat-card"><div class="stat-num" style="color:#2ecc71">'+ongoing+'</div><div class="stat-label">진행중</div></div>'
-    +'<div class="stat-card"><div class="stat-num" style="color:#4fc3f7">'+upcoming+'</div><div class="stat-label">오픈예정</div></div>';
-  if(!filtered.length){
-    document.getElementById('evList').innerHTML='<div style="text-align:center;padding:40px;color:var(--mu)">등록된 이벤트가 없어요</div>';
-    return;
+  eventPage=1;renderEventsTable(filtered);
+}
+
+function renderEventsTable(list){
+  var pages=Math.ceil(list.length/PAGE_SIZE)||1;
+  var slice=list.slice((eventPage-1)*PAGE_SIZE,eventPage*PAGE_SIZE);
+  document.getElementById('eventsBody').innerHTML=slice.length
+    ?slice.map(function(e){
+      var t=calcTemp(e);
+      var tc=t>=80?'var(--hot)':t>=55?'var(--warm)':t>=25?'var(--cool)':'var(--mu)';
+      return'<tr>'
+        +'<td style="font-size:10px;color:var(--mu);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(e.id)+'</td>'
+        +'<td style="font-weight:700;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(e.t)+'</td>'
+        +'<td><span class="badge badge-mu" style="font-size:10px">'+esc(e.ct)+'</span></td>'
+        +'<td style="font-size:12px;color:var(--sub);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(e.lo||'-')+'</td>'
+        +'<td style="font-size:11px;color:var(--sub);white-space:nowrap">'+(e.sd||'')+(e.ed?' ~ '+e.ed:'')+'</td>'
+        +'<td>'+stBadge(e.st)+'</td>'
+        +'<td style="font-weight:900;color:'+tc+'">'+t+'°</td>'
+      +'</tr>';
+    }).join('')
+    :'<tr><td colspan="7" class="empty-row">이벤트가 없습니다</td></tr>';
+  renderPagination('eventPagination',pages,eventPage,function(p){eventPage=p;renderEventsTable(list);});
+}
+
+// ── 팝업스토어 ────────────────────────────────────────────────
+function renderPopupList(){
+  var popups=allEvents.filter(function(e){return e.ct==='팝업스토어';});
+  document.getElementById('popupListBody').innerHTML=popups.length
+    ?popups.map(function(e){
+      return'<tr><td style="font-size:11px;color:var(--mu)">'+esc(e.id)+'</td>'
+        +'<td style="font-weight:700">'+esc(e.t)+'</td>'
+        +'<td style="font-size:12px;color:var(--sub)">'+esc(e.lo||'-')+'</td>'
+        +'<td style="font-size:11px;color:var(--sub)">'+(e.sd||'')+' ~ '+(e.ed||'')+'</td>'
+        +'<td>'+stBadge(e.st)+'</td></tr>';
+    }).join('')
+    :'<tr><td colspan="5" class="empty-row">등록된 팝업스토어가 없습니다</td></tr>';
+}
+
+async function submitPopup(){
+  var t=document.getElementById('pu_t').value.trim();
+  var lo=document.getElementById('pu_lo').value.trim();
+  var sd=document.getElementById('pu_sd').value;
+  var ed=document.getElementById('pu_ed').value;
+  if(!t||!lo||!sd||!ed){toast('필수 항목을 입력해주세요 (이름, 장소, 기간)');return;}
+  var msg=document.getElementById('popupMsg');
+  var btn=document.getElementById('popupSubmitBtn');
+  btn.disabled=true;msg.textContent='저장 중...';
+
+  if(!APPS_URL){
+    toast('⚠ Apps Script URL을 먼저 설정해주세요 (트리거 콘솔 탭)');
+    btn.disabled=false;msg.textContent='';return;
   }
-  var html='';
-  filtered.forEach(function(e){
-    var stColor={ongoing:'#2ecc71',upcoming:'#4fc3f7',ended:'#505068'}[e.st]||'#505068';
-    var stLabel={ongoing:'진행중',upcoming:'오픈예정',ended:'종료'}[e.st]||e.st;
-    var vibeHtml=(e.vibes||[]).map(function(v){return'<span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;background:rgba(191,90,242,0.15);color:#bf5af2;margin:2px">'+v+'</span>';}).join('');
-    var tagHtml=(e.tags||[]).map(function(t){return'<span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;background:var(--card);color:var(--mu);border:1px solid var(--bd);margin:2px">#'+t+'</span>';}).join('');
-    // 썸네일
-    var thumb=e.imgPoster?'<img src="'+e.imgPoster+'" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0">'
-      :'<div style="width:44px;height:44px;border-radius:10px;background:var(--card);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+getIcon(e.ct)+'</div>';
-    html+='<div style="display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid var(--bdL);transition:background 0.1s" onmouseover="this.style.background=\'var(--card)\'" onmouseout="this.style.background=\'\'">'
-      +thumb
-      +'<div style="flex:1;min-width:0">'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'
-      +'<span style="font-size:13.5px;font-weight:700">'+e.t+'</span>'
-      +'<span style="padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:'+stColor+'22;color:'+stColor+'">'+stLabel+'</span>'
-      +(e.fr?'<span style="padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(46,204,113,0.15);color:#2ecc71">무료</span>':'')
-      +'</div>'
-      +'<div style="font-size:11.5px;color:var(--mu);margin-bottom:5px">'+e.ct+' · '+(e.district||'')+' · '+(e.lo||'')+' · '+(e.sd||'')+' ~ '+(e.ed||'')+'</div>'
-      +'<div>'+vibeHtml+tagHtml+'</div>'
-      +'</div>'
-      +'<div style="display:flex;gap:6px;flex-shrink:0">'
-      +'<button class="btn btn-ghost btn-sm" onclick="openEventForm(\''+e.id+'\')">편집</button>'
-      +'<button class="btn btn-danger btn-sm" onclick="deleteEvent(\''+e.id+'\')">삭제</button>'
-      +'</div></div>';
-  });
-  document.getElementById('evList').innerHTML=html;
-}
 
-function getIcon(ct){
-  var m={"뮤지컬":"🎭","콘서트":"🎤","페스티벌":"🎪","팝업스토어":"🏪","전시/행사":"🎨","연극":"🎬"};
-  return m[ct]||"🎫";
-}
-
-function openEventForm(id){
-  editingEvId=id||null;
-  var form=document.getElementById('eventForm');
-  document.getElementById('eventFormTitle').textContent=id?'이벤트 편집':'이벤트 등록';
-  resetImgPreviews();
-  imgData={poster:null,bg:null};
-  // vibes 체크박스
-  // 그룹별로 묶어서 렌더
-  var groups={};
-  var groupOrder=[];
-  VIBES_ALL.forEach(function(item){
-    if(!groups[item.g]){groups[item.g]=[];groupOrder.push(item.g);}
-    groups[item.g].push(item.v);
-  });
-  var html='';
-  groupOrder.forEach(function(g){
-    html+='<div style="margin-bottom:10px">'
-      +'<div style="font-size:10px;font-weight:700;color:var(--mu);letter-spacing:0.06em;margin-bottom:6px;text-transform:uppercase">'+g+'</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:6px">';
-    groups[g].forEach(function(v){
-      html+='<label style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:var(--card);border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;color:var(--sub);transition:all 0.15s">'
-        +'<input type="checkbox" class="vibe-chk" value="'+v+'" style="width:13px;height:13px;cursor:pointer;accent-color:var(--hot)"> '+v+'</label>';
-    });
-    html+='</div></div>';
-  });
-  document.getElementById('vibeCheckboxes').innerHTML=html;
-  // 편의시설 체크박스
-  document.getElementById('amenityCheckboxes').innerHTML=AMENITIES_ALL.map(function(a){
-    return'<label style="display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;background:var(--card);border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;color:var(--sub)">'
-      +'<input type="checkbox" class="amenity-chk" value="'+a.k+'" style="width:14px;height:14px;cursor:pointer"> '+a.l+'</label>';
-  }).join('');
-
-  if(id){
-    var e=getEvents().find(function(x){return x.id===id;});
-    if(!e)return;
-    document.getElementById('ef-title').value=e.t||'';
-    document.getElementById('ef-ct').value=e.ct||'';
-    document.getElementById('ef-ds').value=e.ds||'';
-    document.getElementById('ef-lo').value=e.lo||'';
-    document.getElementById('ef-district').value=e.district||'';
-    document.getElementById('ef-ad').value=e.ad||'';
-    document.getElementById('ef-sd').value=e.sd||'';
-    document.getElementById('ef-ed').value=e.ed||'';
-    document.getElementById('ef-pr').value=e.pr||'';
-    document.getElementById('ef-fr').checked=!!e.fr;
-    document.getElementById('ef-naver').value=e.naver_score||0;
-    document.getElementById('ef-tags').value=(e.tags||[]).join(', ');
-    // 이미지 복원
-    if(e.imgPoster){imgData.poster=e.imgPoster;renderImgPreview('poster',e.imgPoster);}
-    if(e.imgBg){imgData.bg=e.imgBg;renderImgPreview('bg',e.imgBg);}
-    (e.vibes||[]).forEach(function(v){var c=document.querySelector('.vibe-chk[value="'+v+'"]');if(c)c.checked=true;});
-    (e.amenities||[]).forEach(function(a){var c=document.querySelector('.amenity-chk[value="'+a+'"]');if(c)c.checked=true;});
-    var links=parseLinksAdmin(e.sr||'');
-    document.getElementById('ef-url-hp').value=links.homepage||'';
-    document.getElementById('ef-url-ig').value=links.instagram||'';
-    document.getElementById('ef-url-tk').value=links.ticket||'';
-    document.getElementById('ef-url-sh').value=links.shop||'';
-  } else {
-    ['ef-title','ef-ds','ef-lo','ef-ad','ef-pr','ef-tags','ef-url-hp','ef-url-ig','ef-url-tk','ef-url-sh'].forEach(function(fid){document.getElementById(fid).value='';});
-    document.getElementById('ef-ct').value='';
-    document.getElementById('ef-district').value='';
-    document.getElementById('ef-sd').value='';
-    document.getElementById('ef-ed').value='';
-    document.getElementById('ef-fr').checked=false;
-    document.getElementById('ef-naver').value=0;
-  }
-  updateStatusPreview();
-  form.style.display='block';
-  form.scrollIntoView({behavior:'smooth'});
-}
-
-// 날짜 변경 시 상태 미리보기 갱신
-document.addEventListener('change',function(e){
-  if(e.target.id==='ef-sd'||e.target.id==='ef-ed')updateStatusPreview();
-});
-
-function parseLinksAdmin(sr){
-  var result={};
-  if(!sr)return result;
-  sr.split(',').forEach(function(s){var p=s.trim().split('|');if(p.length>=2)result[p[0].trim()]=p.slice(1).join('|').trim();});
-  return result;
-}
-function buildSr(){
-  var parts=[];
-  var hp=document.getElementById('ef-url-hp').value.trim();
-  var ig=document.getElementById('ef-url-ig').value.trim();
-  var tk=document.getElementById('ef-url-tk').value.trim();
-  var sh=document.getElementById('ef-url-sh').value.trim();
-  if(hp)parts.push('homepage|'+hp);
-  if(ig)parts.push('instagram|'+ig);
-  if(tk)parts.push('ticket|'+tk);
-  if(sh)parts.push('shop|'+sh);
-  return parts.join(',');
-}
-
-function saveEvent(){
-  var title=document.getElementById('ef-title').value.trim();
-  var ct=document.getElementById('ef-ct').value;
-  var lo=document.getElementById('ef-lo').value.trim();
-  var sd=document.getElementById('ef-sd').value;
-  var ed=document.getElementById('ef-ed').value;
-  if(!title){alert('이벤트명을 입력해주세요.');return;}
-  if(!ct){alert('카테고리를 선택해주세요.');return;}
-  if(!lo){alert('장소를 입력해주세요.');return;}
-  if(!sd||!ed){alert('시작일과 종료일을 입력해주세요.');return;}
-  var vibes=Array.from(document.querySelectorAll('.vibe-chk:checked')).map(function(c){return c.value;});
-  var amenities=Array.from(document.querySelectorAll('.amenity-chk:checked')).map(function(c){return c.value;});
-  var tags=document.getElementById('ef-tags').value.split(',').map(function(t){return t.trim();}).filter(Boolean);
-  var evObj={
-    id:editingEvId||('ev'+Date.now()),
-    t:title, ct:ct,
-    st:calcStatus(sd,ed)||'ongoing',
-    ds:document.getElementById('ef-ds').value.trim(),
-    lo:lo, district:document.getElementById('ef-district').value,
-    ad:document.getElementById('ef-ad').value.trim(),
-    sd:sd, ed:ed,
-    pr:document.getElementById('ef-pr').value.trim(),
-    fr:document.getElementById('ef-fr').checked?1:0,
-    sr:buildSr(), vibes:vibes, amenities:amenities, tags:tags,
-    imgPoster:imgData.poster||null,
-    imgBg:imgData.bg||null,
-    naver_score:Number(document.getElementById('ef-naver').value)||0,
-    vc:0,lc:0,bc:0,pk:99,ca:new Date().toISOString().split('T')[0],
+  var params={
+    action:'addPopup',
+    t:t,lo:lo,sd:sd,ed:ed,
+    area:document.getElementById('pu_area').value,
+    district:document.getElementById('pu_district').value,
+    pr:document.getElementById('pu_pr').value,
+    fr:document.getElementById('pu_fr').value,
+    ad:document.getElementById('pu_ad').value,
+    sr:document.getElementById('pu_sr').value,
+    tags:document.getElementById('pu_tags').value,
+    ds:document.getElementById('pu_ds').value
   };
-  var events=getEvents();
-  if(editingEvId){
-    var idx=events.findIndex(function(x){return x.id===editingEvId;});
-    if(idx>=0){evObj.vc=events[idx].vc||0;evObj.lc=events[idx].lc||0;evObj.pk=events[idx].pk||99;evObj.ca=events[idx].ca||evObj.ca;events[idx]=evObj;}
-    else events.push(evObj);
-  } else {evObj.pk=events.length+1;events.push(evObj);}
-  try{saveEvents(events);}catch(err){alert('저장 실패: 이미지 용량이 너무 큽니다. 이미지를 제거하거나 더 작은 파일을 사용해주세요.');return;}
-  closeEventForm();
-  renderEvents();
-  showToast(editingEvId?'이벤트가 수정되었습니다 ✓':'이벤트가 등록되었습니다 ✓');
+
+  try{
+    var url=APPS_URL+'?'+Object.keys(params).map(function(k){return k+'='+encodeURIComponent(params[k]);}).join('&');
+    var res=await fetch(url);
+    var json=await res.json();
+    if(json.ok){
+      await writeLog('popup_add',t);
+      toast('✅ 팝업스토어 저장됨 — GitHub 푸시 후 반영됩니다');
+      clearPopupForm();
+    }else{
+      toast('오류: '+(json.error||'저장 실패'));
+    }
+  }catch(e){
+    toast('Apps Script 연결 오류 — URL을 확인해주세요');
+  }
+  btn.disabled=false;msg.textContent='';
 }
 
-function deleteEvent(id){
-  if(!confirm('이 이벤트를 삭제하시겠습니까?'))return;
-  saveEvents(getEvents().filter(function(e){return e.id!==id;}));
-  renderEvents();
-  showToast('삭제되었습니다');
-}
-function closeEventForm(){document.getElementById('eventForm').style.display='none';editingEvId=null;}
-
-
-// ── 앱 미리보기 ──
-function renderPreview(){
-  var curations=getCurations();
-  var html='';
-  curations.forEach(function(c){
-    var isWide=c.wide;
-    var cnt=Math.floor(Math.random()*5)+1;
-    html+='<div style="border-radius:14px;overflow:hidden;cursor:pointer;height:90px;display:flex;align-items:flex-end;padding:12px 14px;position:relative;border:1px solid rgba(255,255,255,0.06)'+(isWide?';grid-column:span 2':'')+'">'
-      +'<div style="position:absolute;inset:0;background:linear-gradient(135deg,'+c.color1+','+c.color2+')"></div>'
-      +'<div style="position:absolute;top:10px;right:12px;font-size:24px;z-index:1">'+c.icon+'</div>'
-      +'<div style="position:relative;z-index:1">'
-      +'<div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:2px">'+c.title+'</div>'
-      +'<div style="font-size:10px;color:rgba(255,255,255,0.65)">'+cnt+'개 이벤트</div>'
-      +'</div></div>';
+function clearPopupForm(){
+  ['pu_t','pu_lo','pu_sd','pu_ed','pu_pr','pu_ad','pu_sr','pu_tags','pu_ds'].forEach(function(id){
+    document.getElementById(id).value='';
   });
-  document.getElementById('previewGrid').innerHTML=html;
+  document.getElementById('pu_fr').value='0';
+  document.getElementById('pu_area').value='';
+  document.getElementById('pu_district').value='';
 }
 
-// 토스트
-function showToast(msg){
+// ── 트리거 실행 ───────────────────────────────────────────────
+async function runTrigger(fn,btn){
+  if(!APPS_URL){toast('⚠ Apps Script URL을 먼저 설정해주세요');return;}
+  btn.disabled=true;btn.textContent='실행 중...';
+  var logEl=document.getElementById('log_'+fn);
+  if(logEl)logEl.textContent='요청 전송 중...';
+  try{
+    var url=APPS_URL+'?action=trigger&fn='+encodeURIComponent(fn);
+    var res=await fetch(url);
+    var json=await res.json();
+    var msg=json.ok?'✅ 실행 완료':'❌ 오류: '+(json.error||'실패');
+    if(logEl)logEl.textContent=msg;
+    if(json.ok)await writeLog('trigger_run',fn);
+    toast(msg);
+  }catch(e){
+    if(logEl)logEl.textContent='❌ 연결 실패';
+    toast('Apps Script 연결 오류');
+  }
+  btn.disabled=false;btn.textContent='▶ 지금 실행';
+}
+
+// ── 랭킹 스냅샷 ──────────────────────────────────────────────
+async function loadSnapshot(){
+  if(!APPS_URL){
+    document.getElementById('snapshotDates').textContent='Apps Script URL을 설정해주세요';return;
+  }
+  try{
+    var res=await fetch(APPS_URL+'?action=snapshotInfo');
+    var json=await res.json();
+    if(json.dates){
+      document.getElementById('snapDateCnt').textContent=json.dates.length;
+      document.getElementById('snapLatest').textContent=json.dates[json.dates.length-1]||'-';
+      document.getElementById('snapEvCnt').textContent=json.latestCount||'-';
+      document.getElementById('snapshotDates').innerHTML=json.dates.map(function(d,i){
+        return'<div style="display:flex;align-items:center;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)">'
+          +'<span style="color:var(--mu);width:24px;text-align:right;font-size:11px">'+(i+1)+'</span>'
+          +'<span>'+d.date+'</span>'
+          +'<span style="font-size:11px;color:var(--mu)">'+d.count+'건</span>'
+          +(i===json.dates.length-1?'<span class="badge badge-ok" style="font-size:10px">최신</span>':'')
+        +'</div>';
+      }).join('');
+    }
+  }catch(e){document.getElementById('snapshotDates').textContent='불러오기 실패';}
+}
+
+async function resetSnapshot(){
+  if(!confirm('Properties 스냅샷을 초기화하시겠습니까?'))return;
+  if(!APPS_URL){toast('Apps Script URL을 설정해주세요');return;}
+  try{
+    var res=await fetch(APPS_URL+'?action=resetSnapshot');
+    var json=await res.json();
+    if(json.ok){await writeLog('snapshot_reset','rank_snapshot');toast('스냅샷 초기화 완료');}
+    else toast('오류: '+(json.error||'실패'));
+  }catch(e){toast('Apps Script 연결 오류');}
+}
+
+// ── 어드민 로그 ───────────────────────────────────────────────
+async function loadLogs(){
+  document.getElementById('logsBody').innerHTML='<tr><td colspan="5" class="empty-row"><span class="loading"></span></td></tr>';
+  var {data}=await supa.from('admin_logs').select('*,profiles(email,nickname)').order('created_at',{ascending:false}).limit(200);
+  allLogs=data||[];filterLogs();
+}
+
+function filterLogs(){
+  var action=document.getElementById('logActionFilter').value;
+  var filtered=action?allLogs.filter(function(l){return l.action===action;}):allLogs;
+  logPage=1;renderLogsTable(filtered);
+}
+
+function renderLogsTable(list){
+  var pages=Math.ceil(list.length/PAGE_SIZE)||1;
+  var slice=list.slice((logPage-1)*PAGE_SIZE,logPage*PAGE_SIZE);
+  document.getElementById('logsBody').innerHTML=slice.length
+    ?slice.map(function(l){
+      return'<tr>'
+        +'<td style="font-size:11px;color:var(--sub);white-space:nowrap">'+fmtDate(l.created_at)+'</td>'
+        +'<td style="font-size:12px">'+(l.profiles?esc(l.profiles.nickname||l.profiles.email):'-')+'</td>'
+        +'<td><span class="badge badge-mu" style="font-size:10px">'+esc(l.action)+'</span></td>'
+        +'<td style="font-size:12px">'+esc(l.target||'-')+'</td>'
+        +'<td style="font-size:11px;color:var(--sub)">'+(l.detail?JSON.stringify(l.detail):'')+'</td>'
+      +'</tr>';
+    }).join('')
+    :'<tr><td colspan="5" class="empty-row">로그 없음</td></tr>';
+  renderPagination('logPagination',pages,logPage,function(p){logPage=p;renderLogsTable(list);});
+}
+
+// ── 어드민 로그 쓰기 ─────────────────────────────────────────
+async function writeLog(action,target,detail){
+  if(!currentAdmin)return;
+  await supa.from('admin_logs').insert({admin_id:currentAdmin.id,action:action,target:target,detail:detail||null});
+}
+
+// ── 페이지네이션 ──────────────────────────────────────────────
+function renderPagination(elId,pages,cur,cb){
+  var el=document.getElementById(elId);
+  if(pages<=1){el.innerHTML='';return;}
+  var btns='';
+  for(var i=1;i<=Math.min(pages,10);i++){
+    btns+='<button class="pg-btn'+(i===cur?' on':'')+'" onclick="('+cb.toString()+')('+i+')">'+i+'</button>';
+  }
+  if(pages>10)btns+='<span style="color:var(--mu);font-size:12px">... '+pages+'페이지</span>';
+  el.innerHTML=btns;
+}
+
+// ── 유틸 ─────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtDate(d){if(!d)return'-';return new Date(d).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function roleBadge(role){
+  if(role==='admin')return'<span class="badge badge-hot">관리자</span>';
+  if(role==='banned')return'<span class="badge badge-danger">정지</span>';
+  return'<span class="badge badge-mu">일반</span>';
+}
+function stBadge(st){
+  if(st==='ongoing')return'<span class="badge badge-ok">진행중</span>';
+  if(st==='upcoming')return'<span class="badge badge-cool">예정</span>';
+  return'<span class="badge badge-mu">종료</span>';
+}
+function miniStat(label,val){return'<div style="background:var(--sf);border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:4px">'+label+'</div><div style="font-size:20px;font-weight:900">'+val+'</div></div>';}
+function infoRow(label,val){return'<div style="display:flex;gap:12px;font-size:13px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="color:var(--mu);font-weight:600;width:60px;flex-shrink:0">'+label+'</span><span>'+esc(val)+'</span></div>';}
+
+var _toastTimer;
+function toast(msg){
   var t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},2500);
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){t.style.opacity='0';},2500);
 }
-
-// 초기화
-renderCurationList();
-renderEvents();
 </script>
 </body>
 </html>
