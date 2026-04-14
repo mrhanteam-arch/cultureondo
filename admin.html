@@ -748,7 +748,13 @@ function closeEventModal(){
 
 function openEventPage(){
   if(!selectedEvent)return;
-  window.open('https://cultureondo.com/?id='+selectedEvent.id,'_blank');
+  var a=document.createElement('a');
+  a.href='https://cultureondo.com/?id='+selectedEvent.id;
+  a.target='_blank';
+  a.rel='noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function miniStat2(label,val){

@@ -2872,7 +2872,6 @@ function closePoster(){
     var profile=await loadProfile(session.user);
     user=profile;
     localStorage.setItem('snr_user',JSON.stringify(profile));
-    // localStorage 좋아요/저장 → Supabase와 병합
     var {data:dbActions}=await supa.from('user_events').select('event_id,action').eq('user_id',profile.id);
     if(dbActions&&dbActions.length){
       dbActions.forEach(function(a){
@@ -2883,8 +2882,17 @@ function closePoster(){
       localStorage.setItem('snr_bm',JSON.stringify(Array.from(bookmarked)));
     }
   }
-  // 로그인 여부와 관계없이 항상 홈으로
-  initApp();
+  // ?id= 파라미터로 특정 이벤트 상세 바로 열기
+  var urlId=new URLSearchParams(location.search).get('id');
+  if(urlId){
+    initApp();
+    loadEvents(function(data){
+      ev=data;
+      viewEv(urlId);
+    });
+  } else {
+    initApp();
+  }
 })();
 
 if('serviceWorker' in navigator){
