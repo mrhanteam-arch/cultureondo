@@ -887,13 +887,40 @@ async function runTrigger(fn,btn){
   var logEl=document.getElementById('log_'+fn);
   if(logEl)logEl.textContent='요청 전송 중...';
   try{
-    var url=APPS_URL+'?action=trigger&fn='+encodeURIComponent(fn);
-    var res=await fetch(url);
-    var json=await res.json();
-    var msg=json.ok?'✅ 실행 완료':'❌ 오류: '+(json.error||'실패');
-    if(logEl)logEl.textContent=msg;
-    if(json.ok)await writeLog('trigger_run',fn);
-    toast(msg);
+    // Apps Script는 CORS 미지원 → no-cors + script 태그 방식 사용
+    var url=APPS_URL+'?action=trigger&fn='+encodeURIComponent(fn)+'&callback=_cb_'+fn;
+    await new Promise(function(resolve,reject){
+      var s=document.createElement('script');
+      window['_cb_'+fn]=function(data){
+        delete window['_cb_'+fn];
+        document.head.removeChild(s);
+        if(data&&data.ok){
+          if(logEl)logEl.textContent='✅ 실행 완료';
+          writeLog('trigger_run',fn);
+          toast('✅ '+fn+' 실행 완료');
+        }else{
+          if(logEl)logEl.textContent='❌ '+(data&&data.error||'실패');
+          toast('❌ 오류: '+(data&&data.error||'실패'));
+        }
+        resolve();
+      };
+      s.onerror=function(){
+        delete window['_cb_'+fn];
+        if(logEl)logEl.textContent='⚠ 요청 전송됨 (응답 확인 불가)';
+        toast('⚠ 요청 전송됨 — Apps Script 로그에서 확인하세요');
+        resolve();
+      };
+      s.src=url;
+      document.head.appendChild(s);
+      setTimeout(function(){
+        if(window['_cb_'+fn]){
+          delete window['_cb_'+fn];
+          if(logEl)logEl.textContent='⚠ 요청 전송됨 (응답 대기 중)';
+          toast('⚠ 요청 전송됨 — Apps Script 로그에서 확인하세요');
+          resolve();
+        }
+      },10000);
+    });
   }catch(e){
     if(logEl)logEl.textContent='❌ 연결 실패';
     toast('Apps Script 연결 오류');
