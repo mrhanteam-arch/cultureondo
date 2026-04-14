@@ -42,6 +42,13 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
 gtag('config','G-ZYH2PMLHHJ');
 </script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL='https://rffbqjwvzxpxxzcrbiza.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmZmJxand2enhweHh6Y3JiaXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNDkzMDMsImV4cCI6MjA5MTcyNTMwM30.Je8fhcjZE2b8RAB1DYVcP3-xu9qJjHoCwqlYf4Aj_CQ';
+const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 /* 모든 버튼/링크/클릭 요소 300ms 딜레이 제거 */
@@ -981,15 +988,44 @@ function go(pg,id){
 }
 function updateNav(){document.querySelectorAll(".bnav-i,.bnav-center").forEach(function(b){b.classList.toggle("on",b.dataset.k===curNav);});}
 
-/* 로그인 */
-function socialLogin(p){
-  var u={naver:"네이버 유저",kakao:"카카오 유저"}[p];
-  loginOK({name:u,email:"user@"+p+".com",provider:p,avatar:u.charAt(0)});
+/* ── Supabase 인증 ── */
+async function loadProfile(supaUser){
+  var {data}=await supa.from('profiles').select('*').eq('id',supaUser.id).single();
+  var name=(data&&data.nickname)||supaUser.email.split('@')[0];
+  return{name:name,email:supaUser.email,provider:'email',avatar:name.charAt(0).toUpperCase(),id:supaUser.id,role:(data&&data.role)||'user'};
 }
+
+function socialLogin(p){
+  showToast('소셜 로그인은 준비 중이에요. 이메일로 가입해주세요.');
+}
+
+async function submitEmail(){
+  var email=document.getElementById('eEmail').value.trim();
+  var pw=document.getElementById('ePw').value;
+  var msg=document.getElementById('eMsg');
+  if(!email||!email.includes('@')){msg.innerHTML='<div class="form-msg msg-err">올바른 이메일을 입력해주세요</div>';return;}
+  if(pw.length<8){msg.innerHTML='<div class="form-msg msg-err">비밀번호는 8자 이상이어야 합니다</div>';return;}
+  msg.innerHTML='<div class="form-msg msg-ok">처리 중...</div>';
+  if(eMode==='signup'){
+    var n=document.getElementById('eName').value.trim();
+    if(!n){msg.innerHTML='<div class="form-msg msg-err">이름을 입력해주세요</div>';return;}
+    var {data,error}=await supa.auth.signUp({email:email,password:pw,options:{data:{nickname:n}}});
+    if(error){msg.innerHTML='<div class="form-msg msg-err">'+error.message+'</div>';return;}
+    await supa.from('profiles').update({nickname:n}).eq('id',data.user.id);
+    msg.innerHTML='<div class="form-msg msg-ok">✅ 가입 완료! 로그인합니다...</div>';
+    setTimeout(async function(){var profile=await loadProfile(data.user);loginOK(profile);},800);
+  } else {
+    var {data,error}=await supa.auth.signInWithPassword({email:email,password:pw});
+    if(error){msg.innerHTML='<div class="form-msg msg-err">이메일 또는 비밀번호가 틀렸습니다</div>';return;}
+    var profile=await loadProfile(data.user);
+    msg.innerHTML='<div class="form-msg msg-ok">✅ 환영합니다!</div>';
+    setTimeout(function(){loginOK(profile);},600);
+  }
+}
+
 function loginOK(u){
   user=u;
   localStorage.setItem('snr_user',JSON.stringify(u));
-  // 로그인 후 MY 탭으로 이동
   renderNav();
   document.getElementById("bnav").style.display="flex";
   if(!ev||!ev.length){
@@ -998,7 +1034,31 @@ function loginOK(u){
     curNav="my";go("my");
   }
 }
+
 function skipLogin(){initApp();}
+
+async function logout(){
+  await supa.auth.signOut();
+  user=null;
+  localStorage.removeItem('snr_user');
+  go('login');
+}
+
+/* ── 좋아요 / 저장 Supabase 동기화 ── */
+async function syncAction(eventId,action,active){
+  if(!user||!user.id)return;
+  if(active){
+    await supa.from('user_events').upsert({user_id:user.id,event_id:eventId,action:action},{onConflict:'user_id,event_id,action'});
+  } else {
+    await supa.from('user_events').delete().eq('user_id',user.id).eq('event_id',eventId).eq('action',action);
+  }
+}
+
+async function logView(eventId){
+  if(!user||!user.id)return;
+  await supa.from('user_events').upsert({user_id:user.id,event_id:eventId,action:'view'},{onConflict:'user_id,event_id,action'});
+}
+
 function initApp(){
   renderNav();
   // 모든 페이지 숨기고 홈만 표시
@@ -1018,7 +1078,7 @@ function initApp(){
     renderHome();
   });
 }
-function logout(){user=null;localStorage.removeItem('snr_user');go("login");}
+function logout(){supa.auth.signOut();user=null;localStorage.removeItem('snr_user');go('login');}
 function showEmail(m){
   eMode=m||'login';
   document.getElementById("eTitle").textContent=eMode==='login'?'이메일 로그인':'회원가입';
@@ -1873,7 +1933,7 @@ function viewEv(id){
     vcMap[id]=(vcMap[id]||0)+1;
     localStorage.setItem('snr_vc',JSON.stringify(vcMap));
   }
-  // 페이지 전환 후 즉시 렌더 (딜레이 없음)
+  logView(id);
   if(sTimer){clearInterval(sTimer);sTimer=null;}
   document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");p.style.display="";});
   var pg=document.getElementById("page-detail");
@@ -2374,6 +2434,7 @@ function likeEv(id){
     lcMap[id]=(lcMap[id]||0)+1;
     localStorage.setItem('snr_lc',JSON.stringify(lcMap));
   }
+  syncAction(id,'like',true);
   renderDetail(id);
 }
 function toggleBm(id){
@@ -2381,7 +2442,6 @@ function toggleBm(id){
   if(wasBookmarked)bookmarked.delete(id);
   else bookmarked.add(id);
   localStorage.setItem('snr_bm',JSON.stringify(Array.from(bookmarked)));
-  // bc 카운트 증감
   var e=ev.find(function(x){return x.id===id;});
   if(e){
     e.bc=(e.bc||0)+(wasBookmarked?-1:1);
@@ -2391,6 +2451,7 @@ function toggleBm(id){
     if(bcMap[id]<0)bcMap[id]=0;
     localStorage.setItem('snr_bc',JSON.stringify(bcMap));
   }
+  syncAction(id,'bookmark',!wasBookmarked);
   if(curPage==='detail')renderDetail(id);
   else if(curPage==='my')renderMy();
 }
@@ -2802,6 +2863,28 @@ function closePoster(){
       if(rk){e.stopPropagation();}
     }
   },true);
+})();
+
+/* ── 세션 복원 (새로고침 시 로그인 유지, 비로그인도 홈 진입 가능) ── */
+(async function(){
+  var {data:{session}}=await supa.auth.getSession();
+  if(session){
+    var profile=await loadProfile(session.user);
+    user=profile;
+    localStorage.setItem('snr_user',JSON.stringify(profile));
+    // localStorage 좋아요/저장 → Supabase와 병합
+    var {data:dbActions}=await supa.from('user_events').select('event_id,action').eq('user_id',profile.id);
+    if(dbActions&&dbActions.length){
+      dbActions.forEach(function(a){
+        if(a.action==='like')liked.add(a.event_id);
+        if(a.action==='bookmark')bookmarked.add(a.event_id);
+      });
+      localStorage.setItem('snr_lk',JSON.stringify(Array.from(liked)));
+      localStorage.setItem('snr_bm',JSON.stringify(Array.from(bookmarked)));
+    }
+  }
+  // 로그인 여부와 관계없이 항상 홈으로
+  initApp();
 })();
 
 if('serviceWorker' in navigator){
