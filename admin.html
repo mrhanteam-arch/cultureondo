@@ -695,6 +695,11 @@ async function openEventModal(id){
     supa.from('user_events').select('id',{count:'exact'}).eq('event_id',id).eq('action','view'),
   ]);
 
+  // 현재 vibes 불러오기
+  var curVibes=[];
+  if(e.vibes){curVibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
+  _selectedVibes=curVibes.slice();
+
   document.getElementById('eventModalBody').innerHTML=
     '<div style="display:grid;gap:14px">'
     // 포스터 + 기본정보
@@ -725,20 +730,45 @@ async function openEventModal(id){
       +miniStat2('👁 조회',(views||[]).length)
       +miniStat2('🔥 온도',t+'°')
     +'</div>'
-    // 상세 정보
-    +'<div style="background:var(--sf);border-radius:10px;padding:14px;display:grid;gap:6px">'
-      +(e.prfcast?infoRow('출연진',e.prfcast):'')
-      +(e.prfruntime?infoRow('공연시간',e.prfruntime):'')
-      +(e.prfage?infoRow('관람연령',e.prfage):'')
-      +(e.entrpsnmP?infoRow('제작사',e.entrpsnmP):'')
-      +(e.district?infoRow('지역구',e.district):'')
-      +infoRow('이벤트 ID',e.id)
-      +(e.naver_score?infoRow('네이버 검색량',e.naver_score):'')
-      +(e.boxoffice_rank>0?infoRow('박스오피스 순위',e.boxoffice_rank+'위'):'')
+    // 탭
+    +'<div style="border-bottom:1px solid var(--bd);display:flex;gap:0">'
+      +'<button onclick="switchEventTab(\'info\')" id="etab_info" style="padding:10px 18px;background:none;border:none;border-bottom:2px solid var(--hot);color:var(--hot);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:-1px">공연 정보</button>'
+      +'<button onclick="switchEventTab(\'vibe\')" id="etab_vibe" style="padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;color:var(--sub);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:-1px">VIBE 태그 <span id="vibeSelectedCount" style="font-size:10px;color:var(--hot);margin-left:4px">'+(_selectedVibes.length?_selectedVibes.length+'개 선택됨':'')+'</span></button>'
+    +'</div>'
+    // 탭 콘텐츠
+    +'<div id="etab_content_info">'
+      +'<div style="background:var(--sf);border-radius:10px;padding:14px;display:grid;gap:6px">'
+        +(e.prfcast?infoRow('출연진',e.prfcast):'')
+        +(e.prfruntime?infoRow('공연시간',e.prfruntime):'')
+        +(e.prfage?infoRow('관람연령',e.prfage):'')
+        +(e.entrpsnmP?infoRow('제작사',e.entrpsnmP):'')
+        +(e.district?infoRow('지역구',e.district):'')
+        +infoRow('이벤트 ID',e.id)
+        +(e.naver_score?infoRow('네이버 검색량',String(e.naver_score)):'')
+        +(e.boxoffice_rank>0?infoRow('박스오피스 순위',e.boxoffice_rank+'위'):'')
+      +'</div>'
+    +'</div>'
+    +'<div id="etab_content_vibe" style="display:none">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+        +'<div style="font-size:12px;color:var(--sub)">스티커처럼 클릭해서 선택하세요</div>'
+        +'<button id="vibeSaveBtn" onclick="saveVibeToSheet()" class="btn btn-primary btn-sm">시트에 저장</button>'
+      +'</div>'
+      +renderVibeStickers(_selectedVibes)
     +'</div>'
     +'</div>';
 
   document.getElementById('eventModal').classList.add('show');
+}
+
+function switchEventTab(tab){
+  document.getElementById('etab_content_info').style.display=tab==='info'?'block':'none';
+  document.getElementById('etab_content_vibe').style.display=tab==='vibe'?'block':'none';
+  document.getElementById('etab_info').style.borderBottomColor=tab==='info'?'var(--hot)':'transparent';
+  document.getElementById('etab_info').style.color=tab==='info'?'var(--hot)':'var(--sub)';
+  document.getElementById('etab_info').style.fontWeight=tab==='info'?'700':'500';
+  document.getElementById('etab_vibe').style.borderBottomColor=tab==='vibe'?'var(--hot)':'transparent';
+  document.getElementById('etab_vibe').style.color=tab==='vibe'?'var(--hot)':'var(--sub)';
+  document.getElementById('etab_vibe').style.fontWeight=tab==='vibe'?'700':'500';
 }
 
 function closeEventModal(){
@@ -764,7 +794,98 @@ function miniStat2(label,val){
     +'</div>';
 }
 
-// ── 회원 관리 ────────────────────────────────────────────────
+// ── VIBE 태그 전체 정의 ───────────────────────────────────────
+var VIBE_TAGS={
+  '지역_서울구역':{label:'지역 (서울)',color:'#0F6E56',bg:'rgba(15,110,86,0.12)',tags:['강남','서초','잠실','송파','홍대','합정','마포','상암','한남','이태원','용산','성수','뚝섬','왕십리','대학로','혜화','명동','광화문','종로','청계천','여의도','영등포','당산','강서','마곡','노원','창동','도봉','은평','신촌','연남','구로','금천','가산','강동','천호','동대문','DDP','장충']},
+  '지역_전국':{label:'지역 (전국)',color:'#085041',bg:'rgba(8,80,65,0.12)',tags:['서울','경기','인천','부산','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주','수원','성남','고양','용인','안산','화성','안양','부천','의정부','남양주','평택','시흥','파주','김포','광명','광주시','하남','양주','구리','오산']},
+  '분위기':{label:'분위기 / 무드',color:'#534AB7',bg:'rgba(83,74,183,0.12)',tags:['감동적인','눈물주의','신나는','웃긴','힐링','고급스러운','독특한','감성적인','몰입감있는','긴장감있는','따뜻한','화려한','잔잔한','웅장한','낭만적인','유쾌한','진지한','어두운','신비로운','에너제틱','청량한','빠른전개','느린호흡','반전있는','교훈적인','철학적인']},
+  '동행':{label:'동행 유형',color:'#993556',bg:'rgba(153,53,86,0.12)',tags:['혼자','데이트','친구','가족','어린이동반','단체','부모님과','조부모님과','반려동물가능','커플','썸','우정여행','직장동료']},
+  '연령대':{label:'연령대',color:'#854F0B',bg:'rgba(133,79,11,0.12)',tags:['10대','20대','30대','40대','50대이상','전연령','유아가능','초등생가능','청소년가능','성인전용']},
+  '가격대':{label:'가격대',color:'#3B6D11',bg:'rgba(59,109,17,0.12)',tags:['무료','1만원이하','1~3만원','3~5만원','5~10만원','10만원이상','가성비','프리미엄','얼리버드','할인가능']},
+  '시간':{label:'시간대 / 일정',color:'#185FA5',bg:'rgba(24,95,165,0.12)',tags:['주말추천','평일가능','공휴일운영','당일치기','반나절','야간공연','오전공연','오후공연','마감임박','장기공연','단기공연','1회성','시즌한정']},
+  '테마':{label:'테마 / 소재',color:'#993C1D',bg:'rgba(153,60,29,0.12)',tags:['사랑이야기','역사물','판타지','공포스릴러','코미디','성장이야기','사회비판','음악중심','춤중심','원작있음','해외라이선스','창작초연','재연','아이돌출연','스타캐스팅','클래식원작','영화원작','소설원작','실화기반','SF','미스터리','서스펜스','가족이야기','전쟁','자연재해','신화','종교','정치']},
+  '공간':{label:'공간 / 형태',color:'#5F5E5A',bg:'rgba(95,94,90,0.12)',tags:['대극장','소극장','야외공연','블랙박스','갤러리','팝업공간','체험형','몰입형','인터랙티브','전시형','페스티벌형','온라인병행','투어공연','순회공연','상설전시','기획전시']},
+  '목적':{label:'목적 / 상황',color:'#3C3489',bg:'rgba(60,52,137,0.12)',tags:['인스타감성','데이트코스','특별한날','생일선물','기념일','여행중','문화생활','교육목적','힐링여행','버킷리스트','포토스팟','SNS핫플','트렌디','레어한경험','힙한','감각있는','아트러버','클래식러버','팝컬처']},
+  '특성':{label:'특성 / 편의',color:'#0F6E56',bg:'rgba(15,110,86,0.1)',tags:['주차가능','대중교통편리','휠체어가능','수어통역','음성해설','자막있음','영어자막','외국인가능','사진촬영가능','굿즈있음','MD있음','음식제공','드레스코드없음','복장자유','예매필수','현장구매가능']}
+};
+
+function renderVibeStickers(selectedVibes){
+  var selected=selectedVibes||[];
+  var html='<div style="display:grid;gap:14px">';
+  Object.keys(VIBE_TAGS).forEach(function(key){
+    var cat=VIBE_TAGS[key];
+    html+='<div>';
+    html+='<div style="font-size:10px;font-weight:700;color:'+cat.color+';text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px">'+cat.label+'</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
+    cat.tags.forEach(function(tag){
+      var isOn=selected.indexOf(tag)>=0;
+      html+='<button onclick="toggleVibeTag(\''+tag+'\')" id="vtag_'+tag.replace(/[^a-zA-Z0-9가-힣]/g,'_')+'" style="'
+        +'padding:4px 10px;border-radius:20px;font-size:12px;font-weight:'+(isOn?'700':'500')+';cursor:pointer;transition:all 0.15s;'
+        +'background:'+(isOn?cat.bg:'rgba(255,255,255,0.03)')+';'
+        +'border:1px solid '+(isOn?cat.color:'rgba(255,255,255,0.1)')+';'
+        +'color:'+(isOn?cat.color:'var(--sub)')+'">'+tag+'</button>';
+    });
+    html+='</div></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+var _selectedVibes=[];
+
+function toggleVibeTag(tag){
+  var idx=_selectedVibes.indexOf(tag);
+  if(idx>=0)_selectedVibes.splice(idx,1);
+  else _selectedVibes.push(tag);
+  // 버튼 스타일 업데이트
+  var key=tag.replace(/[^a-zA-Z0-9가-힣]/g,'_');
+  var btn=document.getElementById('vtag_'+key);
+  if(!btn)return;
+  // 카테고리 색 찾기
+  var color='var(--hot)',bg='rgba(255,94,58,0.12)';
+  Object.keys(VIBE_TAGS).forEach(function(k){
+    if(VIBE_TAGS[k].tags.indexOf(tag)>=0){color=VIBE_TAGS[k].color;bg=VIBE_TAGS[k].bg;}
+  });
+  var isOn=_selectedVibes.indexOf(tag)>=0;
+  btn.style.background=isOn?bg:'rgba(255,255,255,0.03)';
+  btn.style.border='1px solid '+(isOn?color:'rgba(255,255,255,0.1)');
+  btn.style.color=isOn?color:'var(--sub)';
+  btn.style.fontWeight=isOn?'700':'500';
+  // 선택된 태그 수 업데이트
+  var countEl=document.getElementById('vibeSelectedCount');
+  if(countEl)countEl.textContent=_selectedVibes.length+'개 선택됨';
+}
+
+async function saveVibeToSheet(){
+  if(!selectedEvent){toast('이벤트가 선택되지 않았습니다');return;}
+  if(!APPS_URL){toast('Apps Script URL을 먼저 설정해주세요');return;}
+  var btn=document.getElementById('vibeSaveBtn');
+  btn.disabled=true;btn.textContent='저장 중...';
+  try{
+    var url=APPS_URL+'?action=updateVibes&id='+encodeURIComponent(selectedEvent.id)+'&vibes='+encodeURIComponent(_selectedVibes.join(','))+'&callback=_vibeCb';
+    await new Promise(function(resolve){
+      window['_vibeCb']=function(data){
+        delete window['_vibeCb'];
+        if(data&&data.ok){
+          // 로컬 allEvents 업데이트
+          var ev=allEvents.find(function(e){return e.id===selectedEvent.id;});
+          if(ev)ev.vibes=_selectedVibes;
+          toast('✅ VIBE 태그 저장됨 — GitHub 푸시 후 반영');
+          writeLog('vibe_update',selectedEvent.id,{vibes:_selectedVibes});
+        }else{
+          toast('❌ 저장 실패: '+(data&&data.error||'오류'));
+        }
+        resolve();
+      };
+      var s=document.createElement('script');
+      s.src=url;
+      s.onerror=function(){toast('⚠ Apps Script 연결 확인 필요');resolve();};
+      document.head.appendChild(s);
+      setTimeout(resolve,8000);
+    });
+  }catch(e){toast('오류: '+e.message);}
+  btn.disabled=false;btn.textContent='시트에 저장';
+}
 async function loadMembers(){
   document.getElementById('membersBody').innerHTML='<tr><td colspan="6" class="empty-row"><span class="loading"></span></td></tr>';
   var {data}=await supa.from('profiles').select('*').order('created_at',{ascending:false});

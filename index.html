@@ -1655,31 +1655,122 @@ function renderCalendar(){
   document.getElementById("page-calendar").innerHTML=h;
 }
 
+// ── VIBE 태그 전체 정의 (어드민과 동일) ─────────────────────
+var VIBE_CATS={
+  '지역_서울':{label:'서울 지역',icon:'📍',tags:['강남','서초','잠실','송파','홍대','합정','마포','한남','이태원','용산','성수','뚝섬','대학로','혜화','명동','광화문','종로','여의도','영등포','강서','마곡','노원','은평','신촌','연남','구로','강동','동대문','DDP']},
+  '지역_전국':{label:'전국 지역',icon:'🗺',tags:['서울','경기','인천','부산','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주']},
+  '분위기':{label:'분위기',icon:'✨',tags:['감동적인','눈물주의','신나는','웃긴','힐링','고급스러운','독특한','감성적인','몰입감있는','따뜻한','화려한','잔잔한','웅장한','낭만적인','유쾌한','에너제틱','청량한','신비로운']},
+  '동행':{label:'동행',icon:'👥',tags:['혼자','데이트','친구','가족','어린이동반','단체','부모님과']},
+  '연령대':{label:'연령대',icon:'🎂',tags:['10대','20대','30대','40대','50대이상','전연령','유아가능']},
+  '가격대':{label:'가격대',icon:'💰',tags:['무료','1만원이하','1~3만원','3~5만원','5~10만원','10만원이상','가성비','프리미엄']},
+  '시간':{label:'시간/일정',icon:'⏰',tags:['주말추천','평일가능','당일치기','야간공연','마감임박','장기공연','단기공연']},
+  '테마':{label:'테마',icon:'🎭',tags:['사랑이야기','역사물','판타지','공포스릴러','코미디','성장이야기','음악중심','춤중심','창작초연','재연','아이돌출연','스타캐스팅','해외라이선스']},
+  '공간':{label:'공간/형태',icon:'🏛',tags:['대극장','소극장','야외공연','체험형','몰입형','인터랙티브','페스티벌형','갤러리']},
+  '목적':{label:'목적/상황',icon:'🎯',tags:['인스타감성','데이트코스','특별한날','생일선물','여행중','버킷리스트','포토스팟','힙한','트렌디']}
+};
+
+var _activeVibeTags=[];
+var _activeVibeCategory='';
+
+function toggleExploreVibe(tag){
+  var idx=_activeVibeTags.indexOf(tag);
+  if(idx>=0)_activeVibeTags.splice(idx,1);
+  else _activeVibeTags.push(tag);
+  renderVibeResults();
+  // 버튼 스타일 갱신
+  document.querySelectorAll('.vibe-sticker').forEach(function(btn){
+    var t=btn.getAttribute('data-tag');
+    var on=_activeVibeTags.indexOf(t)>=0;
+    btn.style.background=on?'rgba(255,94,58,0.15)':'rgba(255,255,255,0.04)';
+    btn.style.borderColor=on?'var(--hot)':'rgba(255,255,255,0.1)';
+    btn.style.color=on?'var(--hot)':'var(--sub)';
+    btn.style.fontWeight=on?'700':'500';
+  });
+  var countEl=document.getElementById('vibeFilterCount');
+  if(countEl)countEl.textContent=_activeVibeTags.length?_activeVibeTags.length+'개 선택':'';
+}
+
+function clearVibeFilter(){
+  _activeVibeTags=[];
+  document.querySelectorAll('.vibe-sticker').forEach(function(btn){
+    btn.style.background='rgba(255,255,255,0.04)';
+    btn.style.borderColor='rgba(255,255,255,0.1)';
+    btn.style.color='var(--sub)';
+    btn.style.fontWeight='500';
+  });
+  var countEl=document.getElementById('vibeFilterCount');
+  if(countEl)countEl.textContent='';
+  document.getElementById('vibeResultSection').style.display='none';
+}
+
+function renderVibeResults(){
+  var resultEl=document.getElementById('vibeResultSection');
+  if(!_activeVibeTags.length){resultEl.style.display='none';return;}
+  var all=getScoredEvents();
+  var mx=all.length?all[0]._s:1;
+  var matched=all.filter(function(e){
+    var evVibes=[];
+    if(e.vibes){evVibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
+    if(e.tags){var t=Array.isArray(e.tags)?e.tags:String(e.tags).split(',').map(function(v){return v.trim();}).filter(Boolean);evVibes=evVibes.concat(t);}
+    // 지역 태그 매칭
+    _activeVibeTags.forEach(function(tag){
+      if(['강남','서초','잠실','송파','홍대','합정','마포','한남','이태원','용산','성수','뚝섬','대학로','혜화','명동','광화문','종로','여의도','영등포','강서','마곡','노원','은평','신촌','연남','구로','강동','동대문','DDP'].indexOf(tag)>=0){
+        if(e.district===tag||e.lo&&e.lo.indexOf(tag)>=0)evVibes.push(tag);
+      }
+      if(['서울','경기','인천','부산','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'].indexOf(tag)>=0){
+        if(e.area&&e.area.indexOf(tag)>=0)evVibes.push(tag);
+      }
+      // 가격대 태그
+      if(tag==='무료'&&(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0)))evVibes.push(tag);
+      if(tag==='주말추천')evVibes.push(tag); // vibes에 있을 경우만
+    });
+    return _activeVibeTags.every(function(tag){return evVibes.indexOf(tag)>=0;});
+  });
+  resultEl.style.display='block';
+  var h='<div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:14px">'
+    +'<div>'
+      +'<div style="font-size:16px;font-weight:900;letter-spacing:-0.03em">VIBE 결과</div>'
+      +'<div style="font-size:12px;color:var(--sub);margin-top:2px">'+matched.length+'건 매칭</div>'
+    +'</div>'
+    +'<button onclick="clearVibeFilter()" style="font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:inherit">필터 초기화</button>'
+  +'</div>';
+  if(!matched.length){
+    h+='<div style="text-align:center;padding:32px 20px;color:var(--mu);font-size:13px">선택한 VIBE에 맞는 이벤트가 없어요</div>';
+  } else {
+    matched.slice(0,20).forEach(function(e){
+      var t=tc2(e._s,mx);var c=tC(t);
+      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'
+        +rkThumb(e)
+        +'<div class="rk-info"><div class="rk-title">'+e.t+'</div>'
+        +'<div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':gr(e))+'</div>'
+        +'<div class="rk-sub-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div></div>'
+        +thermo(t,e,mx)+'</div>';
+    });
+  }
+  resultEl.innerHTML=h;
+}
+
+function tc2(s,mx){return tc(s,mx);}
+
 /* 탐색 */
 function renderExplore(){
   curNav="explore";
   var all=getScoredEvents();
   var scored=getScoredEvents();
-  // 인기 검색어: 점수 상위에서 공연명 첫 단어 추출
   var tr=scored.slice(0,10).map(function(e,i){
     var prev=e.prev_rank!=null?Number(e.prev_rank):null;
     var rank=i+1;
     var df=prev!=null?prev-rank:null;
-    // ca 기준 7일 이내면 진짜 NEW
     var isRealNew=false;
     if(e.ca){var dIn=Math.ceil((NOW-new Date(e.ca))/864e5);if(dIn>=0&&dIn<=7)isRealNew=true;}
     var isNew=(df===null&&isRealNew);
     return{word:e.t.length>12?e.t.slice(0,12)+'…':e.t,change:df,isNew:isNew,id:e.id};
   });
-  // 카테고리별 건수
   var catCnt={};
   CATS.forEach(function(c){catCnt[c]=all.filter(function(e){return c==="전체"||e.ct===c;}).length;});
-  // 지역별 건수
   var regCnt={};
   REG.forEach(function(r){regCnt[r]=all.filter(function(e){return r==="전국"||gr(e)===r;}).length;});
-  // 무료 이벤트
   var freeList=scored.filter(function(e){return Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0);}).slice(0,4);
-  // 신규 오픈
   var newList=scored.filter(function(e){
     if(!e.ca)return false;
     var a=Math.ceil((NOW-new Date(e.ca))/864e5);
@@ -1693,8 +1784,37 @@ function renderExplore(){
   // 검색바
   h+='<div style="padding:0 20px 16px"><div style="display:flex;align-items:center;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;cursor:pointer" onclick="openSearch()">'
     +'<svg width="17" height="17" fill="none" stroke="#505068" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-    +'<span style="font-size:14px;color:#505068">이벤트, 장소, 태그 검색...</span>'
+    +'<span style="font-size:14px;color:#505068">이벤트, 장소, VIBE 태그 검색...</span>'
     +'</div></div>';
+
+  // ── VIBE 필터 ──
+  h+='<div style="padding:0 20px;margin-bottom:20px">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  h+='<div style="font-size:15px;font-weight:900;letter-spacing:-0.03em">VIBE로 찾기</div>';
+  h+='<span id="vibeFilterCount" style="font-size:11px;color:var(--hot);font-weight:700"></span>';
+  h+='</div>';
+
+  // 카테고리별 스티커
+  Object.keys(VIBE_CATS).forEach(function(key){
+    var cat=VIBE_CATS[key];
+    h+='<div style="margin-bottom:14px">';
+    h+='<div style="font-size:11px;font-weight:700;color:var(--mu);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:7px">'+cat.icon+' '+cat.label+'</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    cat.tags.forEach(function(tag){
+      var isOn=_activeVibeTags.indexOf(tag)>=0;
+      h+='<button class="vibe-sticker" data-tag="'+tag+'" onclick="toggleExploreVibe(\''+tag+'\')" style="'
+        +'padding:5px 12px;border-radius:20px;font-size:12px;font-weight:'+(isOn?'700':'500')+';cursor:pointer;'
+        +'background:'+(isOn?'rgba(255,94,58,0.15)':'rgba(255,255,255,0.04)')+';'
+        +'border:1px solid '+(isOn?'var(--hot)':'rgba(255,255,255,0.1)')+';'
+        +'color:'+(isOn?'var(--hot)':'var(--sub)')+';'
+        +'transition:all 0.15s;font-family:inherit;-webkit-tap-highlight-color:transparent">'+tag+'</button>';
+    });
+    h+='</div></div>';
+  });
+  h+='</div>';
+
+  // VIBE 결과 섹션 (동적)
+  h+='<div id="vibeResultSection" style="display:none;margin-bottom:20px"></div>';
 
   // 인기 랭킹
   h+='<div style="padding:0 20px;margin-bottom:20px">'
@@ -2464,7 +2584,16 @@ function onSInput(){var q=document.getElementById("sInput").value.trim();documen
 function renderSBody(q){
   var body=document.getElementById("sBody");
   if(!q){var pop=["벚꽃","성수동","무료","팝업","콘서트","F&B","한강","페스티벌"];var h='<div class="s-section"><div class="s-sec-title">인기 검색어</div><div class="s-tags">'+pop.map(function(t){return'<button class="s-tag" onclick="doS(\''+t+'\')">'+t+'</button>';}).join('')+'</div></div>';if(sHist.length){h+='<div class="s-section" style="border-top:1px solid #21212e"><div class="s-sec-title" style="display:flex;justify-content:space-between"><span>최근 검색</span><button onclick="clrSH()" style="background:none;border:none;color:#505068;font-size:10px;cursor:pointer">전체 삭제</button></div>'+sHist.slice(0,8).map(function(t,i){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #21212e"><span style="color:#8d8da0;font-size:13px;cursor:pointer" onclick="doS(\''+t.replace(/'/g,"\\'")+'\')" >'+t+'</span><button style="background:none;border:none;color:#505068;cursor:pointer" onclick="delSH('+i+')">✕</button></div>';}).join('')+'</div>';}body.innerHTML=h;return;}
-  var qL=q.toLowerCase(),res=ev.filter(function(e){return[e.t,e.lo,e.ad||"",e.ct].join(" ").toLowerCase().includes(qL);});
+  var qL=q.toLowerCase(),res=ev.filter(function(e){
+    var basic=[e.t,e.lo,e.ad||"",e.ct].join(" ").toLowerCase().includes(qL);
+    // VIBE/태그 매칭
+    var vibeMatch=false;
+    if(e.vibes){var vArr=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();});vibeMatch=vArr.some(function(v){return v.toLowerCase().includes(qL);});}
+    if(!vibeMatch&&e.tags){var tArr=Array.isArray(e.tags)?e.tags:String(e.tags).split(',').map(function(v){return v.trim();});vibeMatch=tArr.some(function(v){return v.toLowerCase().includes(qL);});}
+    if(!vibeMatch&&e.district)(vibeMatch=e.district.toLowerCase().includes(qL));
+    if(!vibeMatch&&e.area)(vibeMatch=e.area.toLowerCase().includes(qL));
+    return basic||vibeMatch;
+  });
   var all=ev.map(function(x){return Object.assign({},x,{_s:sc(x)});}).sort(function(a,b){return b._s-a._s;});var mx=all.length?all[0]._s:1;
   function hl(txt){return txt.replace(new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")",'gi'),'<span class="s-hl">$1</span>');}
   var h='<div class="s-section"><div class="s-sec-title">🔍 검색 결과 · '+res.length+'건</div>';
