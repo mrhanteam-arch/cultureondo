@@ -945,20 +945,19 @@ function scDetail(e,allEv){
 
   // ⑦ 사용자 반응 (max 30.0점) — 핵심 개편
   // 문제: 1명이 좋아요 누르면 log1p(1)=0.693 → 최대값이 1명이면 100% → 12점 펌핑
-  // 해결: 카테고리 내 반응이 없으면(초기) 점수 0, 최소 임계치(3명) 이상부터 선형 반영
-  // 추가: 1인당 기여 상한 (좋아요 1개 = 최대 0.5점 기여) → 조작 방지
-  var LIKE_WEIGHT=0.5;   // 좋아요 1개당 최대 기여 (점)
-  var BM_WEIGHT=0.3;     // 저장 1개당 최대 기여 (점)
-  var VC_WEIGHT=0.03;    // 조회 1회당 최대 기여 (점)
-  var LIKE_CAP=12.0;     // 좋아요 기여 상한
-  var BM_CAP=6.0;        // 저장 기여 상한
-  var VC_CAP=12.0;       // 조회 기여 상한
+  // 사용자 반응 점수 — 1인 기여를 극소화해 펌핑 방지
+  // 좋아요 1개 = 0.1점, 100명 = 10점(상한), 저장 1개 = 0.05점, 조회 1회 = 0.005점
+  var LIKE_WEIGHT=0.1;   // 좋아요 1개당 기여
+  var BM_WEIGHT=0.05;    // 저장 1개당 기여
+  var VC_WEIGHT=0.005;   // 조회 1회당 기여
+  var LIKE_CAP=10.0;     // 좋아요 상한 (100명 이상이면 만점)
+  var BM_CAP=5.0;        // 저장 상한
+  var VC_CAP=10.0;       // 조회 상한 (2000회 이상이면 만점)
 
   var lc=Math.max(0,Number(e.lc)||0);
   var bc=Math.max(0,Number(e.bc)||0);
   var vc=Math.max(0,Number(e.vc)||0);
 
-  // 개인당 가중치 × 인원수, 단 상한 초과 불가
   var likeScore=Math.min(Math.round(lc*LIKE_WEIGHT*10)/10, LIKE_CAP);
   var bmScore=Math.min(Math.round(bc*BM_WEIGHT*10)/10, BM_CAP);
   var vcScore=Math.min(Math.round(vc*VC_WEIGHT*10)/10, VC_CAP);
@@ -971,7 +970,7 @@ function sc(e,allEv){return scDetail(e,allEv).total;}
 function tc(s,mx){return s;}
 function tC(t){if(t>=70)return"#ff5e3a";if(t>=45)return"#ff9500";if(t>=20)return"#4fc3f7";return"#90a4ae";}
 function tB(t){if(t>=70)return"rgba(255,94,58,0.15)";if(t>=45)return"rgba(255,149,0,0.15)";if(t>=20)return"rgba(79,195,247,0.12)";return"rgba(144,164,174,0.12)";}
-var SCORE_MAX=130; // 35+35+12+6+7+5+30
+var SCORE_MAX=112; // 35+35+12+6+7+5+12(반응상한25)
 function gauge(t,sz){sz=sz||46;var c=tC(t),pct=Math.min(t/SCORE_MAX*100,100),r=(sz-6)/2,ci=2*Math.PI*r,of=ci-(ci*pct/100);return'<div class="gauge" style="width:'+sz+'px;height:'+sz+'px"><svg viewBox="0 0 '+sz+' '+sz+'"><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="#2a2a38" stroke-width="3"/><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="'+c+'" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="'+ci+'" stroke-dashoffset="'+of+'" transform="rotate(-90 '+sz/2+' '+sz/2+')"/></svg><div class="gauge-val"><span class="gauge-num" style="color:'+c+'">'+t.toFixed(1)+'°</span></div></div>';}
 function thermo(t,ev_obj,mx){
   var c=tC(t);
@@ -1072,31 +1071,24 @@ async function loginOK(u){
   user=u;
   localStorage.setItem('snr_user',JSON.stringify(u));
 
-  // 로그인 즉시 Supabase에서 좋아요/저장 로드
+  // 로그인 즉시 Supabase에서 좋아요/저장/리뷰 한번에 로드
   liked=new Set();
   bookmarked=new Set();
   rvDB={};
-  var {data:dbActions}=await supa.from('user_events').select('event_id,action').eq('user_id',u.id);
+  var {data:dbActions}=await supa.from('user_events').select('event_id,action,detail').eq('user_id',u.id);
   if(dbActions){
     dbActions.forEach(function(a){
       if(a.action==='like')liked.add(a.event_id);
       if(a.action==='bookmark')bookmarked.add(a.event_id);
-    });
-  }
-  // 리뷰 로드
-  var {data:dbReviews}=await supa.from('admin_logs')
-    .select('target,detail,created_at')
-    .eq('admin_id',u.id)
-    .eq('action','review_write')
-    .order('created_at',{ascending:false});
-  if(dbReviews){
-    dbReviews.forEach(function(row){
-      try{
-        var d=JSON.parse(row.detail);
-        var rv={id:'r_'+row.created_at,userId:u.id,name:d.author||u.name,avatar:(d.author||u.name).charAt(0).toUpperCase(),rating:d.rating||0,text:d.text||'',createdAt:row.created_at,isMine:true};
-        if(!rvDB[row.target])rvDB[row.target]=[];
-        rvDB[row.target].push(rv);
-      }catch(e2){}
+      if(a.action==='review'&&a.detail){
+        try{
+          var d=JSON.parse(a.detail);
+          var evId=a.event_id;
+          var rv={id:'r_'+u.id+'_'+evId,userId:u.id,name:d.author||u.name,avatar:(d.author||u.name).charAt(0).toUpperCase(),rating:d.rating||0,text:d.text||'',createdAt:d.createdAt||new Date().toISOString(),isMine:true};
+          if(!rvDB[evId])rvDB[evId]=[];
+          rvDB[evId].push(rv);
+        }catch(e2){}
+      }
     });
   }
 
@@ -2237,7 +2229,7 @@ function _buildDetailHTML(id,e,kd){
   var bdRows2=[
     {l:'네이버 검색',v:sd2.s1,max:35,hint:e.naver_score||0},
     {l:'예매순위',   v:sd2.s2,max:35,hint:sd2.br>0?sd2.br+'위':'카테고리보정'},
-    {l:'사용자 반응',v:sd2.s7,max:30,hint:'조회/좋아요/저장'},
+    {l:'사용자 반응',v:sd2.s7,max:25,hint:'조회/좋아요/저장'},
     {l:'마감 임박',  v:sd2.s3,max:12,hint:sd2.d>=0?'D-'+sd2.d:'종료'},
     {l:'희소성(기간)',v:sd2.s5,max:7, hint:''},
     {l:'신규 오픈',  v:sd2.s4,max:6, hint:sd2.s4?'7일 이내':''},
@@ -2800,7 +2792,7 @@ async function submitRv(){
   var myAvatar=user.avatar||myName.charAt(0).toUpperCase();
 
   if(_rvMode==='reply'&&_rvReplyTo){
-    // 답글 Supabase 저장
+    // 답글 — user_events에 action='reply'로 저장
     var reply={
       id:'rp'+Date.now(),
       rvId:_rvReplyTo.rvId,
@@ -2811,13 +2803,17 @@ async function submitRv(){
       createdAt:now,
       isMine:true
     };
-    var {error:rpErr}=await supa.from('admin_logs').insert({
-      admin_id:user.id,
-      action:'review_reply',
-      target:rvId,
-      detail:JSON.stringify({rvId:_rvReplyTo.rvId,text:txt,author:myName})
-    });
-    if(rpErr){showToast('등록 실패. 다시 시도해주세요');btn.disabled=false;btn.textContent='등록하기';return;}
+    var {error:rpErr}=await supa.from('user_events').upsert({
+      user_id:user.id,
+      event_id:rvId+'__reply__'+_rvReplyTo.rvId+'__'+Date.now(),
+      action:'reply',
+      detail:JSON.stringify({rvId:_rvReplyTo.rvId,text:txt,author:myName,createdAt:now})
+    },{onConflict:'user_id,event_id,action'});
+    if(rpErr){
+      console.error('[리뷰]',rpErr);
+      showToast('등록 실패: '+rpErr.message);
+      btn.disabled=false;btn.textContent='등록하기';return;
+    }
     // 메모리에도 반영
     var rpKey='snr_rp_'+rvId;
     var rpDB2=JSON.parse(localStorage.getItem(rpKey)||'{}');
@@ -2828,11 +2824,12 @@ async function submitRv(){
     closeRv();
     showToast('답글이 등록됐어요');
     renderDetail(curId);
+
   } else {
-    // 리뷰 Supabase 저장
+    // 리뷰 — user_events에 action='review'로 저장
     if(rvRating===0||txt.length<10){btn.disabled=false;btn.textContent='등록하기';return;}
     var rv={
-      id:'r'+Date.now(),
+      id:'r_'+user.id+'_'+rvId,
       userId:user.id,
       name:myName,
       avatar:myAvatar,
@@ -2842,13 +2839,18 @@ async function submitRv(){
       isMine:true,
       replies:[]
     };
-    var {error:rvErr}=await supa.from('admin_logs').insert({
-      admin_id:user.id,
-      action:'review_write',
-      target:rvId,
-      detail:JSON.stringify({rating:rvRating,text:txt,author:myName})
-    });
-    if(rvErr){showToast('등록 실패. 다시 시도해주세요');btn.disabled=false;btn.textContent='등록하기';return;}
+    // user_id+event_id+action 중복 방지 upsert (같은 공연엔 리뷰 1개)
+    var {error:rvErr}=await supa.from('user_events').upsert({
+      user_id:user.id,
+      event_id:rvId,
+      action:'review',
+      detail:JSON.stringify({rating:rvRating,text:txt,author:myName,createdAt:now})
+    },{onConflict:'user_id,event_id,action'});
+    if(rvErr){
+      console.error('[리뷰]',rvErr);
+      showToast('등록 실패: '+rvErr.message);
+      btn.disabled=false;btn.textContent='등록하기';return;
+    }
     // 메모리 rvDB에 반영
     if(!rvDB[rvId])rvDB[rvId]=[];
     var existIdx=rvDB[rvId].findIndex(function(r){return r.userId===user.id;});
@@ -3162,7 +3164,7 @@ function closeTempGuide(){
     var rows=[
       {l:'네이버 검색',v:sd.s1,max:35,hint:evObj.naver_score||0},
       {l:'예매순위',   v:sd.s2,max:35,hint:sd.br>0?sd.br+'위':'카테고리보정'},
-      {l:'사용자 반응',v:sd.s7,max:30,hint:'조회/좋아요/저장'},
+      {l:'사용자 반응',v:sd.s7,max:25,hint:'조회/좋아요/저장'},
       {l:'마감 임박',  v:sd.s3,max:12,hint:sd.d>=0?'D-'+sd.d:'종료'},
       {l:'희소성(기간)',v:sd.s5,max:7, hint:''},
       {l:'신규 오픈',  v:sd.s4,max:6, hint:sd.s4?'7일 이내':''},
@@ -3304,81 +3306,39 @@ function closePoster(){
     user=profile;
     localStorage.setItem('snr_user',JSON.stringify(profile));
 
-    // ① 좋아요/저장 — Supabase user_events에서 로드 (localStorage 덮어쓰기)
+    // ① 좋아요/저장/리뷰 — Supabase user_events에서 한번에 로드
     liked=new Set();
     bookmarked=new Set();
-    var {data:dbActions}=await supa.from('user_events').select('event_id,action').eq('user_id',profile.id);
-    if(dbActions&&dbActions.length){
+    rvDB={};
+    var {data:dbActions}=await supa.from('user_events').select('event_id,action,detail').eq('user_id',profile.id);
+    if(dbActions){
       dbActions.forEach(function(a){
         if(a.action==='like')liked.add(a.event_id);
         if(a.action==='bookmark')bookmarked.add(a.event_id);
+        if(a.action==='review'&&a.detail){
+          try{
+            var d=JSON.parse(a.detail);
+            var evId=a.event_id;
+            var rv={
+              id:'r_'+profile.id+'_'+evId,
+              userId:profile.id,
+              name:d.author||profile.name,
+              avatar:(d.author||profile.name).charAt(0).toUpperCase(),
+              rating:d.rating||0,
+              text:d.text||'',
+              createdAt:d.createdAt||new Date().toISOString(),
+              isMine:true
+            };
+            if(!rvDB[evId])rvDB[evId]=[];
+            rvDB[evId].push(rv);
+          }catch(e2){}
+        }
       });
       localStorage.setItem('snr_lk',JSON.stringify(Array.from(liked)));
       localStorage.setItem('snr_bm',JSON.stringify(Array.from(bookmarked)));
     } else {
       localStorage.removeItem('snr_lk');
       localStorage.removeItem('snr_bm');
-    }
-
-    // ② 리뷰 — Supabase admin_logs에서 내가 쓴 리뷰 로드
-    rvDB={};
-    var {data:dbReviews}=await supa.from('admin_logs')
-      .select('target,detail,created_at')
-      .eq('admin_id',profile.id)
-      .eq('action','review_write')
-      .order('created_at',{ascending:false});
-    if(dbReviews&&dbReviews.length){
-      dbReviews.forEach(function(row){
-        var evId=row.target;
-        try{
-          var d=JSON.parse(row.detail);
-          var rv={
-            id:'r_'+row.created_at,
-            userId:profile.id,
-            name:d.author||profile.name,
-            avatar:(d.author||profile.name).charAt(0).toUpperCase(),
-            rating:d.rating||0,
-            text:d.text||'',
-            createdAt:row.created_at,
-            isMine:true,
-            replies:[]
-          };
-          if(!rvDB[evId])rvDB[evId]=[];
-          rvDB[evId].push(rv);
-        }catch(e2){}
-      });
-    }
-
-    // ③ 답글 — Supabase admin_logs에서 로드
-    var {data:dbReplies}=await supa.from('admin_logs')
-      .select('target,detail,created_at')
-      .eq('admin_id',profile.id)
-      .eq('action','review_reply')
-      .order('created_at',{ascending:false});
-    if(dbReplies&&dbReplies.length){
-      dbReplies.forEach(function(row){
-        var evId=row.target;
-        try{
-          var d=JSON.parse(row.detail);
-          var rp={
-            id:'rp_'+row.created_at,
-            rvId:d.rvId,
-            userId:profile.id,
-            name:d.author||profile.name,
-            avatar:(d.author||profile.name).charAt(0).toUpperCase(),
-            text:d.text||'',
-            createdAt:row.created_at,
-            isMine:true
-          };
-          // 해당 rvId의 답글 localStorage에도 저장
-          var rpKey='snr_rp_'+evId;
-          var rpDB2=JSON.parse(localStorage.getItem(rpKey)||'{}');
-          if(!rpDB2[d.rvId])rpDB2[d.rvId]=[];
-          var already=rpDB2[d.rvId].some(function(x){return x.id===rp.id;});
-          if(!already)rpDB2[d.rvId].unshift(rp);
-          localStorage.setItem(rpKey,JSON.stringify(rpDB2));
-        }catch(e2){}
-      });
     }
   } else {
     // 비로그인: liked/bookmarked/rvDB 초기화
