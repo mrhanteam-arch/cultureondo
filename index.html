@@ -1786,41 +1786,10 @@ function renderExplore(){
     +'</div>';
 
   // 검색바
-  h+='<div style="padding:0 20px 20px"><div style="display:flex;align-items:center;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;cursor:pointer" onclick="openSearch()">'
+  h+='<div style="padding:0 20px 16px"><div style="display:flex;align-items:center;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;cursor:pointer" onclick="openSearch()">'
     +'<svg width="16" height="16" fill="none" stroke="#505068" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-    +'<span style="font-size:14px;color:#505068">이벤트, 장소, VIBE 태그 검색...</span>'
+    +'<span style="font-size:14px;color:#505068">이벤트, 장소, 태그 검색...</span>'
     +'</div></div>';
-
-  // ── VIBE 필터 ──
-  h+='<div style="padding:0 20px">';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
-  h+='<div style="font-size:16px;font-weight:900;letter-spacing:-0.03em">VIBE 필터</div>';
-  h+='<span id="vibeFilterCount" style="font-size:11px;color:var(--hot);font-weight:700"></span>';
-  h+='</div>';
-
-  Object.keys(VIBE_CATS).forEach(function(key){
-    var cat=VIBE_CATS[key];
-    h+='<div style="margin-bottom:16px">';
-    h+='<div style="font-size:11px;font-weight:700;color:var(--mu);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px">'+cat.label+'</div>';
-    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
-    cat.tags.forEach(function(tag){
-      var isOn=_activeVibeTags.indexOf(tag)>=0;
-      h+='<button class="vibe-sticker" data-tag="'+tag+'" onclick="toggleExploreVibe(\''+tag+'\')" style="'
-        +'padding:5px 12px;border-radius:20px;font-size:12px;font-weight:'+(isOn?'700':'500')+';cursor:pointer;'
-        +'background:'+(isOn?'rgba(255,94,58,0.15)':'rgba(255,255,255,0.04)')+';'
-        +'border:1px solid '+(isOn?'var(--hot)':'rgba(255,255,255,0.1)')+';'
-        +'color:'+(isOn?'var(--hot)':'var(--sub)')+';'
-        +'transition:all 0.15s;font-family:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+tag+'</button>';
-    });
-    h+='</div></div>';
-  });
-  h+='</div>';
-
-  // VIBE 결과
-  h+='<div id="vibeResultSection" style="display:none;border-top:1px solid var(--bdL);padding-top:16px;margin-top:4px"></div>';
-
-  // 구분선
-  h+='<div style="height:1px;background:var(--bdL);margin:8px 0 20px"></div>';
 
   // 인기 랭킹
   h+='<div style="padding:0 20px;margin-bottom:20px">'
