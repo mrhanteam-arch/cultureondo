@@ -66,7 +66,7 @@ a{color:inherit;text-decoration:none}
 :root{--bg:#111114;--sf:#1a1a20;--card:#1e1e28;--bd:#2a2a38;--bdL:#21212e;--tx:#ededf0;--sub:#8d8da0;--mu:#505068;--hot:#ff5e3a;--warm:#ff9500;--cool:#4fc3f7;}
 .sk{background:linear-gradient(90deg,#1e1e28 0%,#252530 50%,#1e1e28 100%);background-size:200px 100%;animation:skl 1.3s ease-in-out infinite;border-radius:6px}
 #app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);position:relative;overflow-x:hidden;width:100%}
-.page{display:none;animation:fi 0.25s ease;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+.page{display:none;animation:fi 0.25s ease;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
 .page.active{display:block}
 .login-page{padding-bottom:0!important;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}.page.login-page:not(.active){display:none!important}
 /* ── 네비게이션 바 ── */
@@ -274,15 +274,15 @@ a{color:inherit;text-decoration:none}
 .region-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 20px}
 .region-item{padding:14px 4px;border-radius:12px;border:1.5px solid var(--bd);background:var(--card);color:var(--sub);font-size:14px;font-weight:600;text-align:center;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:48px;display:flex;align-items:center;justify-content:center}
 .region-item.on{color:#fff;background:var(--hot);border-color:var(--hot)}
-.rk{display:flex;align-items:flex-start;padding:14px 20px;border-bottom:1px solid var(--bdL);cursor:pointer;transition:background 0.12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden;width:100%;box-sizing:border-box}
+.rk{display:flex;align-items:flex-start;padding:14px 20px;border-bottom:1px solid var(--bdL);cursor:pointer;transition:background 0.12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%;box-sizing:border-box}
 .rk:hover{background:var(--sf)}
-.rk-n{width:34px;text-align:center;flex-shrink:0;margin-right:8px;margin-top:2px}
+.rk-n{width:34px;text-align:center;flex-shrink:0;margin-right:8px;padding-top:2px}
 .rk-n-v{font-size:18px;font-weight:800;line-height:1}
 .rk-ch{margin-top:4px;font-size:10px;font-weight:700;line-height:1}
 .rk-ch.up{color:var(--hot)}.rk-ch.dn{color:var(--cool)}.rk-ch.sm{color:var(--mu)}
 .rk-ch.new-entry{color:#bf5af2;font-size:9px}
 .rk-img{width:54px;height:72px;border-radius:6px;overflow:hidden;flex-shrink:0;margin-right:14px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px}
-.rk-info{flex:1;min-width:0;margin-right:10px;overflow:hidden}
+.rk-info{flex:1;min-width:0;margin-right:10px;overflow:visible}
 .rk-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;line-height:1.2}
 .rk-sub{font-size:12px;color:var(--sub);display:flex;flex-direction:column;gap:3px}
 .rk-sub-loc{display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -293,11 +293,11 @@ a{color:inherit;text-decoration:none}
 .gauge-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .gauge-num{font-size:13px;font-weight:800}
 /* 온도계 바 (랭킹 리스트 전용) */
-.thermo{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;width:36px;cursor:pointer;position:relative;margin-top:0}
-.thermo-tube{width:8px;height:36px;border-radius:5px 5px 0 0;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-bottom:none;overflow:hidden;position:relative}
+.thermo{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;width:34px;cursor:pointer;position:relative;padding-top:4px}
+.thermo-tube{width:8px;height:32px;border-radius:5px 5px 0 0;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-bottom:none;overflow:hidden;position:relative}
 .thermo-mercury{position:absolute;bottom:0;left:0;right:0;border-radius:3px 3px 0 0;transition:height 0.9s cubic-bezier(0.34,1.56,0.64,1)}
-.thermo-bulb{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.1);margin-top:0;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
-.thermo-num{font-size:10.5px;font-weight:800;margin-top:2px;line-height:1}
+.thermo-bulb{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.1);box-shadow:0 2px 6px rgba(0,0,0,0.4)}
+.thermo-num{font-size:10px;font-weight:800;margin-top:2px;line-height:1;white-space:nowrap}
 /* 온도 툴팁 */
 .thermo-tip{
   display:none;position:fixed;
@@ -402,7 +402,7 @@ a{color:inherit;text-decoration:none}
 .quick-btn svg{width:22px;height:22px}
 .qb-label{font-size:10px;font-weight:600;letter-spacing:0.01em}
 .qb-count{font-size:9px;font-weight:700;opacity:0.8}
-.info-card{background:var(--sf);border-radius:14px;margin:0 20px 16px;border:1px solid var(--bd);overflow:hidden}
+.info-card{background:var(--sf);border-radius:14px;margin:0 20px 16px;border:1px solid var(--bd);overflow:visible}
 .info-row{display:flex;align-items:flex-start;gap:0;padding:13px 16px;border-bottom:1px solid var(--bdL)}
 .info-row:last-child{border-bottom:none}
 .info-l{font-size:10.5px;color:var(--mu);font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em}
@@ -485,6 +485,15 @@ a{color:inherit;text-decoration:none}
 .rv-ta:focus{border-color:var(--hot)}
 .rv-sub-btn{width:100%;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,#ff5e3a,#ff2d55);color:#fff;font-size:14px;font-weight:800;cursor:pointer}
 .rv-sub-btn:disabled{opacity:0.4;cursor:not-allowed}
+/* 답글 아이템 */
+.rv-reply{background:rgba(255,255,255,0.03);border-left:2px solid var(--bd);border-radius:0 8px 8px 0;padding:10px 12px;margin-top:8px}
+.rv-reply-hdr{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.rv-reply-avatar{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#4fc3f7,#0070f3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.rv-reply-name{font-size:11.5px;font-weight:700;color:var(--sub)}
+.rv-reply-time{font-size:10px;color:var(--mu)}
+.rv-reply-body{font-size:12.5px;line-height:1.55;color:var(--tx);opacity:0.85}
+/* 내 리뷰 강조 */
+.rv-item.my-review{border-left:2px solid var(--hot);padding-left:12px}
 /* 로그인 */
 .login-hero{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 20px 40px}
 .login-logo{width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#ff5e3a,#ff2d55);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:20px}
@@ -665,11 +674,14 @@ a{color:inherit;text-decoration:none}
 
 <div class="rv-overlay" id="rvOverlay">
   <div class="rv-modal">
-    <div class="rv-title"><span>리뷰 작성</span><button class="rv-close" onclick="closeRv()">✕</button></div>
-    <div style="font-size:11.5px;color:var(--sub);margin-bottom:16px" id="rvSub"></div>
+    <div class="rv-title"><span id="rvModalTitle">리뷰 작성</span><button class="rv-close" onclick="closeRv()">✕</button></div>
+    <div style="font-size:11.5px;color:var(--sub);margin-bottom:12px" id="rvSub"></div>
+    <!-- 별점 (리뷰 작성 시만 표시) -->
     <div class="rv-stars" id="rvStars"></div>
+    <!-- 답글 대상 표시 -->
+    <div id="rvReplyTarget" style="display:none;background:rgba(255,255,255,0.04);border-left:2px solid var(--hot);border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--sub)"></div>
     <textarea class="rv-ta" id="rvTa" placeholder="솔직한 후기를 남겨주세요 (최소 10자)" maxlength="500" oninput="chkRv()"></textarea>
-    <button class="rv-sub-btn" id="rvSubmit" onclick="submitRv()" disabled>리뷰 등록하기</button>
+    <button class="rv-sub-btn" id="rvSubmit" onclick="submitRv()" disabled>등록하기</button>
   </div>
 </div>
 
@@ -895,60 +907,64 @@ function scDetail(e,allEv){
   if(e.st==='ended'||(!isBoxoffice&&d<0))return{total:0,s1:0,s2:0,s3:0,s4:0,s5:0,s6:0,s7:0,d:d,br:0};
   var arr=allEv||ev;
 
-  // ① 네이버 검색량 (max 35점) — 실제 대중 관심도 핵심 지표
-  // 카테고리별 최대값 기준 정규화로 전시/클래식도 공정하게
+  // ① 네이버 검색량 (max 35.0점) — 카테고리 내 최대값 기준 정규화
   var naverRaw=Number(e.naver_score)||0;
   var catPeers=arr.filter(function(x){return x.ct===e.ct&&x.st!=='ended';});
   var catMaxNaver=1;
   catPeers.forEach(function(x){if((Number(x.naver_score)||0)>catMaxNaver)catMaxNaver=Number(x.naver_score);});
-  var s1=naverRaw>0?Math.round((naverRaw/catMaxNaver)*35):0;
+  var s1=naverRaw>0?Math.round((naverRaw/catMaxNaver)*350)/10:0;  // 소수점 1자리
 
-  // ② 예매순위 (max 35점) — 배점 낮추고 카테고리 내 상대 순위 반영
-  // 순위 없는 카테고리(전시/무료) 불이익 완화: 예매순위 없으면 s1(네이버)로 보정
+  // ② 예매순위 (max 35.0점) — 카테고리 내 보정 포함
   var br=Number(e.boxoffice_rank)||0;
-  var s2=br>0?Math.max(0,37-(br*2)):0;
-  // 순위 없어도 네이버 검색량이 높으면 일부 보정 (전시·클래식 카테고리 공정성)
+  var s2=br>0?Math.max(0,Math.round((370-(br*20)))/10):0;  // 1위=35.0, 2위=33.0...
   var noRankCats=['전시/미술','클래식/무용','복합'];
   if(br===0&&noRankCats.indexOf(e.ct)>=0&&naverRaw>0){
-    s2=Math.round((naverRaw/catMaxNaver)*15); // 최대 15점 보정
+    s2=Math.round((naverRaw/catMaxNaver)*150)/10;  // 최대 15.0점 보정
   }
 
-  // ③ 마감 임박 (max 12점) — 기존 25점에서 대폭 축소
-  // "곧 끝난다"는 이유만으로 인기 상위가 되는 왜곡 방지
-  var s3=d<=1?12:d<=3?8:d<=7?4:0;
+  // ③ 마감 임박 (max 12.0점) — 소수점 세분화
+  var s3=d<=0?12.0:d<=1?10.0:d<=3?7.0:d<=7?3.5:0;
 
-  // ④ 신규 오픈 (max 6점) — 기존 10점에서 축소
-  // "막 열었다"는 이유만으로 점수 boost 최소화
+  // ④ 신규 오픈 (max 6.0점) — 일수별 점진 감소
   var s4=0;
-  if(e.ca){var a=Math.ceil((NOW-new Date(e.ca))/864e5);if(a<=3)s4=6;else if(a<=7)s4=3;}
+  if(e.ca){
+    var a=Math.ceil((NOW-new Date(e.ca))/864e5);
+    s4=a<=1?6.0:a<=2?5.5:a<=3?5.0:a<=5?3.0:a<=7?1.5:0;
+  }
 
-  // ⑤ 희소성/공연기간 (max 7점) — 기존 12점에서 축소, ③+⑤ 중복 boost 차단
-  // 단기공연이라고 자동 상위 노출되는 왜곡 제거
+  // ⑤ 희소성/공연기간 (max 7.0점) — 마감임박 중복 시 절반
   var s5=0;
   if(e.sd&&e.ed){
     var span=Math.ceil((new Date(e.ed)-new Date(e.sd))/864e5);
-    // 마감임박 점수 받고 있으면 희소성 절반만
-    var s5base=span<=3?7:span<=7?5:span<=14?2:0;
-    s5=(d<=7)?Math.floor(s5base*0.5):s5base;
+    var s5base=span<=3?7.0:span<=7?5.0:span<=14?2.0:0;
+    s5=(d<=7)?Math.round(s5base*0.5*10)/10:s5base;
   }
 
-  // ⑥ 무료입장 (5점) — 기존 8점에서 축소, 무료라는 이유만으로 과도하게 올라가지 않게
-  var s6=(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))?5:0;
+  // ⑥ 무료입장 (5.0점)
+  var s6=(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))?5.0:0;
 
-  // ⑦ 사용자 반응 (max 30점) — 기존 20점에서 상향, 실제 유저 반응이 핵심 지표
-  // 카테고리 내 상대 정규화로 전시/클래식도 자기 카테고리 안에서 공정하게 경쟁
-  var maxVL=1,maxLL=1,maxBL=1;
-  catPeers.forEach(function(x){
-    var vl=Math.log1p(x.vc||0),ll=Math.log1p(x.lc||0),bl=Math.log1p(x.bc||0);
-    if(vl>maxVL)maxVL=vl;if(ll>maxLL)maxLL=ll;if(bl>maxBL)maxBL=bl;
-  });
-  var s7=Math.round(
-    Math.log1p(e.vc||0)/maxVL*12+   // 조회 12점
-    Math.log1p(e.lc||0)/maxLL*12+   // 좋아요 12점
-    Math.log1p(e.bc||0)/maxBL*6     // 저장 6점
-  );
+  // ⑦ 사용자 반응 (max 30.0점) — 핵심 개편
+  // 문제: 1명이 좋아요 누르면 log1p(1)=0.693 → 최대값이 1명이면 100% → 12점 펌핑
+  // 해결: 카테고리 내 반응이 없으면(초기) 점수 0, 최소 임계치(3명) 이상부터 선형 반영
+  // 추가: 1인당 기여 상한 (좋아요 1개 = 최대 0.5점 기여) → 조작 방지
+  var LIKE_WEIGHT=0.5;   // 좋아요 1개당 최대 기여 (점)
+  var BM_WEIGHT=0.3;     // 저장 1개당 최대 기여 (점)
+  var VC_WEIGHT=0.03;    // 조회 1회당 최대 기여 (점)
+  var LIKE_CAP=12.0;     // 좋아요 기여 상한
+  var BM_CAP=6.0;        // 저장 기여 상한
+  var VC_CAP=12.0;       // 조회 기여 상한
 
-  var total=s1+s2+s3+s4+s5+s6+s7;
+  var lc=Math.max(0,Number(e.lc)||0);
+  var bc=Math.max(0,Number(e.bc)||0);
+  var vc=Math.max(0,Number(e.vc)||0);
+
+  // 개인당 가중치 × 인원수, 단 상한 초과 불가
+  var likeScore=Math.min(Math.round(lc*LIKE_WEIGHT*10)/10, LIKE_CAP);
+  var bmScore=Math.min(Math.round(bc*BM_WEIGHT*10)/10, BM_CAP);
+  var vcScore=Math.min(Math.round(vc*VC_WEIGHT*10)/10, VC_CAP);
+  var s7=Math.round((likeScore+bmScore+vcScore)*10)/10;
+
+  var total=Math.round((s1+s2+s3+s4+s5+s6+s7)*10)/10;
   return{total:total,s1:s1,s2:s2,s3:s3,s4:s4,s5:s5,s6:s6,s7:s7,d:d,br:br};
 }
 function sc(e,allEv){return scDetail(e,allEv).total;}
@@ -956,7 +972,7 @@ function tc(s,mx){return s;}
 function tC(t){if(t>=70)return"#ff5e3a";if(t>=45)return"#ff9500";if(t>=20)return"#4fc3f7";return"#90a4ae";}
 function tB(t){if(t>=70)return"rgba(255,94,58,0.15)";if(t>=45)return"rgba(255,149,0,0.15)";if(t>=20)return"rgba(79,195,247,0.12)";return"rgba(144,164,174,0.12)";}
 var SCORE_MAX=130; // 35+35+12+6+7+5+30
-function gauge(t,sz){sz=sz||46;var c=tC(t),pct=Math.min(t/SCORE_MAX*100,100),r=(sz-6)/2,ci=2*Math.PI*r,of=ci-(ci*pct/100);return'<div class="gauge" style="width:'+sz+'px;height:'+sz+'px"><svg viewBox="0 0 '+sz+' '+sz+'"><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="#2a2a38" stroke-width="3"/><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="'+c+'" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="'+ci+'" stroke-dashoffset="'+of+'" transform="rotate(-90 '+sz/2+' '+sz/2+')"/></svg><div class="gauge-val"><span class="gauge-num" style="color:'+c+'">'+t+'°</span></div></div>';}
+function gauge(t,sz){sz=sz||46;var c=tC(t),pct=Math.min(t/SCORE_MAX*100,100),r=(sz-6)/2,ci=2*Math.PI*r,of=ci-(ci*pct/100);return'<div class="gauge" style="width:'+sz+'px;height:'+sz+'px"><svg viewBox="0 0 '+sz+' '+sz+'"><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="#2a2a38" stroke-width="3"/><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="'+c+'" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="'+ci+'" stroke-dashoffset="'+of+'" transform="rotate(-90 '+sz/2+' '+sz/2+')"/></svg><div class="gauge-val"><span class="gauge-num" style="color:'+c+'">'+t.toFixed(1)+'°</span></div></div>';}
 function thermo(t,ev_obj,mx){
   var c=tC(t);
   var pct=Math.min(Math.round(t/SCORE_MAX*100),100);
@@ -969,7 +985,7 @@ function thermo(t,ev_obj,mx){
       '<div class="thermo-mercury" style="height:'+pct+'%;background:linear-gradient(to top,'+c+','+c+'cc)"></div>'+
     '</div>'+
     '<div class="thermo-bulb" style="background:'+c+';box-shadow:0 0 8px '+c+'88"></div>'+
-    '<div class="thermo-num" style="color:'+c+'">'+t+'°</div>'+
+    '<div class="thermo-num" style="color:'+c+'">'+t.toFixed(1)+'°</div>'+
   '</div>';
 }
 function pLinks(src){if(!src)return[];if(src.includes("|"))return src.split(",").map(function(s){var p=s.trim().split("|");return{type:p[0].trim(),url:p.slice(1).join("|").trim()};}).filter(function(l){return l.url;});var tp="homepage";if(src.includes("instagram"))tp="instagram";else if(src.includes("interpark")||src.includes("weverse"))tp="ticket";return[{type:tp,url:src}];}
@@ -1196,7 +1212,7 @@ function renderHome(){
           // 텍스트
           +'<div style="flex:1;min-width:0">'
             +'<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:'+c+'22;border:1px solid '+c+'55;margin-bottom:6px">'
-              +'<span style="font-size:10px;font-weight:800;color:'+c+';letter-spacing:0.04em">HOT '+t+'°C</span>'
+              +'<span style="font-size:10px;font-weight:800;color:'+c+';letter-spacing:0.04em">HOT '+t.toFixed(1)+'°C</span>'
             +'</div>'
             +'<div style="font-size:17px;font-weight:800;color:#fff;line-height:1.25;letter-spacing:-0.02em;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.t+'</div>'
             +'<div style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div>'
@@ -1278,7 +1294,7 @@ function renderHome(){
       +'</svg>'
       +'<div class="hot-card-body">'
         +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
-          +'<span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,0.65);letter-spacing:0.03em">HOT '+(topEv?topTemp+'°C · 지금 가장 뜨거운':'온도 랭킹')+'</span>'
+          +'<span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,0.65);letter-spacing:0.03em">HOT '+(topEv?topTemp.toFixed(1)+'°C · 지금 가장 뜨거운':'온도 랭킹')+'</span>'
         +'</div>'
         +'<div style="font-size:17px;font-weight:900;color:#fff;letter-spacing:-0.04em;line-height:1.15">컬처 핫온도</div>'
         +'<div style="font-size:10.5px;color:rgba(255,255,255,0.6);margin-top:3px">카테고리별 1위 큐레이션</div>'
@@ -1369,7 +1385,7 @@ function renderHome(){
     else if(dE===0){badgeTxt='오늘마감';badgeBg='rgba(255,94,58,0.2)';badgeColor='#ff5e3a';}
     else if(dS>3){badgeTxt='진행예정';badgeBg='rgba(79,195,247,0.15)';badgeColor='#4fc3f7';}
     else if(dS>0){badgeTxt='D-'+dS;badgeBg='rgba(255,149,0,0.2)';badgeColor='#ff9500';}
-    else{badgeTxt=t+'°C';badgeBg=tB(t);badgeColor=c;}
+    else{badgeTxt=t.toFixed(1)+'°C';badgeBg=tB(t);badgeColor=c;}
     return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:'+badgeBg+';color:'+badgeColor+'">'+badgeTxt+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div><div class="h-card-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div>';
   }).join('')+'</div>';
   var openSoon=ranked.filter(function(e){var dS=dd(e.sd);return dS>0&&dS<=3;}).slice(0,6);
@@ -1415,9 +1431,9 @@ function vibeTagsHtml(e){
   var vibes=[];
   if(e.vibes){vibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
   if(!vibes.length)return'';
-  return'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">'
-    +vibes.slice(0,5).map(function(tag){
-      return'<span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.2)">'+tag+'</span>';
+  return'<div style="display:flex;flex-wrap:wrap;gap:4px">'
+    +vibes.slice(0,4).map(function(tag){
+      return'<span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.2);white-space:nowrap">'+tag+'</span>';
     }).join('')
   +'</div>';
 }
@@ -1525,15 +1541,16 @@ function renderRanking(){
       ct=df>0?df+'▲':df<0?Math.abs(df)+'▼':'—';
     }
     var t=tc(e._s,mx);
-    h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'
-      +'<div class="rk-n"><div class="rk-n-v">'+rk+'</div><div class="rk-ch '+cc+'">'+ct+'</div></div>'
-      +rkThumb(e)
-      +'<div class="rk-info"><div class="rk-title">'+e.t+'</div>'
-      +'<div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':gr(e))+'</div>'
-      +'<div class="rk-sub-date">'+(e.ct==='박스오피스'?('개봉 '+e.sd+(e.boxoffice_rank>0?' · 박스오피스 '+e.boxoffice_rank+'위':'')):e.lo+' · '+fmtRange(e.sd,e.ed))+'</div></div>'
-      +vibeTagsHtml(e)
-      +'</div>'
-      +thermo(t,e,mx)+'</div>';
+      var vibeHtml=vibeTagsHtml(e);
+      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'
+        +'<div class="rk-n"><div class="rk-n-v">'+rk+'</div><div class="rk-ch '+cc+'">'+ct+'</div></div>'
+        +rkThumb(e)
+        +'<div class="rk-info"><div class="rk-title">'+e.t+'</div>'
+        +'<div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':gr(e))+'</div>'
+        +'<div class="rk-sub-date">'+(e.ct==='박스오피스'?('개봉 '+e.sd+(e.boxoffice_rank>0?' · 박스오피스 '+e.boxoffice_rank+'위':'')):e.lo+' · '+fmtRange(e.sd,e.ed))+'</div></div>'
+        +(vibeHtml?'<div style="margin-top:6px;overflow:hidden">'+vibeHtml+'</div>':'')
+        +'</div>'
+        +thermo(t,e,mx)+'</div>';
   });}
   document.getElementById("page-ranking").innerHTML=h+'';
   // 활성 카테고리 탭 자동 스크롤 (탭이 잘려 안 보이는 문제 해결)
@@ -1925,22 +1942,48 @@ function renderMy(){
       H.push('<div style="font-size:13px;color:var(--mu)">이벤트 상세에서 리뷰를 남겨보세요</div>');
       H.push('</div>');
     } else {
+      H.push('<div style="padding:0 0 16px">');
       rvKeys.forEach(function(evId){
         var evObj=ev.find(function(x){return x.id===evId;});
         var reviews=rvDB[evId]||[];
         if(!reviews.length)return;
-        var r=reviews[0];
-        var dots='';
-        for(var i=1;i<=5;i++)dots+='<span style="color:'+(i<=r.rating?'#ffd60a':'#2a2a38')+';font-size:10px">●</span>';
-        H.push('<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 20px;border-bottom:1px solid var(--bdL);cursor:pointer" onclick="viewEv(\''+evId+'\')">');
-        H.push(rkThumb(evObj||{ct:'복합'}));
-        H.push('<div style="flex:1;min-width:0">');
-        H.push('<div style="font-size:13px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(evObj?evObj.t:'알 수 없음')+'</div>');
-        H.push('<div style="display:flex;gap:2px;margin-bottom:5px">'+dots+'</div>');
-        H.push('<div style="font-size:12px;color:var(--sub);line-height:1.5">'+r.text+'</div>');
-        H.push('<div style="font-size:10px;color:var(--mu);margin-top:4px">'+r.date+'</div>');
-        H.push('</div></div>');
+        // 이 공연에 내가 쓴 리뷰만
+        var myReviews=reviews.filter(function(r){return r.isMine||(user&&r.userId===user.id);});
+        if(!myReviews.length)return;
+        myReviews.forEach(function(r){
+          var dots='';
+          for(var i=1;i<=5;i++)dots+='<span style="color:'+(i<=r.rating?'#ffd60a':'#2a2a38')+';font-size:11px">●</span>';
+          var rpKey='snr_rp_'+evId;
+          var rpDB=JSON.parse(localStorage.getItem(rpKey)||'{}');
+          var myReplies=(rpDB[r.id]||[]).filter(function(rp){return rp.isMine||(user&&rp.userId===user.id);});
+          H.push('<div style="border-bottom:1px solid var(--bdL);cursor:pointer" onclick="viewEv(\''+evId+'\')" >');
+          // 공연 정보 헤더
+          H.push('<div style="display:flex;align-items:center;gap:10px;padding:14px 20px 10px">');
+          H.push(rkThumb(evObj||{ct:'복합'}));
+          H.push('<div style="flex:1;min-width:0">');
+          H.push('<div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">'+(evObj?evObj.t:'알 수 없는 공연')+'</div>');
+          H.push('<div style="font-size:11px;color:var(--mu)">'+(evObj?evObj.ct:'')+'</div>');
+          H.push('</div></div>');
+          // 리뷰 내용
+          H.push('<div style="margin:0 20px 12px;padding:12px;background:var(--card);border-radius:12px;border-left:2px solid var(--hot)">');
+          H.push('<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">');
+          H.push('<div style="display:flex;gap:1px">'+dots+'</div>');
+          H.push('<span style="font-size:11px;color:var(--mu)">'+timeAgo(r.createdAt||r.date)+'</span>');
+          H.push('</div>');
+          H.push('<div style="font-size:13px;line-height:1.6;color:var(--tx);opacity:0.9">'+r.text+'</div>');
+          // 내가 쓴 답글
+          if(myReplies.length){
+            H.push('<div style="margin-top:10px;border-top:1px solid var(--bdL);padding-top:8px">');
+            myReplies.forEach(function(rp){
+              H.push('<div style="font-size:12px;color:var(--sub);margin-top:4px">↩ '+rp.text+'<span style="color:var(--mu);margin-left:6px;font-size:10px">'+timeAgo(rp.createdAt)+'</span></div>');
+            });
+            H.push('</div>');
+          }
+          H.push('</div>');
+          H.push('</div>');
+        });
       });
+      H.push('</div>');
     }
   } else if(!list.length){
     var emptyIcon=myTab==="bookmark"
@@ -2125,7 +2168,7 @@ function _buildDetailHTML(id,e,kd){
       +'<svg width="24" height="24" viewBox="0 0 24 24" fill="'+(ilk?'var(--hot)':'none')+'" stroke="'+(ilk?'var(--hot)':'currentColor')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'
         +'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'
       +'</svg>'
-      +'<span class="qb-label">좋아요</span>'
+      +'<span class="qb-label">'+(ilk?'취소':'좋아요')+'</span>'
       +'<span class="qb-count">'+(e.lc>0?e.lc.toLocaleString():'')+'</span>'
     +'</button>'
     +'<button class="quick-btn'+(ibm?' active':'')+'\" onclick="toggleBm(\''+e.id+'\')" style="gap:5px">'
@@ -2165,7 +2208,7 @@ function _buildDetailHTML(id,e,kd){
       +'<span class="bd-label">'+r.l
       +(r.hint?'<span class="bd-hint">'+r.hint+'</span>':'')
       +'</span>'
-      +'<span class="bd-val" style="color:'+c+'">'+r.v+'°<span>/'+r.max+'°</span></span>'
+      +'<span class="bd-val" style="color:'+c+'">'+r.v.toFixed(1)+'°<span>/'+r.max+'°</span></span>'
     +'</div>'
     +'<div class="bd-bar-wrap"><div class="bd-bar-fill" style="width:'+p2+'%;background:'+c+'"></div></div>';
   });
@@ -2189,7 +2232,7 @@ function _buildDetailHTML(id,e,kd){
       +'</div>'
       // 온도 수치 + 바
       +'<div style="display:flex;align-items:center;gap:14px">'
-        +'<span style="font-size:30px;font-weight:900;color:'+c+';line-height:1;letter-spacing:-0.03em;flex-shrink:0">'+t+'<span style="font-size:16px;font-weight:700">°C</span></span>'
+        +'<span style="font-size:30px;font-weight:900;color:'+c+';line-height:1;letter-spacing:-0.03em;flex-shrink:0">'+t.toFixed(1)+'<span style="font-size:16px;font-weight:700">°C</span></span>'
         +'<div style="flex:1">'
           // 전체 바
           +'<div style="height:3px;border-radius:2px;background:rgba(255,255,255,0.05);overflow:hidden;margin-bottom:6px">'
@@ -2199,7 +2242,7 @@ function _buildDetailHTML(id,e,kd){
           +'<div style="display:flex;align-items:center;gap:0">'
             +'<span style="font-size:10px;color:#6e6e88;font-weight:500">전체 <span style="color:#8d8da0;font-weight:700">#'+rank+'위</span></span>'
             +(sd2.br>0?'<span style="font-size:10px;color:#3a3a52;margin:0 5px">·</span><span style="font-size:10px;color:#6e6e88">예매 <span style="color:#8d8da0;font-weight:700">'+sd2.br+'위</span></span>':'')
-            +'<span style="font-size:10px;color:#3a3a52;margin-left:auto">온도 <span style="color:#6e6e88;font-weight:700">'+sd2.total+'°</span></span>'
+            +'<span style="font-size:10px;color:#3a3a52;margin-left:auto">온도 <span style="color:#6e6e88;font-weight:700">'+sd2.total.toFixed(1)+'°</span></span>'
           +'</div>'
         +'</div>'
       +'</div>'
@@ -2211,7 +2254,7 @@ function _buildDetailHTML(id,e,kd){
       +'<div style="height:1px;background:rgba(255,255,255,0.05);margin:10px 0 8px"></div>'
       +'<div style="display:flex;align-items:center;justify-content:space-between">'
         +'<span style="font-size:11.5px;font-weight:700;color:#ededf0">온도 합계</span>'
-        +'<span style="font-size:14px;font-weight:900;color:'+c+';letter-spacing:-0.02em">'+sd2.total+'°</span>'
+        +'<span style="font-size:14px;font-weight:900;color:'+c+';letter-spacing:-0.02em">'+sd2.total.toFixed(1)+'°</span>'
       +'</div>'
     +'</div>'
   +'</div>';
@@ -2296,10 +2339,21 @@ function _buildDetailHTML(id,e,kd){
     h+='</div></div>';
   }
   if(am.length){h+='<div class="det-sec"><div class="det-sec-title">편의시설</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+am.map(function(a){var m=amM[a];if(!m)return'';return'<div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;border-radius:10px;background:var(--card);border:1px solid var(--bd)"><div style="font-size:20px">'+m.ic+'</div><div style="font-size:10px;color:#8d8da0;font-weight:600">'+m.l+'</div></div>';}).join('')+'</div></div>';}
-  h+='<div class="det-sec"><div class="det-sec-title">리뷰'+(rvl.length?' ('+rvl.length+')':'')+(Number(rva)>0?' · '+rva+'점':'')+'</div><button onclick="openRv(\''+id+'\')" style="width:100%;padding:12px;border-radius:10px;border:1px dashed #2a2a38;background:var(--sf);color:#8d8da0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px">리뷰 작성하기</button>';
-  if(rvl.length){h+='<div class="rv-list">'+rvl.slice(0,3).map(function(r){var dots='';for(var i=1;i<=5;i++)dots+='<span style="color:'+(i<=r.rating?'#ffd60a':'#2a2a38')+';font-size:10px">●</span>';return'<div class="rv-item"><div class="rv-item-hdr"><div class="rv-avatar">'+r.avatar+'</div><div><div class="rv-name">'+r.name+'</div><div class="rv-date" style="display:flex;align-items:center;gap:6px"><span>'+r.date+'</span><span style="display:flex;gap:1px">'+dots+'</span></div></div></div><div class="rv-body">'+r.text+'</div></div>';}).join('')+'</div>';}
-  h+='</div>';
-  if(related.length){h+='<div class="det-sec"><div class="det-sec-title">비슷한 '+e.ct+'</div><div class="related">'+related.map(function(r){var rt=tc(r._s,mx),rc=tC(rt);return'<div class="related-item" onclick="viewEv(\''+r.id+'\')"><div class="related-img" style="'+(getPoster(r)?'background-image:url('+getPoster(r)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(r)?IC[r.ct]:'')+' <div class="related-temp" style="background:'+tB(rt)+';color:'+rc+'">'+rt+'°</div></div><div class="related-title">'+r.t+'</div><div style="font-size:10.5px;color:#8d8da0;margin-top:2px">'+(r.ct==='박스오피스'?(r.vibes||'영화'):r.lo)+'</div></div>';}).join('')+'</div></div>';}
+  h+='<div class="det-sec">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+      +'<div class="det-sec-title" style="margin-bottom:0">리뷰'+(rvl.length?' ('+rvl.length+')':'')+(Number(rva)>0?' · ⭐'+rva:'')+'</div>'
+      +(rvl.length>3?'<button onclick="showAllReviews(\''+id+'\')" style="font-size:12px;color:var(--mu);font-weight:600;background:none;border:none;cursor:pointer;padding:0">전체보기</button>':'')
+    +'</div>'
+    +(user
+      ?'<button onclick="openRv(\''+id+'\')" style="width:100%;padding:11px;border-radius:10px;border:1px dashed rgba(255,94,58,0.3);background:rgba(255,94,58,0.04);color:var(--hot);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px">'
+        +'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>'
+        +'리뷰 작성하기'
+      +'</button>'
+      :'<div onclick="go(\'login\')" style="width:100%;padding:11px;border-radius:10px;border:1px dashed var(--bd);background:var(--sf);color:var(--mu);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:14px;text-align:center">🔒 로그인하고 리뷰 남기기</div>'
+    )
+    +(rvl.length?'<div class="rv-list">'+renderReviews(id,rvl,3)+'</div>':'<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--mu)">아직 리뷰가 없어요. 첫 번째 리뷰를 남겨보세요!</div>')
+  +'</div>';
+  if(related.length){h+='<div class="det-sec"><div class="det-sec-title">비슷한 '+e.ct+'</div><div class="related">'+related.map(function(r){var rt=tc(r._s,mx),rc=tC(rt);return'<div class="related-item" onclick="viewEv(\''+r.id+'\')"><div class="related-img" style="'+(getPoster(r)?'background-image:url('+getPoster(r)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(r)?IC[r.ct]:'')+' <div class="related-temp" style="background:'+tB(rt)+';color:'+rc+'">'+rt.toFixed(1)+'°</div></div><div class="related-title">'+r.t+'</div><div style="font-size:10.5px;color:#8d8da0;margin-top:2px">'+(r.ct==='박스오피스'?(r.vibes||'영화'):r.lo)+'</div></div>';}).join('')+'</div></div>';}
   // 하단 고정 예매 버튼 — ticket URL 있을 때만 표시
   var ticketLk=allLks.find(function(l){return l.type==='ticket';});
   if(ticketLk){
@@ -2524,17 +2578,26 @@ function showToast(msg) {
   t._timer = setTimeout(function() { t.style.opacity = '0'; }, 2000);
 }
 function likeEv(id){
-  if(liked.has(id))return;
-  liked.add(id);
+  var wasLiked=liked.has(id);
+  if(!user){showToast('로그인 후 이용할 수 있어요 💙');return;}
+  if(wasLiked){
+    liked.delete(id);
+  } else {
+    liked.add(id);
+  }
   localStorage.setItem('snr_lk',JSON.stringify(Array.from(liked)));
   var e=ev.find(function(x){return x.id===id;});
   if(e){
-    e.lc=(e.lc||0)+1;
+    // lc는 실제 사람 수 카운트 (정수) — 점수 계산 시 log 스케일로 펌핑 방지
+    e.lc=(e.lc||0)+(wasLiked?-1:1);
+    if(e.lc<0)e.lc=0;
     var lcMap=JSON.parse(localStorage.getItem('snr_lc')||'{}');
-    lcMap[id]=(lcMap[id]||0)+1;
+    lcMap[id]=(lcMap[id]||0)+(wasLiked?-1:1);
+    if(lcMap[id]<0)lcMap[id]=0;
     localStorage.setItem('snr_lc',JSON.stringify(lcMap));
   }
-  syncAction(id,'like',true);
+  syncAction(id,'like',!wasLiked);
+  _scoredCache=null;
   renderDetail(id);
 }
 function toggleBm(id){
@@ -2554,6 +2617,24 @@ function toggleBm(id){
   syncAction(id,'bookmark',!wasBookmarked);
   if(curPage==='detail')renderDetail(id);
   else if(curPage==='my')renderMy();
+}
+
+function showAllReviews(evId){
+  var rvList=rvDB[evId]||[];
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;display:flex;align-items:flex-end;justify-content:center;animation:fi 0.15s';
+  var sheet=document.createElement('div');
+  sheet.style.cssText='background:var(--sf);border:1px solid var(--bd);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:slideUp 0.3s ease;font-family:-apple-system,BlinkMacSystemFont,\'Malgun Gothic\',sans-serif';
+  sheet.innerHTML='<div style="width:36px;height:4px;border-radius:2px;background:var(--bd);margin:14px auto 0"></div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;border-bottom:1px solid var(--bdL)">'
+      +'<div style="font-size:16px;font-weight:900;color:#ededf0">리뷰 전체 ('+rvList.length+')</div>'
+      +'<button onclick="this.closest(\'div[data-ov]\').remove()" style="width:32px;height:32px;border-radius:50%;background:var(--card);border:1px solid var(--bd);color:#8d8da0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit">✕</button>'
+    +'</div>'
+    +'<div style="padding:12px 20px calc(40px + env(safe-area-inset-bottom))" class="rv-list">'+renderReviews(evId,rvList,999)+'</div>';
+  overlay.setAttribute('data-ov','1');
+  overlay.appendChild(sheet);
+  overlay.addEventListener('click',function(e2){if(e2.target===overlay)overlay.remove();});
+  document.body.appendChild(overlay);
 }
 
 /* 검색 */
@@ -2586,13 +2667,200 @@ function saveSH(q){sHist=[q].concat(sHist.filter(function(x){return x!==q;})).sl
 function delSH(i){sHist.splice(i,1);localStorage.setItem("snr_sh",JSON.stringify(sHist));renderSBody("");}
 function clrSH(){sHist=[];localStorage.setItem("snr_sh","[]");renderSBody("");}
 
-/* 리뷰 */
-function openRv(id){rvId=id;rvRating=0;document.getElementById("rvTa").value="";document.getElementById("rvSubmit").disabled=true;var e=ev.find(function(x){return x.id===id;});document.getElementById("rvSub").textContent=e?e.t:"";rstars();document.getElementById("rvOverlay").classList.add("show");}
-function closeRv(){document.getElementById("rvOverlay").classList.remove("show");rvId=null;rvRating=0;}
-function rstars(){var el=document.getElementById("rvStars");var h="";for(var i=1;i<=5;i++){h+='<span class="rv-star'+(i<=rvRating?' on':'')+'\" onclick="setR('+i+')" style="font-size:28px;color:'+(i<=rvRating?'#ffd60a':'#2a2a38')+'">●</span>';}el.innerHTML=h;}
+/* ── 상대시간 표시 ── */
+function timeAgo(dateStr){
+  var d=new Date(dateStr);
+  if(isNaN(d.getTime()))return dateStr;
+  var diff=Math.floor((Date.now()-d.getTime())/1000);
+  if(diff<60)return '방금 전';
+  if(diff<3600)return Math.floor(diff/60)+'분 전';
+  if(diff<86400)return Math.floor(diff/3600)+'시간 전';
+  if(diff<2592000)return Math.floor(diff/86400)+'일 전';
+  if(diff<31536000)return Math.floor(diff/2592000)+'달 전';
+  return Math.floor(diff/31536000)+'년 전';
+}
+
+/* ── 리뷰 모달 상태 ── */
+var _rvMode='review'; // 'review' | 'reply'
+var _rvReplyTo=null;  // {rvId, authorName}
+
+function openRv(id){
+  if(!user){showToast('로그인 후 리뷰를 작성할 수 있어요');return;}
+  _rvMode='review';_rvReplyTo=null;
+  rvId=id;rvRating=0;
+  document.getElementById("rvTa").value="";
+  document.getElementById("rvTa").placeholder="솔직한 후기를 남겨주세요 (최소 10자)";
+  document.getElementById("rvSubmit").disabled=true;
+  document.getElementById("rvModalTitle").textContent="리뷰 작성";
+  document.getElementById("rvReplyTarget").style.display='none';
+  var e=ev.find(function(x){return x.id===id;});
+  document.getElementById("rvSub").textContent=e?e.t:"";
+  document.getElementById("rvStars").style.display='flex';
+  rstars();
+  document.getElementById("rvOverlay").classList.add("show");
+  setTimeout(function(){document.getElementById("rvTa").focus();},200);
+}
+
+function openReply(evId, rvItemId, authorName){
+  if(!user){showToast('로그인 후 답글을 작성할 수 있어요');return;}
+  _rvMode='reply';
+  _rvReplyTo={rvId:rvItemId,authorName:authorName};
+  rvId=evId;
+  document.getElementById("rvTa").value="";
+  document.getElementById("rvTa").placeholder="답글을 작성해주세요 (최소 5자)";
+  document.getElementById("rvSubmit").disabled=true;
+  document.getElementById("rvModalTitle").textContent="답글 작성";
+  document.getElementById("rvStars").style.display='none';
+  document.getElementById("rvReplyTarget").style.display='block';
+  document.getElementById("rvReplyTarget").textContent='@'+authorName+' 의 리뷰에 답글';
+  var e=ev.find(function(x){return x.id===evId;});
+  document.getElementById("rvSub").textContent=e?e.t:"";
+  document.getElementById("rvOverlay").classList.add("show");
+  setTimeout(function(){document.getElementById("rvTa").focus();},200);
+}
+
+function closeRv(){
+  document.getElementById("rvOverlay").classList.remove("show");
+  rvId=null;rvRating=0;_rvMode='review';_rvReplyTo=null;
+}
+
+function rstars(){
+  var el=document.getElementById("rvStars");
+  var h="";
+  for(var i=1;i<=5;i++){
+    h+='<span class="rv-star'+(i<=rvRating?' on':'')+'" onclick="setR('+i+')" style="font-size:28px;color:'+(i<=rvRating?'#ffd60a':'#2a2a38')+';cursor:pointer">●</span>';
+  }
+  el.innerHTML=h;
+}
 function setR(r){rvRating=r;rstars();chkRv();}
-function chkRv(){var txt=document.getElementById("rvTa").value.trim();document.getElementById("rvSubmit").disabled=!(rvRating>0&&txt.length>=10);}
-function submitRv(){var txt=document.getElementById("rvTa").value.trim();if(rvRating===0||txt.length<10)return;var nicks=["여행러","리뷰어","손난로유저","문화덕후","이벤트러버"];var nick=nicks[Math.floor(Math.random()*nicks.length)];var rv={id:"r"+Date.now(),name:nick,rating:rvRating,text:txt,date:"2026-04-05",avatar:nick.charAt(0)};if(!rvDB[rvId])rvDB[rvId]=[];rvDB[rvId].unshift(rv);localStorage.setItem("snr_rv",JSON.stringify(rvDB));var id=rvId;closeRv();alert("✅ 리뷰가 등록되었습니다!");renderDetail(id);}
+function chkRv(){
+  var txt=document.getElementById("rvTa").value.trim();
+  var minLen=_rvMode==='reply'?5:10;
+  var ratingOk=_rvMode==='reply'?true:(rvRating>0);
+  document.getElementById("rvSubmit").disabled=!(ratingOk&&txt.length>=minLen);
+}
+
+async function submitRv(){
+  var txt=document.getElementById("rvTa").value.trim();
+  if(!user)return;
+  var btn=document.getElementById("rvSubmit");
+  btn.disabled=true;btn.textContent='등록 중...';
+
+  var now=new Date().toISOString();
+  var myName=user.name||user.email.split('@')[0];
+  var myAvatar=user.avatar||myName.charAt(0).toUpperCase();
+
+  if(_rvMode==='reply'&&_rvReplyTo){
+    // 답글 저장
+    var reply={
+      id:'rp'+Date.now(),
+      rvId:_rvReplyTo.rvId,
+      userId:user.id,
+      name:myName,
+      avatar:myAvatar,
+      text:txt,
+      createdAt:now,
+      isMine:true
+    };
+    var rpKey='snr_rp_'+rvId;
+    var rpDB=JSON.parse(localStorage.getItem(rpKey)||'{}');
+    if(!rpDB[_rvReplyTo.rvId])rpDB[_rvReplyTo.rvId]=[];
+    rpDB[_rvReplyTo.rvId].unshift(reply);
+    localStorage.setItem(rpKey,JSON.stringify(rpDB));
+    // Supabase 저장 시도
+    try{
+      await supa.from('admin_logs').insert({
+        admin_id:user.id,
+        action:'review_reply',
+        target:rvId,
+        detail:JSON.stringify({rvId:_rvReplyTo.rvId,text:txt,author:myName})
+      });
+    }catch(e2){}
+    var curId=rvId;
+    closeRv();
+    showToast('답글이 등록됐어요 💬');
+    renderDetail(curId);
+  } else {
+    // 리뷰 저장
+    if(rvRating===0||txt.length<10){btn.disabled=false;btn.textContent='등록하기';return;}
+    var rv={
+      id:'r'+Date.now(),
+      userId:user.id,
+      name:myName,
+      avatar:myAvatar,
+      rating:rvRating,
+      text:txt,
+      createdAt:now,
+      isMine:true,
+      replies:[]
+    };
+    if(!rvDB[rvId])rvDB[rvId]=[];
+    // 같은 유저 중복 리뷰 방지 — 기존 것 교체
+    var existIdx=rvDB[rvId].findIndex(function(r){return r.userId===user.id;});
+    if(existIdx>=0)rvDB[rvId].splice(existIdx,1);
+    rvDB[rvId].unshift(rv);
+    localStorage.setItem("snr_rv",JSON.stringify(rvDB));
+    // Supabase 저장 시도
+    try{
+      await supa.from('admin_logs').insert({
+        admin_id:user.id,
+        action:'review_write',
+        target:rvId,
+        detail:JSON.stringify({rating:rvRating,text:txt,author:myName})
+      });
+    }catch(e2){}
+    var curId2=rvId;
+    closeRv();
+    showToast('리뷰가 등록됐어요 ⭐');
+    renderDetail(curId2);
+  }
+}
+
+/* ── 리뷰 렌더링 헬퍼 ── */
+function renderReviews(evId, rvList, maxShow){
+  if(!rvList||!rvList.length)return'';
+  var rpKey='snr_rp_'+evId;
+  var rpDB=JSON.parse(localStorage.getItem(rpKey)||'{}');
+
+  return rvList.slice(0,maxShow||99).map(function(r){
+    var isMine=(user&&r.userId===user.id)||r.isMine;
+    var dots='';
+    for(var i=1;i<=5;i++)dots+='<span style="color:'+(i<=r.rating?'#ffd60a':'#2a2a38')+';font-size:10px">●</span>';
+    var avatarBg=isMine?'linear-gradient(135deg,#ff5e3a,#ff9500)':'linear-gradient(135deg,#4fc3f7,#0070f3)';
+    var replies=rpDB[r.id]||[];
+    var repliesHtml=replies.map(function(rp){
+      var rpIsMine=(user&&rp.userId===user.id)||rp.isMine;
+      var rpBg=rpIsMine?'linear-gradient(135deg,#ff5e3a,#ff9500)':'linear-gradient(135deg,#30d158,#0a7a3a)';
+      return'<div class="rv-reply">'
+        +'<div class="rv-reply-hdr">'
+          +'<div class="rv-reply-avatar" style="background:'+rpBg+'">'+rp.avatar+'</div>'
+          +'<span class="rv-reply-name">'+(rpIsMine?'나 ('+rp.name+')':rp.name)+'</span>'
+          +'<span class="rv-reply-time">'+timeAgo(rp.createdAt)+'</span>'
+        +'</div>'
+        +'<div class="rv-reply-body">'+rp.text+'</div>'
+      +'</div>';
+    }).join('');
+
+    return'<div class="rv-item'+(isMine?' my-review':'')+'">'
+      +'<div class="rv-item-hdr">'
+        +'<div class="rv-avatar" style="background:'+avatarBg+'">'+r.avatar+'</div>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div class="rv-name">'+(isMine?'나 ('+r.name+')':r.name)+'</div>'
+          +'<div class="rv-date" style="display:flex;align-items:center;gap:6px">'
+            +'<span>'+timeAgo(r.createdAt||r.date)+'</span>'
+            +'<span style="display:flex;gap:1px">'+dots+'</span>'
+          +'</div>'
+        +'</div>'
+        +'<button onclick="openReply(\''+evId+'\',\''+r.id+'\',\''+r.name.replace(/'/g,"\\'")+'\')" style="flex-shrink:0;padding:4px 10px;border-radius:8px;border:1px solid var(--bd);background:none;color:var(--mu);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px">'
+          +'<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          +'답글'
+        +'</button>'
+      +'</div>'
+      +'<div class="rv-body">'+r.text+'</div>'
+      +repliesHtml
+    +'</div>';
+  }).join('');
+}
 
 /* 네비 */
 function renderNav(){
@@ -2860,7 +3128,7 @@ function closeTempGuide(){
     // 헤더: 온도 수치
     var html='<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,0.05)">'
       +'<div style="font-size:9px;font-weight:700;color:#3a3a52;text-transform:uppercase;letter-spacing:0.1em">컬처온도</div>'
-      +'<div style="font-size:18px;font-weight:900;color:'+c+';letter-spacing:-0.03em;line-height:1">'+sd.total+'<span style="font-size:10px;font-weight:600;color:#505068;margin-left:2px">°</span></div>'
+      +'<div style="font-size:18px;font-weight:900;color:'+c+';letter-spacing:-0.03em;line-height:1">'+sd.total.toFixed(1)+'<span style="font-size:10px;font-weight:600;color:#505068;margin-left:2px">°</span></div>'
     +'</div>';
 
     // 항목 리스트
@@ -2872,7 +3140,7 @@ function closeTempGuide(){
           +'<span style="font-size:11px;color:'+(active?'#8d8da0':'#3a3a52')+'">'+r.l
           +(r.hint?'<span style="font-size:9px;color:#3a3a52;margin-left:4px;background:rgba(255,255,255,0.04);padding:1px 4px;border-radius:3px">'+r.hint+'</span>':'')
           +'</span>'
-          +'<span style="font-size:11.5px;font-weight:800;color:'+(active?c:'#2a2a38')+';letter-spacing:-0.02em">'+r.v
+          +'<span style="font-size:11.5px;font-weight:800;color:'+(active?c:'#2a2a38')+';letter-spacing:-0.02em">'+(typeof r.v==='number'?r.v.toFixed(1):r.v)
             +'<span style="font-size:8.5px;font-weight:400;color:#2a2a38">/'+r.max+'°</span>'
           +'</span>'
         +'</div>'
