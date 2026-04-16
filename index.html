@@ -647,8 +647,12 @@ a{color:inherit;text-decoration:none}
       <div class="form-title" id="eTitle">이메일 로그인</div>
       <div class="form-sub" id="eSub">이메일과 비밀번호를 입력해주세요</div>
       <div class="form-group" id="eNameGroup" style="display:none">
-        <label class="form-label">이름</label>
-        <input class="form-input" id="eName" type="text" placeholder="홍길동">
+        <label class="form-label">닉네임</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="eName" type="text" placeholder="2~10자, 중복불가" maxlength="10" style="flex:1">
+          <button onclick="checkNickname()" id="eNickBtn" style="flex-shrink:0;padding:0 14px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">중복확인</button>
+        </div>
+        <div id="eNickMsg" style="font-size:12px;margin-top:5px;min-height:16px"></div>
       </div>
       <div class="form-group">
         <label class="form-label">이메일</label>
@@ -1080,13 +1084,13 @@ async function submitEmail(){
     var {data,error}=await supa.auth.signUp({email:email,password:pw,options:{data:{nickname:n}}});
     if(error){msg.innerHTML='<div class="form-msg msg-err">'+error.message+'</div>';return;}
     await supa.from('profiles').update({nickname:n}).eq('id',data.user.id);
-    msg.innerHTML='<div class="form-msg msg-ok">✅ 가입 완료! 로그인합니다...</div>';
+    msg.innerHTML='<div class="form-msg msg-ok">가입 완료! 로그인합니다...</div>';
     setTimeout(async function(){var profile=await loadProfile(data.user);loginOK(profile);},800);
   } else {
     var {data,error}=await supa.auth.signInWithPassword({email:email,password:pw});
     if(error){msg.innerHTML='<div class="form-msg msg-err">이메일 또는 비밀번호가 틀렸습니다</div>';return;}
     var profile=await loadProfile(data.user);
-    msg.innerHTML='<div class="form-msg msg-ok">✅ 환영합니다!</div>';
+    msg.innerHTML='<div class="form-msg msg-ok">환영합니다!</div>';
     setTimeout(function(){loginOK(profile);},600);
   }
 }
@@ -1195,23 +1199,85 @@ function showEmail(m){
   document.getElementById("eMsg").innerHTML='';
   document.getElementById("eEmail").value='';document.getElementById("ePw").value='';
   if(document.getElementById("eName"))document.getElementById("eName").value='';
+  if(document.getElementById("eNickMsg"))document.getElementById("eNickMsg").innerHTML='';
+  _nicknameChecked=false;
   go("email");
 }
 function toggleEmail(){showEmail(eMode==='login'?'signup':'login');}
-function submitEmail(){
+
+var _nicknameChecked=false;
+
+async function checkNickname(){
+  var nick=document.getElementById("eName").value.trim();
+  var msgEl=document.getElementById("eNickMsg");
+  var btn=document.getElementById("eNickBtn");
+  if(!nick||nick.length<2){msgEl.innerHTML='<span style="color:#ff5e3a">2자 이상 입력해주세요</span>';return;}
+  if(nick.length>10){msgEl.innerHTML='<span style="color:#ff5e3a">10자 이하로 입력해주세요</span>';return;}
+  btn.textContent='확인 중...';btn.disabled=true;
+  var {data,error}=await supa.from('profiles').select('id').eq('nickname',nick).maybeSingle();
+  btn.textContent='중복확인';btn.disabled=false;
+  if(error){msgEl.innerHTML='<span style="color:#ff5e3a">오류가 발생했어요</span>';return;}
+  if(data){
+    msgEl.innerHTML='<span style="color:#ff5e3a">이미 사용 중인 닉네임이에요</span>';
+    _nicknameChecked=false;
+  } else {
+    msgEl.innerHTML='<span style="color:#30d158">사용 가능한 닉네임이에요</span>';
+    _nicknameChecked=true;
+  }
+}
+
+async function submitEmail(){
   var email=document.getElementById("eEmail").value.trim();
   var pw=document.getElementById("ePw").value;
   var msg=document.getElementById("eMsg");
+  var btn=document.getElementById("eBtn");
   if(!email||!email.includes("@")){msg.innerHTML='<div class="form-msg msg-err">올바른 이메일을 입력해주세요</div>';return;}
   if(pw.length<8){msg.innerHTML='<div class="form-msg msg-err">비밀번호는 8자 이상이어야 합니다</div>';return;}
+
+  btn.disabled=true;
+
   if(eMode==='signup'){
-    var n=document.getElementById("eName").value.trim();
-    if(!n){msg.innerHTML='<div class="form-msg msg-err">이름을 입력해주세요</div>';return;}
-    msg.innerHTML='<div class="form-msg msg-ok">✅ 가입 완료! 로그인합니다...</div>';
-    setTimeout(function(){loginOK({name:n,email:email,provider:'email',avatar:n.charAt(0)});},800);
+    var nick=document.getElementById("eName").value.trim();
+    if(!nick||nick.length<2){msg.innerHTML='<div class="form-msg msg-err">닉네임을 입력해주세요</div>';btn.disabled=false;return;}
+    if(!_nicknameChecked){msg.innerHTML='<div class="form-msg msg-err">닉네임 중복확인을 해주세요</div>';btn.disabled=false;return;}
+
+    // Supabase Auth 회원가입
+    var {data,error}=await supa.auth.signUp({
+      email:email,
+      password:pw,
+      options:{data:{nickname:nick}}
+    });
+    btn.disabled=false;
+    if(error){
+      var errMsg='회원가입에 실패했습니다';
+      if(error.message.includes('already registered'))errMsg='이미 가입된 이메일입니다';
+      if(error.message.includes('Password'))errMsg='비밀번호가 너무 짧거나 단순합니다';
+      msg.innerHTML='<div class="form-msg msg-err">'+errMsg+'</div>';return;
+    }
+    // 이메일 인증 필요 여부 확인
+    if(data.user&&!data.session){
+      // 이메일 인증 대기
+      msg.innerHTML='<div class="form-msg msg-ok">가입 완료! 이메일을 확인해 인증 후 로그인해주세요</div>';
+      // profiles 테이블에 닉네임 저장
+      await supa.from('profiles').upsert({id:data.user.id,nickname:nick,email:email,role:'user'},{onConflict:'id'});
+    } else if(data.session){
+      // 이메일 인증 없이 바로 로그인 (Supabase 설정에 따라)
+      await supa.from('profiles').upsert({id:data.user.id,nickname:nick,email:email,role:'user'},{onConflict:'id'});
+      var profile=await loadProfile(data.user);
+      profile.name=nick;
+      await loginOK(profile);
+    }
   } else {
-    msg.innerHTML='<div class="form-msg msg-ok">✅ 환영합니다!</div>';
-    setTimeout(function(){loginOK({name:email.split("@")[0],email:email,provider:'email',avatar:email.charAt(0).toUpperCase()});},600);
+    // 로그인
+    var {data:loginData,error:loginErr}=await supa.auth.signInWithPassword({email:email,password:pw});
+    btn.disabled=false;
+    if(loginErr){
+      var lMsg='이메일 또는 비밀번호가 틀렸습니다';
+      if(loginErr.message.includes('Email not confirmed'))lMsg='이메일 인증이 필요합니다. 받은 편지함을 확인해주세요';
+      msg.innerHTML='<div class="form-msg msg-err">'+lMsg+'</div>';return;
+    }
+    var profile=await loadProfile(loginData.user);
+    await loginOK(profile);
   }
 }
 
@@ -2827,12 +2893,12 @@ async function submitRv(){
       createdAt:now,
       isMine:true
     };
-    var {error:rpErr}=await supa.from('user_events').upsert({
+    var {error:rpErr}=await supa.from('user_events').insert({
       user_id:user.id,
-      event_id:rvId+'__reply__'+_rvReplyTo.rvId+'__'+Date.now(),
+      event_id:rvId+'__rp__'+Date.now(),
       action:'reply',
       detail:JSON.stringify({rvId:_rvReplyTo.rvId,text:txt,author:myName,createdAt:now})
-    },{onConflict:'user_id,event_id,action'});
+    });
     if(rpErr){
       console.error('[리뷰]',rpErr);
       showToast('등록 실패: '+rpErr.message);
@@ -2863,13 +2929,23 @@ async function submitRv(){
       isMine:true,
       replies:[]
     };
-    // user_id+event_id+action 중복 방지 upsert (같은 공연엔 리뷰 1개)
-    var {error:rvErr}=await supa.from('user_events').upsert({
-      user_id:user.id,
-      event_id:rvId,
-      action:'review',
-      detail:JSON.stringify({rating:rvRating,text:txt,author:myName,createdAt:now})
-    },{onConflict:'user_id,event_id,action'});
+    var detailJson=JSON.stringify({rating:rvRating,text:txt,author:myName,createdAt:now});
+    // 기존 리뷰 있는지 확인
+    var {data:existing}=await supa.from('user_events')
+      .select('id').eq('user_id',user.id).eq('event_id',rvId).eq('action','review').maybeSingle();
+    var rvErr;
+    if(existing){
+      // 기존 리뷰 업데이트
+      var {error:e2}=await supa.from('user_events')
+        .update({detail:detailJson})
+        .eq('user_id',user.id).eq('event_id',rvId).eq('action','review');
+      rvErr=e2;
+    } else {
+      // 새 리뷰 insert
+      var {error:e3}=await supa.from('user_events')
+        .insert({user_id:user.id,event_id:rvId,action:'review',detail:detailJson});
+      rvErr=e3;
+    }
     if(rvErr){
       console.error('[리뷰]',rvErr);
       showToast('등록 실패: '+rvErr.message);
