@@ -293,11 +293,11 @@ a{color:inherit;text-decoration:none}
 .gauge-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .gauge-num{font-size:13px;font-weight:800}
 /* 온도계 바 (랭킹 리스트 전용) */
-.thermo{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;width:46px;cursor:pointer;position:relative;margin-top:2px}
-.thermo-tube{width:10px;height:52px;border-radius:6px 6px 0 0;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-bottom:none;overflow:hidden;position:relative}
-.thermo-mercury{position:absolute;bottom:0;left:0;right:0;border-radius:4px 4px 0 0;transition:height 0.9s cubic-bezier(0.34,1.56,0.64,1)}
-.thermo-bulb{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.1);margin-top:0;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
-.thermo-num{font-size:11.5px;font-weight:800;margin-top:3px;line-height:1}
+.thermo{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;width:36px;cursor:pointer;position:relative;margin-top:0}
+.thermo-tube{width:8px;height:36px;border-radius:5px 5px 0 0;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-bottom:none;overflow:hidden;position:relative}
+.thermo-mercury{position:absolute;bottom:0;left:0;right:0;border-radius:3px 3px 0 0;transition:height 0.9s cubic-bezier(0.34,1.56,0.64,1)}
+.thermo-bulb{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.1);margin-top:0;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
+.thermo-num{font-size:10.5px;font-weight:800;margin-top:2px;line-height:1}
 /* 온도 툴팁 */
 .thermo-tip{
   display:none;position:fixed;
@@ -890,45 +890,72 @@ function gr(e){
 }
 function scDetail(e,allEv){
   var d=dd(e.ed);
-  // 박스오피스는 ed 없음 → 종료 처리 안 함, d=999로 고정
   var isBoxoffice=e.ct==='박스오피스';
   if(isBoxoffice&&!e.ed)d=999;
   if(e.st==='ended'||(!isBoxoffice&&d<0))return{total:0,s1:0,s2:0,s3:0,s4:0,s5:0,s6:0,s7:0,d:d,br:0};
   var arr=allEv||ev;
-  // ① 네이버 검색량 (max 30점)
-  var s1=Math.round((Number(e.naver_score)||0)*0.3);
-  // ② 예매순위 (max 40점) — 최고 배점, 1위=40점, 2위=38점...
+
+  // ① 네이버 검색량 (max 35점) — 실제 대중 관심도 핵심 지표
+  // 카테고리별 최대값 기준 정규화로 전시/클래식도 공정하게
+  var naverRaw=Number(e.naver_score)||0;
+  var catPeers=arr.filter(function(x){return x.ct===e.ct&&x.st!=='ended';});
+  var catMaxNaver=1;
+  catPeers.forEach(function(x){if((Number(x.naver_score)||0)>catMaxNaver)catMaxNaver=Number(x.naver_score);});
+  var s1=naverRaw>0?Math.round((naverRaw/catMaxNaver)*35):0;
+
+  // ② 예매순위 (max 35점) — 배점 낮추고 카테고리 내 상대 순위 반영
+  // 순위 없는 카테고리(전시/무료) 불이익 완화: 예매순위 없으면 s1(네이버)로 보정
   var br=Number(e.boxoffice_rank)||0;
-  var s2=br>0?Math.max(0,42-(br*2)):0;
-  // ③ 마감 임박 (max 25점)
-  var s3=d<=3?25:d<=7?15:d<=14?7:0;
-  // ④ 신규 오픈 (max 10점)
+  var s2=br>0?Math.max(0,37-(br*2)):0;
+  // 순위 없어도 네이버 검색량이 높으면 일부 보정 (전시·클래식 카테고리 공정성)
+  var noRankCats=['전시/미술','클래식/무용','복합'];
+  if(br===0&&noRankCats.indexOf(e.ct)>=0&&naverRaw>0){
+    s2=Math.round((naverRaw/catMaxNaver)*15); // 최대 15점 보정
+  }
+
+  // ③ 마감 임박 (max 12점) — 기존 25점에서 대폭 축소
+  // "곧 끝난다"는 이유만으로 인기 상위가 되는 왜곡 방지
+  var s3=d<=1?12:d<=3?8:d<=7?4:0;
+
+  // ④ 신규 오픈 (max 6점) — 기존 10점에서 축소
+  // "막 열었다"는 이유만으로 점수 boost 최소화
   var s4=0;
-  if(e.ca){var a=Math.ceil((NOW-new Date(e.ca))/864e5);if(a<=7)s4=10;}
-  // ⑤ 희소성 (max 12점)
+  if(e.ca){var a=Math.ceil((NOW-new Date(e.ca))/864e5);if(a<=3)s4=6;else if(a<=7)s4=3;}
+
+  // ⑤ 희소성/공연기간 (max 7점) — 기존 12점에서 축소, ③+⑤ 중복 boost 차단
+  // 단기공연이라고 자동 상위 노출되는 왜곡 제거
   var s5=0;
-  if(e.sd&&e.ed){var span=Math.ceil((new Date(e.ed)-new Date(e.sd))/864e5);s5=span<=7?12:span<=14?6:0;}
-  // ⑥ 무료입장 (8점)
-  var s6=(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))?8:0;
-  // ⑦ 사용자 반응 (max 20점) — 로그 스케일로 소수점 쏠림 방지
+  if(e.sd&&e.ed){
+    var span=Math.ceil((new Date(e.ed)-new Date(e.sd))/864e5);
+    // 마감임박 점수 받고 있으면 희소성 절반만
+    var s5base=span<=3?7:span<=7?5:span<=14?2:0;
+    s5=(d<=7)?Math.floor(s5base*0.5):s5base;
+  }
+
+  // ⑥ 무료입장 (5점) — 기존 8점에서 축소, 무료라는 이유만으로 과도하게 올라가지 않게
+  var s6=(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0))?5:0;
+
+  // ⑦ 사용자 반응 (max 30점) — 기존 20점에서 상향, 실제 유저 반응이 핵심 지표
+  // 카테고리 내 상대 정규화로 전시/클래식도 자기 카테고리 안에서 공정하게 경쟁
   var maxVL=1,maxLL=1,maxBL=1;
-  arr.forEach(function(x){
+  catPeers.forEach(function(x){
     var vl=Math.log1p(x.vc||0),ll=Math.log1p(x.lc||0),bl=Math.log1p(x.bc||0);
     if(vl>maxVL)maxVL=vl;if(ll>maxLL)maxLL=ll;if(bl>maxBL)maxBL=bl;
   });
   var s7=Math.round(
-    Math.log1p(e.vc||0)/maxVL*8+
-    Math.log1p(e.lc||0)/maxLL*8+
-    Math.log1p(e.bc||0)/maxBL*4
+    Math.log1p(e.vc||0)/maxVL*12+   // 조회 12점
+    Math.log1p(e.lc||0)/maxLL*12+   // 좋아요 12점
+    Math.log1p(e.bc||0)/maxBL*6     // 저장 6점
   );
+
   var total=s1+s2+s3+s4+s5+s6+s7;
   return{total:total,s1:s1,s2:s2,s3:s3,s4:s4,s5:s5,s6:s6,s7:s7,d:d,br:br};
 }
 function sc(e,allEv){return scDetail(e,allEv).total;}
-function tc(s,mx){return s;}  // 원점수 그대로 사용
-function tC(t){if(t>=80)return"#ff5e3a";if(t>=55)return"#ff9500";if(t>=25)return"#4fc3f7";return"#90a4ae";}
-function tB(t){if(t>=80)return"rgba(255,94,58,0.15)";if(t>=55)return"rgba(255,149,0,0.15)";if(t>=25)return"rgba(79,195,247,0.12)";return"rgba(144,164,174,0.12)";}
-var SCORE_MAX=135; // 전체 점수 최대 (40+25+30+10+12+8+20)
+function tc(s,mx){return s;}
+function tC(t){if(t>=70)return"#ff5e3a";if(t>=45)return"#ff9500";if(t>=20)return"#4fc3f7";return"#90a4ae";}
+function tB(t){if(t>=70)return"rgba(255,94,58,0.15)";if(t>=45)return"rgba(255,149,0,0.15)";if(t>=20)return"rgba(79,195,247,0.12)";return"rgba(144,164,174,0.12)";}
+var SCORE_MAX=130; // 35+35+12+6+7+5+30
 function gauge(t,sz){sz=sz||46;var c=tC(t),pct=Math.min(t/SCORE_MAX*100,100),r=(sz-6)/2,ci=2*Math.PI*r,of=ci-(ci*pct/100);return'<div class="gauge" style="width:'+sz+'px;height:'+sz+'px"><svg viewBox="0 0 '+sz+' '+sz+'"><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="#2a2a38" stroke-width="3"/><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="'+c+'" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="'+ci+'" stroke-dashoffset="'+of+'" transform="rotate(-90 '+sz/2+' '+sz/2+')"/></svg><div class="gauge-val"><span class="gauge-num" style="color:'+c+'">'+t+'°</span></div></div>';}
 function thermo(t,ev_obj,mx){
   var c=tC(t);
@@ -1114,6 +1141,7 @@ function submitEmail(){
 /* 홈 */
 function renderHome(){
   curNav="home";
+  sIdx=0;  // 슬라이드 인덱스 리셋
   var ranked=getScoredEvents();
   var mx=ranked.length?ranked[0]._s:1;
   var hot5=ranked.slice(0,6),closing=ranked.filter(function(e){return dd(e.ed)>=0&&dd(e.ed)<=7&&e.st==="ongoing"&&e.ct!=='박스오피스';}).sort(function(a,b){return dd(a.ed)-dd(b.ed);}).slice(0,4);
@@ -1205,7 +1233,7 @@ function renderHome(){
         },{passive:true});
       },100);
     })();
-    sTimer=setInterval(function(){sIdx=(sIdx+1)%slides.length;goSlide(sIdx);},5000);
+    sTimer=setInterval(function(){sIdx=(sIdx+1)%slides.length;goSlide(sIdx);},7000);
   }
   // 큐레이션 테마 카드
   var curations=getCurations();
@@ -2122,13 +2150,13 @@ function _buildDetailHTML(id,e,kd){
   // ── 온도 카드: 요약 + hover 브레이크다운 ──
   var rank=all.findIndex(function(x){return x.id===id;})+1;
   var bdRows2=[
-    {l:'예매순위',   v:sd2.s2,max:40,hint:sd2.br>0?sd2.br+'위':'미집계'},
-    {l:'마감 임박',  v:sd2.s3,max:25,hint:sd2.d>=0?'D-'+sd2.d:'종료'},
-    {l:'네이버 검색',v:sd2.s1,max:30,hint:e.naver_score||0},
-    {l:'신규 오픈',  v:sd2.s4,max:10,hint:sd2.s4?'7일 이내':''},
-    {l:'희소성(기간)',v:sd2.s5,max:12,hint:''},
-    {l:'무료입장',   v:sd2.s6,max:8, hint:sd2.s6?'무료':''},
-    {l:'사용자 반응',v:sd2.s7,max:20,hint:'조회/좋아요/저장'},
+    {l:'네이버 검색',v:sd2.s1,max:35,hint:e.naver_score||0},
+    {l:'예매순위',   v:sd2.s2,max:35,hint:sd2.br>0?sd2.br+'위':'카테고리보정'},
+    {l:'사용자 반응',v:sd2.s7,max:30,hint:'조회/좋아요/저장'},
+    {l:'마감 임박',  v:sd2.s3,max:12,hint:sd2.d>=0?'D-'+sd2.d:'종료'},
+    {l:'희소성(기간)',v:sd2.s5,max:7, hint:''},
+    {l:'신규 오픈',  v:sd2.s4,max:6, hint:sd2.s4?'7일 이내':''},
+    {l:'무료입장',   v:sd2.s6,max:5, hint:sd2.s6?'무료':''},
   ];
   var bdHtml2='';
   bdRows2.forEach(function(r){
@@ -2445,7 +2473,16 @@ function renderTagPage(key){
     if(isCuration) displayList=displayList.slice(0,20);
     displayList.forEach(function(e,i){
       var t=tc(e._s,mx);
-      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':(e.district||gr(e)))+'</div><div class="rk-sub-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div></div>'+thermo(t,e,mx)+'</div>';
+      var evVibes=[];
+      if(e.vibes){evVibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
+      var vibeHtml=evVibes.length
+        ?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">'
+          +evVibes.slice(0,4).map(function(tag){
+            return'<span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.2)">'+tag+'</span>';
+          }).join('')
+          +'</div>'
+        :'';
+      h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'+rkThumb(e)+'<div class="rk-info"><div class="rk-title">'+e.t+'</div><div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':(e.district||gr(e)))+'</div><div class="rk-sub-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div>'+vibeHtml+'</div></div>'+thermo(t,e,mx)+'</div>';
     });
   }
   document.getElementById("page-tag").innerHTML=h;
@@ -2667,10 +2704,10 @@ initApp();
         </div>
       </div>
       <div class="tg-temp-scale">
-        <div class="tg-temp-item" style="color:#ff5e3a"><span class="tg-temp-dot" style="background:#ff5e3a"></span>80°+ <span class="tg-temp-tag">🔥 극열</span></div>
-        <div class="tg-temp-item" style="color:#ff9500"><span class="tg-temp-dot" style="background:#ff9500"></span>55~79° <span class="tg-temp-tag">🌡️ 뜨거움</span></div>
-        <div class="tg-temp-item" style="color:#4fc3f7"><span class="tg-temp-dot" style="background:#4fc3f7"></span>25~54° <span class="tg-temp-tag">💧 보통</span></div>
-        <div class="tg-temp-item" style="color:#90a4ae"><span class="tg-temp-dot" style="background:#90a4ae"></span>~24° <span class="tg-temp-tag">❄️ 차가움</span></div>
+        <div class="tg-temp-item" style="color:#ff5e3a"><span class="tg-temp-dot" style="background:#ff5e3a"></span>70°+ <span class="tg-temp-tag">🔥 극열</span></div>
+        <div class="tg-temp-item" style="color:#ff9500"><span class="tg-temp-dot" style="background:#ff9500"></span>45~69° <span class="tg-temp-tag">🌡️ 뜨거움</span></div>
+        <div class="tg-temp-item" style="color:#4fc3f7"><span class="tg-temp-dot" style="background:#4fc3f7"></span>20~44° <span class="tg-temp-tag">💧 보통</span></div>
+        <div class="tg-temp-item" style="color:#90a4ae"><span class="tg-temp-dot" style="background:#90a4ae"></span>~19° <span class="tg-temp-tag">❄️ 차가움</span></div>
       </div>
     </div>
 
@@ -2679,26 +2716,38 @@ initApp();
 
       <div class="tg-item">
         <div class="tg-item-head">
-          <div class="tg-item-icon" style="background:rgba(255,94,58,0.15)">
-            <svg width="16" height="16" fill="none" stroke="#ff5e3a" stroke-width="1.8" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="tg-item-title">예매순위 <span class="tg-item-max">최대 45°</span></div>
-        </div>
-        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:100%;background:#ff5e3a"></div></div>
-        <div class="tg-item-desc">KOPIS(공연예술통합전산망) 박스오피스 순위 기반. 1위=45°, 2위=43°… 순으로 감소. 전시·무료문화처럼 <strong>예매 데이터가 없는 공연은 패널티 없이 기본 12°</strong>가 부여됩니다.</div>
-        <div class="tg-item-source">📡 출처: KOPIS 박스오피스 순위 (주 1회 이상 갱신)</div>
-      </div>
-
-      <div class="tg-item">
-        <div class="tg-item-head">
           <div class="tg-item-icon" style="background:rgba(255,149,0,0.15)">
             <svg width="16" height="16" fill="none" stroke="#ff9500" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/></svg>
           </div>
           <div class="tg-item-title">네이버 검색량 <span class="tg-item-max">최대 35°</span></div>
         </div>
-        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:78%;background:#ff9500"></div></div>
-        <div class="tg-item-desc">네이버 검색 API로 수집한 검색량을 정규화해 산출. 예매 없이 입소문으로 알려진 전시·전시/미술을 <strong>공정하게 평가</strong>하는 핵심 지표입니다.</div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:100%;background:#ff9500"></div></div>
+        <div class="tg-item-desc">네이버 검색 API로 수집한 검색량을 <strong>카테고리 내 최대값 기준</strong>으로 정규화. 전시·클래식도 자기 장르 안에서 공정하게 평가받는 핵심 지표입니다.</div>
         <div class="tg-item-source">📡 출처: 네이버 DataLab / 검색 API (주 1회 이상 갱신)</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(255,94,58,0.15)">
+            <svg width="16" height="16" fill="none" stroke="#ff5e3a" stroke-width="1.8" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="tg-item-title">예매순위 <span class="tg-item-max">최대 35°</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:100%;background:#ff5e3a"></div></div>
+        <div class="tg-item-desc">KOPIS 박스오피스 순위 기반. 1위=35°, 2위=33°… 순으로 감소. <strong>전시·클래식 등 예매 데이터가 없는 장르는 검색량 비례 최대 15°로 공정하게 보정</strong>됩니다.</div>
+        <div class="tg-item-source">📡 출처: KOPIS 박스오피스 순위 (주 1회 이상 갱신)</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(79,195,247,0.15)">
+            <svg width="16" height="16" fill="none" stroke="#4fc3f7" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div class="tg-item-title">사용자 반응 <span class="tg-item-max">최대 30°</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:86%;background:#4fc3f7"></div></div>
+        <div class="tg-item-desc">조회(12°)·좋아요(12°)·저장(6°) 합산. <strong>카테고리 내 상대 정규화</strong>로 전시·클래식도 자기 장르 안에서 공정하게 반영. 서비스가 활성화될수록 신뢰도가 높아지는 핵심 지표입니다.</div>
+        <div class="tg-item-source">📐 기준: 컬처온도 앱 내 사용자 행동 데이터</div>
       </div>
 
       <div class="tg-item">
@@ -2706,23 +2755,11 @@ initApp();
           <div class="tg-item-icon" style="background:rgba(79,195,247,0.15)">
             <svg width="16" height="16" fill="none" stroke="#4fc3f7" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg>
           </div>
-          <div class="tg-item-title">마감 임박 <span class="tg-item-max">최대 20°</span></div>
+          <div class="tg-item-title">마감 임박 <span class="tg-item-max">최대 12°</span></div>
         </div>
-        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:44%;background:#4fc3f7"></div></div>
-        <div class="tg-item-desc">종료까지 남은 일수에 따라 부여. D-0(오늘 마감)=20°, D-3이내=15°, D-7이내=8°, D-14이내=3°. 곧 끝나는 문화행사에 관심이 집중되는 현상을 반영합니다.</div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:34%;background:#4fc3f7"></div></div>
+        <div class="tg-item-desc">D-0(오늘마감)=12°, D-3이내=8°, D-7이내=4°. <strong>기존 대비 대폭 축소</strong>해 "곧 끝나는 것 = 인기"로 왜곡되던 문제를 해결했습니다.</div>
         <div class="tg-item-source">📐 기준: 공연 종료일 기준 D-Day 계산</div>
-      </div>
-
-      <div class="tg-item">
-        <div class="tg-item-head">
-          <div class="tg-item-icon" style="background:rgba(191,90,242,0.15)">
-            <svg width="16" height="16" fill="none" stroke="#bf5af2" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="tg-item-title">신규 오픈 <span class="tg-item-max">최대 10°</span></div>
-        </div>
-        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:22%;background:#bf5af2"></div></div>
-        <div class="tg-item-desc">등록 후 7일 이내 공연에 부여. 첫날≈10°에서 7일차≈4°로 자연스럽게 감소. 새 문화행사가 초기에 노출될 기회를 확보합니다.</div>
-        <div class="tg-item-source">📐 기준: 컬처온도 DB 최초 등록일 기준</div>
       </div>
 
       <div class="tg-item">
@@ -2732,9 +2769,21 @@ initApp();
           </div>
           <div class="tg-item-title">희소성 <span class="tg-item-max">최대 7°</span></div>
         </div>
-        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:16%;background:#30d158"></div></div>
-        <div class="tg-item-desc">전체 공연기간이 짧을수록 높음. 7일 이내=7°, 14일 이내=3°. 단, 마감임박과 합산 상한 22°를 두어 단기 공연의 과도한 보너스를 제한합니다.</div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:20%;background:#30d158"></div></div>
+        <div class="tg-item-desc">전체 공연기간이 짧을수록 높음. 3일 이내=7°, 7일 이내=5°, 14일 이내=2°. <strong>마감임박 점수를 동시에 받는 경우 절반만 부여</strong>해 단기 공연의 중복 boost를 차단합니다.</div>
         <div class="tg-item-source">📐 기준: 공연 시작일~종료일 전체 기간</div>
+      </div>
+
+      <div class="tg-item">
+        <div class="tg-item-head">
+          <div class="tg-item-icon" style="background:rgba(191,90,242,0.15)">
+            <svg width="16" height="16" fill="none" stroke="#bf5af2" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="tg-item-title">신규 오픈 <span class="tg-item-max">최대 6°</span></div>
+        </div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:17%;background:#bf5af2"></div></div>
+        <div class="tg-item-desc">등록 후 3일 이내=6°, 7일 이내=3°. <strong>기존 대비 축소</strong>해 "막 열었다"는 이유만으로 과도하게 상위 노출되는 왜곡을 방지합니다.</div>
+        <div class="tg-item-source">📐 기준: 컬처온도 DB 최초 등록일 기준</div>
       </div>
 
       <div class="tg-item">
@@ -2744,12 +2793,10 @@ initApp();
           </div>
           <div class="tg-item-title">무료입장 <span class="tg-item-max">5° 보너스</span></div>
         </div>
-        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:11%;background:#2ecc71"></div></div>
+        <div class="tg-item-bar-wrap"><div class="tg-item-bar" style="width:14%;background:#2ecc71"></div></div>
         <div class="tg-item-desc">무료 공연·전시에 부여하는 <strong>접근성 보너스</strong>. 가격 부담 없이 즐길 수 있는 문화행사가 소외되지 않도록 소폭 우대합니다.</div>
         <div class="tg-item-source">📐 기준: 가격 정보 "무료" 포함 또는 관리자 설정</div>
       </div>
-
-    </div>
 
     <div class="tg-footer">
       <svg width="13" height="13" fill="none" stroke="var(--mu)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -2801,13 +2848,13 @@ function closeTempGuide(){
     var sd=scDetail(evObj,ev);
     var c=tC(tc(sd.total));
     var rows=[
-      {l:'예매순위',   v:sd.s2,max:40,hint:sd.br>0?sd.br+'위':'미집계'},
-      {l:'마감 임박',  v:sd.s3,max:25,hint:sd.d>=0?'D-'+sd.d:'종료'},
-      {l:'네이버 검색',v:sd.s1,max:30,hint:evObj.naver_score||0},
-      {l:'신규 오픈',  v:sd.s4,max:10,hint:sd.s4?'7일 이내':''},
-      {l:'희소성(기간)',v:sd.s5,max:12,hint:''},
-      {l:'무료입장',   v:sd.s6,max:8, hint:sd.s6?'무료':''},
-      {l:'사용자 반응',v:sd.s7,max:20,hint:'조회/좋아요/저장'},
+      {l:'네이버 검색',v:sd.s1,max:35,hint:evObj.naver_score||0},
+      {l:'예매순위',   v:sd.s2,max:35,hint:sd.br>0?sd.br+'위':'카테고리보정'},
+      {l:'사용자 반응',v:sd.s7,max:30,hint:'조회/좋아요/저장'},
+      {l:'마감 임박',  v:sd.s3,max:12,hint:sd.d>=0?'D-'+sd.d:'종료'},
+      {l:'희소성(기간)',v:sd.s5,max:7, hint:''},
+      {l:'신규 오픈',  v:sd.s4,max:6, hint:sd.s4?'7일 이내':''},
+      {l:'무료입장',   v:sd.s6,max:5, hint:sd.s6?'무료':''},
     ];
 
     // 헤더: 온도 수치
