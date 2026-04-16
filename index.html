@@ -65,7 +65,7 @@ a{color:inherit;text-decoration:none}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 :root{--bg:#111114;--sf:#1a1a20;--card:#1e1e28;--bd:#2a2a38;--bdL:#21212e;--tx:#ededf0;--sub:#8d8da0;--mu:#505068;--hot:#ff5e3a;--warm:#ff9500;--cool:#4fc3f7;}
 .sk{background:linear-gradient(90deg,#1e1e28 0%,#252530 50%,#1e1e28 100%);background-size:200px 100%;animation:skl 1.3s ease-in-out infinite;border-radius:6px}
-#app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);position:relative;overflow-x:hidden}
+#app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);position:relative;overflow-x:hidden;width:100%}
 .page{display:none;animation:fi 0.25s ease;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 .page.active{display:block}
 .login-page{padding-bottom:0!important;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}.page.login-page:not(.active){display:none!important}
@@ -87,10 +87,12 @@ a{color:inherit;text-decoration:none}
 .credit-marquee-track:hover{animation-play-state:paused}
 .credit-marquee-item{display:inline-flex;align-items:center;gap:6px;padding:0 20px;font-size:10px;color:rgba(255,255,255,0.25);font-weight:500;white-space:nowrap;flex-shrink:0}
 .credit-marquee-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0}
+.credit-block{
   padding:20px 20px 80px;
   display:flex;flex-direction:column;align-items:center;gap:0;
   border-top:1px solid var(--bdL);
   margin-top:8px;
+  width:100%;box-sizing:border-box;overflow:hidden;
 }
 .credit-row{
   display:flex;align-items:center;justify-content:center;
@@ -272,19 +274,19 @@ a{color:inherit;text-decoration:none}
 .region-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 20px}
 .region-item{padding:14px 4px;border-radius:12px;border:1.5px solid var(--bd);background:var(--card);color:var(--sub);font-size:14px;font-weight:600;text-align:center;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:48px;display:flex;align-items:center;justify-content:center}
 .region-item.on{color:#fff;background:var(--hot);border-color:var(--hot)}
-.rk{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bdL);cursor:pointer;transition:background 0.12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.rk{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--bdL);cursor:pointer;transition:background 0.12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden;width:100%;box-sizing:border-box}
 .rk:hover{background:var(--sf)}
 .rk-n{width:34px;text-align:center;flex-shrink:0;margin-right:8px}
 .rk-n-v{font-size:18px;font-weight:800;line-height:1}
 .rk-ch{margin-top:4px;font-size:10px;font-weight:700;line-height:1}
 .rk-ch.up{color:var(--hot)}.rk-ch.dn{color:var(--cool)}.rk-ch.sm{color:var(--mu)}
 .rk-ch.new-entry{color:#bf5af2;font-size:9px}
-.rk-img{width:54px;height:72px;border-radius:6px;overflow:hidden;flex-shrink:0;margin-right:14px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px}
-.rk-info{flex:1;min-width:0;margin-right:10px}
-.rk-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;line-height:1.2}
-.rk-sub{font-size:12px;color:var(--sub);display:flex;flex-direction:column;gap:3px}
-.rk-sub-loc{display:flex;align-items:center;gap:3px}
-.rk-sub-date{font-size:10.5px;color:var(--mu)}
+.rk-img{width:48px;height:64px;border-radius:6px;overflow:hidden;flex-shrink:0;margin-right:12px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px}
+.rk-info{flex:1;min-width:0;margin-right:8px;overflow:hidden}
+.rk-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;line-height:1.2}
+.rk-sub{font-size:11px;color:var(--sub);display:flex;flex-direction:column;gap:3px}
+.rk-sub-loc{display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-sub-date{font-size:10px;color:var(--mu)}
 /* 온도 게이지 (원형 - 상세/홈 등 유지) */
 .gauge{flex-shrink:0;position:relative}
 .gauge svg{width:100%;height:100%}
@@ -1355,7 +1357,7 @@ function renderHome(){
   +'</div>'+'<div class="h-scroll">'+openSoon.map(function(e){var s=dd(e.sd);return'<div class="h-card" onclick="viewEv(\''+e.id+'\')">'+hThumb(e,'<div class="h-card-temp" style="background:rgba(255,149,0,0.2);color:#ff9500">D-'+s+'</div>')+'<div class="h-card-title">'+e.t+'</div><div class="h-card-sub">'+e.ct+' · '+(e.ct==='박스오피스'?(e.vibes||'영화'):e.lo)+'</div><div class="h-card-date">'+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div>';}).join('')+'</div>';}
   document.getElementById("page-home").innerHTML=h+'<div class="credit-block"><div class="credit-marquee-wrap"><div class="credit-marquee-track"><span class="credit-marquee-item"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">Powered by NAVER OpenAPI</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🏛️ 한국문화정보원</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🎬 영화진흥위원회 KOBIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">Powered by NAVER OpenAPI</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🏛️ 한국문화정보원</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🎬 영화진흥위원회 KOBIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">Powered by NAVER OpenAPI</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🏛️ 한국문화정보원</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🎬 영화진흥위원회 KOBIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" stroke-linecap="round" stroke-linejoin="round"/></svg>공연예술통합전산망 KOPIS</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">Powered by NAVER OpenAPI</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🏛️ 한국문화정보원</span><span class="credit-marquee-dot"></span><span class="credit-marquee-item">🎬 영화진흥위원회 KOBIS</span><span class="credit-marquee-dot"></span></div></div>'
   +'<div style="display:flex;align-items:center;justify-content:center;gap:0;padding:12px 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)"><a href="#" style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-decoration:none;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap">서비스 소개</a><a href="#" style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-decoration:none;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap">이용약관</a><a href="#" style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-decoration:none;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap">개인정보처리방침</a><a href="mailto:hello@cultureondo.com" style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;text-decoration:none;padding:0 14px;white-space:nowrap">1:1 문의하기</a></div>'
-  +'<div style="width:100%;margin-top:0;border-top:none;padding-top:20px;padding-bottom:8px">'
+  +'<div style="width:100%;margin-top:0;border-top:none;padding-top:20px;padding-bottom:8px;box-sizing:border-box;overflow:hidden">'
     // 로고 + 토글 헤더
     +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:14px">'
       +'<div style="width:18px;height:18px;border-radius:5px;background:linear-gradient(145deg,#ff5e3a,#ff2d55);display:flex;align-items:center;justify-content:center;flex-shrink:0">'
@@ -1364,7 +1366,7 @@ function renderHome(){
       +'<span style="font-size:13px;font-weight:800;background:linear-gradient(95deg,#ff6b4a,#ff2d55);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.03em">CULTURE°</span>'
       +'<span style="font-size:10px;font-weight:500;color:rgba(255,255,255,0.2)">사업자정보</span>'
     +'</div>'
-    +'<div>'
+    +'<div style="word-break:keep-all;overflow-wrap:break-word">'
       +'<div style="font-size:10.5px;color:rgba(255,255,255,0.3);line-height:2;letter-spacing:0.01em">'
         +'상호명 : 컬처온도 &nbsp;|&nbsp; 대표자 : 홍길동<br>'
         +'사업자등록번호 : 000-00-00000 &nbsp;<span style="font-size:10px;color:rgba(255,255,255,0.2);text-decoration:underline;cursor:pointer" onclick="window.open(\'https://www.ftc.go.kr/bizCommPop.do?wrkr_no=0000000000\')">[사업자정보확인]</span><br>'
@@ -1375,13 +1377,23 @@ function renderHome(){
       +'</div>'
       +'<div style="font-size:10.5px;color:rgba(255,255,255,0.3);line-height:2;letter-spacing:0.01em;margin-top:12px">'
         +'고객센터 : <span style="color:rgba(255,255,255,0.45);font-weight:600">hello@cultureondo.com</span><br>'
-        +'공용메일 : hello@cultureondo.com<br>'
         +'평일 10:00 ~ 18:00 (주말·공휴일 휴무)'
       +'</div>'
       +'<div style="font-size:9.5px;color:rgba(255,255,255,0.15);margin-top:14px;letter-spacing:0.01em">© 2025 CULTURE° All rights reserved.</div>'
   +'</div>'
   +'</div>';
 }
+function vibeTagsHtml(e){
+  var vibes=[];
+  if(e.vibes){vibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
+  if(!vibes.length)return'';
+  return'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">'
+    +vibes.slice(0,5).map(function(tag){
+      return'<span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.2)">'+tag+'</span>';
+    }).join('')
+  +'</div>';
+}
+
 function goSlide(i){sIdx=i;var tr=document.getElementById("heroTrack");if(!tr)return;tr.style.transform="translateX(-"+(i*100)+"%)";document.querySelectorAll(".hero-dot").forEach(function(d,j){d.classList.toggle("on",j===i);});}
 function goPrevSlide(){var l=document.getElementById("heroTrack").children.length;goSlide((sIdx-1+l)%l);}
 function goNextSlide(){var l=document.getElementById("heroTrack").children.length;goSlide((sIdx+1)%l);}
@@ -1490,7 +1502,9 @@ function renderRanking(){
       +rkThumb(e)
       +'<div class="rk-info"><div class="rk-title">'+e.t+'</div>'
       +'<div class="rk-sub"><div class="rk-sub-loc">'+e.ct+' · '+(e.ct==='박스오피스'?'전국':gr(e))+'</div>'
-      +'<div class="rk-sub-date">'+(e.ct==='박스오피스'?('개봉 '+e.sd+(e.boxoffice_rank>0?' · 박스오피스 '+e.boxoffice_rank+'위':'')):e.lo+' · '+fmtRange(e.sd,e.ed))+'</div></div></div>'
+      +'<div class="rk-sub-date">'+(e.ct==='박스오피스'?('개봉 '+e.sd+(e.boxoffice_rank>0?' · 박스오피스 '+e.boxoffice_rank+'위':'')):e.lo+' · '+fmtRange(e.sd,e.ed))+'</div></div>'
+      +vibeTagsHtml(e)
+      +'</div>'
       +thermo(t,e,mx)+'</div>';
   });}
   document.getElementById("page-ranking").innerHTML=h+'';
@@ -1657,27 +1671,25 @@ function renderCalendar(){
 
 // ── VIBE 태그 전체 정의 (어드민과 동일) ─────────────────────
 var VIBE_CATS={
-  '지역_서울':{label:'서울 지역',icon:'📍',tags:['강남','서초','잠실','송파','홍대','합정','마포','한남','이태원','용산','성수','뚝섬','대학로','혜화','명동','광화문','종로','여의도','영등포','강서','마곡','노원','은평','신촌','연남','구로','강동','동대문','DDP']},
-  '지역_전국':{label:'전국 지역',icon:'🗺',tags:['서울','경기','인천','부산','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주']},
-  '분위기':{label:'분위기',icon:'✨',tags:['감동적인','눈물주의','신나는','웃긴','힐링','고급스러운','독특한','감성적인','몰입감있는','따뜻한','화려한','잔잔한','웅장한','낭만적인','유쾌한','에너제틱','청량한','신비로운']},
-  '동행':{label:'동행',icon:'👥',tags:['혼자','데이트','친구','가족','어린이동반','단체','부모님과']},
-  '연령대':{label:'연령대',icon:'🎂',tags:['10대','20대','30대','40대','50대이상','전연령','유아가능']},
-  '가격대':{label:'가격대',icon:'💰',tags:['무료','1만원이하','1~3만원','3~5만원','5~10만원','10만원이상','가성비','프리미엄']},
-  '시간':{label:'시간/일정',icon:'⏰',tags:['주말추천','평일가능','당일치기','야간공연','마감임박','장기공연','단기공연']},
-  '테마':{label:'테마',icon:'🎭',tags:['사랑이야기','역사물','판타지','공포스릴러','코미디','성장이야기','음악중심','춤중심','창작초연','재연','아이돌출연','스타캐스팅','해외라이선스']},
-  '공간':{label:'공간/형태',icon:'🏛',tags:['대극장','소극장','야외공연','체험형','몰입형','인터랙티브','페스티벌형','갤러리']},
-  '목적':{label:'목적/상황',icon:'🎯',tags:['인스타감성','데이트코스','특별한날','생일선물','여행중','버킷리스트','포토스팟','힙한','트렌디']}
+  '지역_서울':{label:'서울',tags:['강남','서초','잠실','송파','홍대','합정','마포','한남','이태원','용산','성수','뚝섬','대학로','혜화','명동','광화문','종로','여의도','영등포','강서','마곡','노원','은평','신촌','연남','구로','강동','동대문','DDP']},
+  '지역_전국':{label:'전국',tags:['서울','경기','인천','부산','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주']},
+  '분위기':{label:'분위기',tags:['감동적인','눈물주의','신나는','웃긴','힐링','고급스러운','독특한','감성적인','몰입감있는','따뜻한','화려한','잔잔한','웅장한','낭만적인','유쾌한','에너제틱','청량한','신비로운']},
+  '동행':{label:'동행',tags:['혼자','데이트','친구','가족','어린이동반','단체','부모님과']},
+  '연령대':{label:'연령대',tags:['10대','20대','30대','40대','50대이상','전연령','유아가능']},
+  '가격대':{label:'가격대',tags:['무료','1만원이하','1~3만원','3~5만원','5~10만원','10만원이상','가성비','프리미엄']},
+  '시간':{label:'시간',tags:['주말추천','평일가능','당일치기','야간공연','마감임박','장기공연','단기공연']},
+  '테마':{label:'테마',tags:['사랑이야기','역사물','판타지','공포스릴러','코미디','성장이야기','음악중심','춤중심','창작초연','재연','아이돌출연','스타캐스팅','해외라이선스']},
+  '공간':{label:'공간',tags:['대극장','소극장','야외공연','체험형','몰입형','인터랙티브','페스티벌형','갤러리']},
+  '목적':{label:'목적',tags:['인스타감성','데이트코스','특별한날','생일선물','여행중','버킷리스트','포토스팟','힙한','트렌디']}
 };
 
 var _activeVibeTags=[];
-var _activeVibeCategory='';
 
 function toggleExploreVibe(tag){
   var idx=_activeVibeTags.indexOf(tag);
   if(idx>=0)_activeVibeTags.splice(idx,1);
   else _activeVibeTags.push(tag);
   renderVibeResults();
-  // 버튼 스타일 갱신
   document.querySelectorAll('.vibe-sticker').forEach(function(btn){
     var t=btn.getAttribute('data-tag');
     var on=_activeVibeTags.indexOf(t)>=0;
@@ -1700,11 +1712,13 @@ function clearVibeFilter(){
   });
   var countEl=document.getElementById('vibeFilterCount');
   if(countEl)countEl.textContent='';
-  document.getElementById('vibeResultSection').style.display='none';
+  var r=document.getElementById('vibeResultSection');
+  if(r)r.style.display='none';
 }
 
 function renderVibeResults(){
   var resultEl=document.getElementById('vibeResultSection');
+  if(!resultEl)return;
   if(!_activeVibeTags.length){resultEl.style.display='none';return;}
   var all=getScoredEvents();
   var mx=all.length?all[0]._s:1;
@@ -1712,33 +1726,23 @@ function renderVibeResults(){
     var evVibes=[];
     if(e.vibes){evVibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
     if(e.tags){var t=Array.isArray(e.tags)?e.tags:String(e.tags).split(',').map(function(v){return v.trim();}).filter(Boolean);evVibes=evVibes.concat(t);}
-    // 지역 태그 매칭
     _activeVibeTags.forEach(function(tag){
-      if(['강남','서초','잠실','송파','홍대','합정','마포','한남','이태원','용산','성수','뚝섬','대학로','혜화','명동','광화문','종로','여의도','영등포','강서','마곡','노원','은평','신촌','연남','구로','강동','동대문','DDP'].indexOf(tag)>=0){
-        if(e.district===tag||e.lo&&e.lo.indexOf(tag)>=0)evVibes.push(tag);
-      }
-      if(['서울','경기','인천','부산','대구','대전','광주','울산','세종','강원','충북','충남','전북','전남','경북','경남','제주'].indexOf(tag)>=0){
-        if(e.area&&e.area.indexOf(tag)>=0)evVibes.push(tag);
-      }
-      // 가격대 태그
+      if(e.district&&e.district===tag)evVibes.push(tag);
+      if(e.lo&&e.lo.indexOf(tag)>=0)evVibes.push(tag);
+      if(e.area&&e.area.indexOf(tag)>=0)evVibes.push(tag);
       if(tag==='무료'&&(Number(e.fr)===1||e.fr===true||(e.pr&&e.pr.indexOf('무료')>=0)))evVibes.push(tag);
-      if(tag==='주말추천')evVibes.push(tag); // vibes에 있을 경우만
     });
     return _activeVibeTags.every(function(tag){return evVibes.indexOf(tag)>=0;});
   });
-  resultEl.style.display='block';
-  var h='<div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:14px">'
-    +'<div>'
-      +'<div style="font-size:16px;font-weight:900;letter-spacing:-0.03em">VIBE 결과</div>'
-      +'<div style="font-size:12px;color:var(--sub);margin-top:2px">'+matched.length+'건 매칭</div>'
-    +'</div>'
-    +'<button onclick="clearVibeFilter()" style="font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:inherit">필터 초기화</button>'
+  var h='<div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px">'
+    +'<div style="font-size:15px;font-weight:900;letter-spacing:-0.03em">결과 <span style="font-size:13px;font-weight:600;color:var(--sub)">'+matched.length+'건</span></div>'
+    +'<button onclick="clearVibeFilter()" style="font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 8px">초기화</button>'
   +'</div>';
   if(!matched.length){
-    h+='<div style="text-align:center;padding:32px 20px;color:var(--mu);font-size:13px">선택한 VIBE에 맞는 이벤트가 없어요</div>';
+    h+='<div style="text-align:center;padding:28px 20px;color:var(--mu);font-size:13px">선택한 VIBE에 맞는 이벤트가 없어요</div>';
   } else {
-    matched.slice(0,20).forEach(function(e){
-      var t=tc2(e._s,mx);var c=tC(t);
+    matched.slice(0,30).forEach(function(e){
+      var t=tc(e._s,mx);
       h+='<div class="rk" onclick="viewEv(\''+e.id+'\')">'
         +rkThumb(e)
         +'<div class="rk-info"><div class="rk-title">'+e.t+'</div>'
@@ -1747,14 +1751,14 @@ function renderVibeResults(){
         +thermo(t,e,mx)+'</div>';
     });
   }
+  resultEl.style.display='block';
   resultEl.innerHTML=h;
 }
-
-function tc2(s,mx){return tc(s,mx);}
 
 /* 탐색 */
 function renderExplore(){
   curNav="explore";
+  window.scrollTo(0,0);
   var all=getScoredEvents();
   var scored=getScoredEvents();
   var tr=scored.slice(0,10).map(function(e,i){
@@ -1777,28 +1781,27 @@ function renderExplore(){
     return a>=0&&a<=7;
   }).slice(0,4);
 
-  var h='<div style="padding:16px 20px 10px;display:flex;align-items:center;justify-content:space-between">'
+  var h='<div style="padding:16px 20px 12px">'
     +'<h1 style="font-size:18px;font-weight:800">탐색</h1>'
     +'</div>';
 
   // 검색바
-  h+='<div style="padding:0 20px 16px"><div style="display:flex;align-items:center;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;cursor:pointer" onclick="openSearch()">'
-    +'<svg width="17" height="17" fill="none" stroke="#505068" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  h+='<div style="padding:0 20px 20px"><div style="display:flex;align-items:center;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;cursor:pointer" onclick="openSearch()">'
+    +'<svg width="16" height="16" fill="none" stroke="#505068" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
     +'<span style="font-size:14px;color:#505068">이벤트, 장소, VIBE 태그 검색...</span>'
     +'</div></div>';
 
   // ── VIBE 필터 ──
-  h+='<div style="padding:0 20px;margin-bottom:20px">';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
-  h+='<div style="font-size:15px;font-weight:900;letter-spacing:-0.03em">VIBE로 찾기</div>';
+  h+='<div style="padding:0 20px">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
+  h+='<div style="font-size:16px;font-weight:900;letter-spacing:-0.03em">VIBE 필터</div>';
   h+='<span id="vibeFilterCount" style="font-size:11px;color:var(--hot);font-weight:700"></span>';
   h+='</div>';
 
-  // 카테고리별 스티커
   Object.keys(VIBE_CATS).forEach(function(key){
     var cat=VIBE_CATS[key];
-    h+='<div style="margin-bottom:14px">';
-    h+='<div style="font-size:11px;font-weight:700;color:var(--mu);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:7px">'+cat.icon+' '+cat.label+'</div>';
+    h+='<div style="margin-bottom:16px">';
+    h+='<div style="font-size:11px;font-weight:700;color:var(--mu);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px">'+cat.label+'</div>';
     h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
     cat.tags.forEach(function(tag){
       var isOn=_activeVibeTags.indexOf(tag)>=0;
@@ -1807,14 +1810,17 @@ function renderExplore(){
         +'background:'+(isOn?'rgba(255,94,58,0.15)':'rgba(255,255,255,0.04)')+';'
         +'border:1px solid '+(isOn?'var(--hot)':'rgba(255,255,255,0.1)')+';'
         +'color:'+(isOn?'var(--hot)':'var(--sub)')+';'
-        +'transition:all 0.15s;font-family:inherit;-webkit-tap-highlight-color:transparent">'+tag+'</button>';
+        +'transition:all 0.15s;font-family:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+tag+'</button>';
     });
     h+='</div></div>';
   });
   h+='</div>';
 
-  // VIBE 결과 섹션 (동적)
-  h+='<div id="vibeResultSection" style="display:none;margin-bottom:20px"></div>';
+  // VIBE 결과
+  h+='<div id="vibeResultSection" style="display:none;border-top:1px solid var(--bdL);padding-top:16px;margin-top:4px"></div>';
+
+  // 구분선
+  h+='<div style="height:1px;background:var(--bdL);margin:8px 0 20px"></div>';
 
   // 인기 랭킹
   h+='<div style="padding:0 20px;margin-bottom:20px">'
@@ -1837,74 +1843,7 @@ function renderExplore(){
   h+='</div>';
 
   // 카테고리 SVG 아이콘 맵
-  var CAT_SVG={
-    '뮤지컬':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-    '연극':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
-    '콘서트/페스티벌':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
-    '클래식/무용':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>',
-    '전시/미술':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8l3 3 2-2 3 3"/></svg>',
-    '복합':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
-    '팝업스토어':'<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-  };
-  var CAT_COLOR={
-    '뮤지컬':'#bf5af2','연극':'#ffd60a','콘서트/페스티벌':'#ff5e3a',
-    '클래식/무용':'#4fc3f7','전시/미술':'#ff6b9d','복합':'#30d158','팝업스토어':'#ff9500'
-  };
-
-  h+='<div style="padding:0 20px;margin-bottom:20px">'
-    +'<div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">장르별</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
-  CATS.filter(function(c){return c!=='전체';}).forEach(function(c){
-    var cnt=catCnt[c]||0;
-    h+='<div style="padding:14px 8px;border-radius:14px;border:1px solid var(--bd);background:var(--sf);text-align:center;cursor:pointer;transition:all 0.15s" onclick="cCat=\''+c+'\';go(\'ranking\')">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--tx)">'+c+'</div>'
-      +'<div style="font-size:10px;color:var(--mu)">'+cnt+'건</div>'
-      +'</div>';
-  });
-  h+='</div></div>';
-
-  // 지역별
-  h+='<div style="padding:0 20px;margin-bottom:20px">'
-    +'<div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">지역별</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">';
-  REG.filter(function(r){return r!=='전국';}).forEach(function(r){
-    h+='<div style="padding:9px 4px;border-radius:10px;border:1.5px solid var(--bd);background:var(--card);text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:var(--sub);transition:all 0.15s" onclick="cRegion=\''+r+'\';go(\'ranking\')">'+r+'<div style="font-size:9px;color:var(--mu);margin-top:2px">'+regCnt[r]+'건</div></div>';
-  });
-  h+='</div></div>';
-
-  // 무료 이벤트
-  if(freeList.length){
-    h+='<div style="padding:0 20px;margin-bottom:20px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em">무료 입장</div>'
-      +'<button style="font-size:11px;color:#505068;font-weight:500;background:none;border:none;cursor:pointer" onclick="goTag(\'keyword\',\'무료입장\')">전체보기 ›</button>'
-      +'</div>';
-    freeList.forEach(function(e){
-      h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdL);cursor:pointer" onclick="viewEv(\''+e.id+'\')">'
-        +'<div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px;'+(getPoster(e)?'background-image:url('+getPoster(e)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(e)?IC[e.ct]:'')+'</div>'
-        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.t+'</div>'
-        +'<div style="font-size:11px;color:var(--sub);margin-top:2px">'+(e.ct==='박스오피스'?'개봉 '+e.sd:e.lo+' · '+fmtRange(e.sd,e.ed))+'</div></div>'
-        +'</div>';
-    });
-    h+='</div>';
-  }
-
-  // 신규 오픈
-  if(newList.length){
-    h+='<div style="padding:0 20px;margin-bottom:20px">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">신규 오픈</div>';
-    newList.forEach(function(e){
-      h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdL);cursor:pointer" onclick="viewEv(\''+e.id+'\')">'
-        +'<div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px;'+(getPoster(e)?'background-image:url('+getPoster(e)+');background-size:cover;background-position:center top;font-size:0':'')+'">'+(!getPoster(e)?IC[e.ct]:'')+'</div>'
-        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.t+'</div>'
-        +'<div style="font-size:11px;color:var(--sub);margin-top:2px">'+e.ct+' · '+(e.ct==='박스오피스'?'개봉 '+e.sd:fmtRange(e.sd,e.ed))+'</div></div>'
-        +'<span style="padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(191,90,242,0.12);color:#bf5af2;flex-shrink:0">NEW</span>'
-        +'</div>';
-    });
-    h+='</div>';
-  }
-
-  document.getElementById("page-explore").innerHTML=h+'';
+  document.getElementById("page-explore").innerHTML=h;
 }
 
 /* 마이페이지 */
@@ -2147,7 +2086,18 @@ function _buildDetailHTML(id,e,kd){
     h+='<div class="det-sub"><span>'+e.lo+'</span><span class="dot"></span><span>'+fmtRange(e.sd,e.ed)+'</span>';
     if(runtime)h+='<span class="dot"></span><span>'+runtime+'</span>';
   }
-  h+='</div></div>';
+  h+='</div>';
+  // VIBE 태그
+  var detVibes=[];
+  if(e.vibes){detVibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
+  if(detVibes.length){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px">'
+      +detVibes.map(function(tag){
+        return'<span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.85);border:1px solid rgba(255,94,58,0.2)">'+tag+'</span>';
+      }).join('')
+    +'</div>';
+  }
+  h+='</div>';
 
   h+='<div class="quick-bar">'
     +'<button class="quick-btn'+(ilk?' active':'')+'\" onclick="likeEv(\''+e.id+'\')" style="gap:5px">'
