@@ -860,7 +860,7 @@ function getKopisLink(id){
 }
 // 네이버 검색 딥링크
 function getNaverSearchLink(title){
-  return'https://search.naver.com/search.naver?query='+encodeURIComponent(title+' 예매');
+  return'https://search.naver.com/search.naver?query='+encodeURIComponent(title);
 }
 
 function dd(e){return Math.floor((new Date(e)-NOW)/864e5);}
@@ -1558,9 +1558,11 @@ function vibeTagsHtml(e){
   var vibes=[];
   if(e.vibes){vibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
   if(!vibes.length)return'';
-  return'<div style="display:flex;flex-wrap:wrap;gap:4px">'
-    +vibes.slice(0,4).map(function(tag){
-      return'<span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.2);white-space:nowrap">'+tag+'</span>';
+  return'<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">'
+    +vibes.slice(0,3).map(function(tag){
+      // 6자 초과 태그는 말줄임
+      var label=tag.length>6?tag.slice(0,5)+'…':tag;
+      return'<span style="display:inline-block;padding:2px 6px;border-radius:8px;font-size:9.5px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.18);white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis">'+label+'</span>';
     }).join('')
   +'</div>';
 }
@@ -2401,19 +2403,17 @@ function _buildDetailHTML(id,e,kd){
   // 바로가기 링크 — ticket/instagram/shop만 어드민에서, 나머지 자동
   var allLks=lks.filter(function(l){return l.type==='ticket'||l.type==='instagram'||l.type==='shop';});
   var hasTicket=allLks.some(function(l){return l.type==='ticket';});
-  // 네이버 검색은 항상 추가 (박스오피스는 '영화' 키워드 포함)
-  var naverQ=isBoxoffice?e.t+' 영화':e.t+' 예매';
+  // 네이버 검색 — 상품명만 검색 (예매 키워드 제거)
+  var naverQ=isBoxoffice?e.t+' 영화':e.t;
   allLks.push({type:'naver',url:'https://search.naver.com/search.naver?query='+encodeURIComponent(naverQ)});
 
-  // 네이버 SVG 로고 버튼 렌더러
+  // 네이버 로고 버튼 렌더러 — 공식 로고 이미지 사용
   function naverLinkBtn(url){
     return '<a href="'+url+'" target="_blank" rel="noopener" class="link-btn">'
-      +'<div class="link-icon" style="background:#03c75a;display:flex;align-items:center;justify-content:center">'
-        +'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
-          +'<path d="M13.3 12.6L10.4 8H8v8h2.7v-4.6L13.6 16H16V8h-2.7v4.6z" fill="white"/>'
-        +'</svg>'
+      +'<div class="link-icon" style="background:none;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px">'
+        +'<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAIAAABuYg/PAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAC3ElEQVR42t1Xz2sdZRQ9537fy2tSrWlq1IRaUSjd2EVBBf+AQnfFpeCilUKrLoSCC/8GQXRjpV1kUcSd0C6Lq26KunFpLaQFLSHU2Fgb8n7MnOMivte8N5mRqLxFhrOZmY9z55zv3u/eYXp4HpO6MuRJBsOeVbZXbfQklbFRGUdvvfsFu7DRTzhNMACNEvp/SxAV1vBbKMjBHG1DAAm5lD3ysYxA5HobvXMwwVMlv1m4+OLUocIiYOP91aVb/Z/bab/gQr1X4/BXix8IMpAZv/Z+f2vlsx4V4+42JggBwxBOTL/8Qmt2+Hxp4fxrdz/usEjIlp5K7ePTR4Zv5/MBiluEOyoIyLUwNtQVXECC+y6P7Vv85Nl3is6j8JaLElwOFmyUXdgNhE3BKAQ4RIupsC7Mnzy9/83N3jqc4JEFAcJoCkahDlWHgzR86fC5Bcyx6ISjstVuIAwLdag6T0D2wtTBS4vn3N2kd8qreoTrL4iVYAyycHl67vW350496K1XC7OBMGjXARqp4J6K1e4fBINh+PMjZ95ov9JXyTEb6wkDQi3GZBEX7y096D8iYGC+deDTl8543Go2EAZcj202Gmgxf7+5/OG9JYKyDD/fnp3afl4YKN1A2KisIu65/MzXqzeu/fZDZpLtagYZjcrEWgwze3AmWGSaeW/5ykr3YbCajLSaCANGHVips1Iy2yv99Qt3rhDU+LnqBjYYAbMONiXLW4BsmCg13Zq9vvbdl/e/zYy+S2G4xg1sMP9hz2ZSO8gckcggEwKyyjK3nv5o+ertjfstpgAzI8iZ1IbcwJarlfukBcs//nl3rXeosEgG+LjfgUNCID/WxtmfLn9x9OygV8Uv3TWbVLWBDzjTzXfr+3Qpldt3JCIQCSDsYPTLDowg7b/5IzIY/24sSME0Pm9o0LjtHPsMwyC3lZobxoL/MFzZ3u3cyAmOcp5gME32xwJ71EZO9Mdigsr+AvuBxcNZqLHXAAAAAElFTkSuQmCC" alt="NAVER" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<svg width=20 height=20 viewBox=&quot;0 0 24 24&quot; fill=none><path d=&quot;M13.3 12.6L10.4 8H8v8h2.7v-4.6L13.6 16H16V8h-2.7v4.6z&quot; fill=white/></svg>\'">'
       +'</div>'
-      +'<div class="link-label">네이버 검색</div>'
+      +'<div class="link-label">네이버</div>'
     +'</a>';
   }
 
@@ -2619,10 +2619,21 @@ function renderTagPage(key){
         matched=[];
       }
     }
-  } else if(type==="district"){matched=ev.filter(function(e){return e.district===val;});}
-  else if(type==="vibe"){matched=ev.filter(function(e){return(e.vibes||[]).indexOf(val)>=0;});}
-  else if(type==="keyword"){matched=ev.filter(function(e){return(e.tags||[]).indexOf(val)>=0;});}
-  else{matched=[];}
+  } else if(type==="district"){
+    matched=ev.filter(function(e){return e.district===val||gr(e)===val;});
+  } else if(type==="vibe"){
+    matched=ev.filter(function(e){
+      if(!e.vibes)return false;
+      var arr=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();});
+      return arr.indexOf(val)>=0;
+    });
+  } else if(type==="keyword"){
+    matched=ev.filter(function(e){
+      if(!e.tags)return false;
+      var arr=Array.isArray(e.tags)?e.tags:String(e.tags).split(',').map(function(v){return v.trim();});
+      return arr.indexOf(val)>=0;
+    });
+  }
   var all=getScoredEvents();
   var mx=all.length?all[0]._s:1;
   var h='<div class="hdr">'
@@ -2635,8 +2646,10 @@ function renderTagPage(key){
     var relTags={};
     matched.forEach(function(e){
       if(e.district&&e.district!==val)(relTags["district::"+e.district]=relTags["district::"+e.district]||{type:"district",val:e.district,cnt:0}).cnt++;
-      (e.vibes||[]).forEach(function(v){if(v!==val)(relTags["vibe::"+v]=relTags["vibe::"+v]||{type:"vibe",val:v,cnt:0}).cnt++;});
-      (e.tags||[]).forEach(function(t){if(t!==val)(relTags["keyword::"+t]=relTags["keyword::"+t]||{type:"keyword",val:t,cnt:0}).cnt++;});
+      var evVibes=e.vibes?(Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();})):[];
+      var evTags=e.tags?(Array.isArray(e.tags)?e.tags:String(e.tags).split(',').map(function(v){return v.trim();})):[];
+      evVibes.forEach(function(v){if(v&&v!==val)(relTags["vibe::"+v]=relTags["vibe::"+v]||{type:"vibe",val:v,cnt:0}).cnt++;});
+      evTags.forEach(function(t){if(t&&t!==val)(relTags["keyword::"+t]=relTags["keyword::"+t]||{type:"keyword",val:t,cnt:0}).cnt++;});
     });
     var relArr=Object.values(relTags).sort(function(a,b){return b.cnt-a.cnt;}).slice(0,8);
     if(relArr.length){h+='<div style="padding:8px 20px 14px;border-bottom:1px solid var(--bdL)"><div style="font-size:11px;color:var(--mu);font-weight:600;margin-bottom:8px">관련 태그</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+relArr.map(function(r){return'<span class="tag '+typeCls[r.type]+'" style="font-size:11px" onclick="goTag(\''+r.type+'\',\''+r.val+'\')">'+(r.type==="keyword"?"#"+r.val:r.val)+'</span>';}).join('')+'</div></div>';}
@@ -2653,9 +2666,10 @@ function renderTagPage(key){
       var evVibes=[];
       if(e.vibes){evVibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
       var vibeHtml=evVibes.length
-        ?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">'
-          +evVibes.slice(0,4).map(function(tag){
-            return'<span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.2)">'+tag+'</span>';
+        ?'<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">'
+          +evVibes.slice(0,3).map(function(tag){
+            var label=tag.length>6?tag.slice(0,5)+'…':tag;
+            return'<span style="display:inline-block;padding:2px 6px;border-radius:8px;font-size:9.5px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.18);white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis">'+label+'</span>';
           }).join('')
           +'</div>'
         :'';
@@ -3308,14 +3322,28 @@ function closeTempGuide(){
 
     var rect=th.getBoundingClientRect();
     var tipW=216,tipH=tipEl.offsetHeight||260;
-    var left=rect.left-tipW-12;
-    if(left<4)left=rect.right+12;
-    if(left+tipW>window.innerWidth-4)left=Math.max(4,rect.left-tipW-12);
-    var top=rect.top+rect.height/2-tipH/2;
-    if(top<8)top=8;
-    if(top+tipH>window.innerHeight-8)top=window.innerHeight-tipH-8;
-    tipEl.style.left=left+'px';
-    tipEl.style.top=top+'px';
+    var isMobile=window.innerWidth<=520;
+
+    if(isMobile){
+      // 모바일: 온도계 위쪽 중앙에 표시
+      var left=rect.left+rect.width/2-tipW/2;
+      if(left<8)left=8;
+      if(left+tipW>window.innerWidth-8)left=window.innerWidth-tipW-8;
+      var top=rect.top-tipH-10;
+      if(top<8)top=rect.bottom+10; // 위가 너무 좁으면 아래로
+      tipEl.style.left=left+'px';
+      tipEl.style.top=top+'px';
+    } else {
+      // 데스크탑: 좌우에 표시
+      var left2=rect.left-tipW-12;
+      if(left2<4)left2=rect.right+12;
+      if(left2+tipW>window.innerWidth-4)left2=Math.max(4,rect.left-tipW-12);
+      var top2=rect.top+rect.height/2-tipH/2;
+      if(top2<8)top2=8;
+      if(top2+tipH>window.innerHeight-8)top2=window.innerHeight-tipH-8;
+      tipEl.style.left=left2+'px';
+      tipEl.style.top=top2+'px';
+    }
   }
 
   function hideTip(){
@@ -3347,6 +3375,30 @@ function closeTempGuide(){
       if(bd)bd.classList.remove('show');
     }
   });
+
+  // ── 모바일 터치: 온도계 터치 → 토글, 바깥 터치 → 닫힘 ──
+  var _activeTh=null;
+  document.addEventListener('touchend',function(e){
+    var th=e.target.closest('.thermo');
+    if(th){
+      e.preventDefault(); // 클릭 이벤트 중복 방지
+      if(_activeTh===th&&tipEl.style.display==='block'){
+        // 같은 온도계 다시 터치 → 닫기
+        hideTip();
+        _activeTh=null;
+      } else {
+        // 다른 온도계 터치 → 열기
+        showTip(th);
+        _activeTh=th;
+      }
+      return;
+    }
+    // 온도계 바깥 터치 → 닫기
+    if(tipEl.style.display==='block'){
+      hideTip();
+      _activeTh=null;
+    }
+  },{passive:false});
 })();
 
 
