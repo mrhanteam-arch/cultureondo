@@ -1559,10 +1559,8 @@ function vibeTagsHtml(e){
   if(e.vibes){vibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
   if(!vibes.length)return'';
   return'<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">'
-    +vibes.slice(0,3).map(function(tag){
-      // 6자 초과 태그는 말줄임
-      var label=tag.length>6?tag.slice(0,5)+'…':tag;
-      return'<span style="display:inline-block;padding:2px 6px;border-radius:8px;font-size:9.5px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.18);white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis">'+label+'</span>';
+    +vibes.slice(0,4).map(function(tag){
+      return'<span style="display:inline-block;padding:2px 5px;border-radius:8px;font-size:9px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.18);white-space:nowrap;max-width:66px;overflow:hidden;text-overflow:ellipsis">'+tag+'</span>';
     }).join('')
   +'</div>';
 }
@@ -2667,9 +2665,8 @@ function renderTagPage(key){
       if(e.vibes){evVibes=Array.isArray(e.vibes)?e.vibes:String(e.vibes).split(',').map(function(v){return v.trim();}).filter(Boolean);}
       var vibeHtml=evVibes.length
         ?'<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">'
-          +evVibes.slice(0,3).map(function(tag){
-            var label=tag.length>6?tag.slice(0,5)+'…':tag;
-            return'<span style="display:inline-block;padding:2px 6px;border-radius:8px;font-size:9.5px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.18);white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis">'+label+'</span>';
+          +evVibes.slice(0,4).map(function(tag){
+            return'<span style="display:inline-block;padding:2px 5px;border-radius:8px;font-size:9px;font-weight:600;background:rgba(255,94,58,0.1);color:rgba(255,94,58,0.8);border:1px solid rgba(255,94,58,0.18);white-space:nowrap;max-width:66px;overflow:hidden;text-overflow:ellipsis">'+tag+'</span>';
           }).join('')
           +'</div>'
         :'';
