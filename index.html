@@ -740,7 +740,7 @@ var rvDB={};  // Supabase에서 로드 (로그인 후)
 var user=null;  // Supabase 세션에서 설정
 var eMode='login';
 var rvId=null,rvRating=0;
-var CATS=["전체","뮤지컬","콘서트/페스티벌","연극","클래식/무용","미술","전시회","복합","박스오피스","팝업스토어"];
+var CATS=["전체","뮤지컬","콘서트/페스티벌","연극","전시회","클래식/무용","미술","복합","박스오피스","팝업스토어"];
 var IC={"전체":"🔥","박스오피스":"🎬","뮤지컬":"🎭","연극":"🎬","콘서트/페스티벌":"🎤","클래식/무용":"🎻","미술":"🖼️","전시회":"🏛️","복합":"✨","팝업스토어":"🏪"};
 var REG=["전국","서울","경기","인천","부산","대구","대전","광주","강원","충청","경상","전라","제주"];
 
@@ -1744,7 +1744,7 @@ function renderCalendar(){
     +'<button onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}calSel=null;renderCalendar()">›</button>'
   +'</div>';
   // 카테고리 필터 탭
-  var calCats=["전체","뮤지컬","연극","콘서트/페스티벌","클래식/무용","미술","전시회","복합","박스오피스"];
+  var calCats=["전체","뮤지컬","연극","전시회","콘서트/페스티벌","클래식/무용","미술","복합","박스오피스"];
   h+='<div style="display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none">';
   calCats.forEach(function(cat){
     var on=(calCat===cat);
