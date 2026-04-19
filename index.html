@@ -1630,19 +1630,12 @@ function renderRanking(){
     });
     return;
   }
-  // 기간 필터 — 해당 범위 내에 공연이 진행 중인 것만
-  var rng=pdRange();
+  // 기간 필터 — 날짜 범위 아닌 점수 기준 랭킹만 (일간/주간/월간은 레이블 표시용)
   var _allScored=getScoredEvents();
   var list=_allScored.filter(function(e){
     if(e.st==="ended")return false;
     if(cCat!=="전체"&&e.ct!==cCat)return false;
     if(cRegion!=="전국"&&gr(e)!==cRegion)return false;
-    // 박스오피스는 ed 없으므로 기간 필터 패스
-    if(e.ct==='박스오피스')return true;
-    if(e.sd&&e.ed){
-      var esd=new Date(e.sd),eed=new Date(e.ed);
-      if(eed<rng.s||esd>rng.e)return false;
-    }
     return true;
   }).sort(function(a,b){return b._s-a._s;});
   var mx=list.length?list[0]._s:1;
