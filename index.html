@@ -740,8 +740,8 @@ var rvDB={};  // Supabase에서 로드 (로그인 후)
 var user=null;  // Supabase 세션에서 설정
 var eMode='login';
 var rvId=null,rvRating=0;
-var CATS=["전체","뮤지컬","콘서트/페스티벌","연극","전시회","클래식/무용","미술","복합","박스오피스","팝업스토어"];
-var IC={"전체":"🔥","박스오피스":"🎬","뮤지컬":"🎭","연극":"🎬","콘서트/페스티벌":"🎤","클래식/무용":"🎻","미술":"🖼️","전시회":"🏛️","복합":"✨","팝업스토어":"🏪"};
+var CATS=["전체","뮤지컬","콘서트","페스티벌","연극","전시회","클래식/무용","미술","복합","박스오피스","팝업스토어"];
+var IC={"전체":"🔥","박스오피스":"🎬","뮤지컬":"🎭","연극":"🎬","콘서트":"🎤","페스티벌":"🎪","클래식/무용":"🎻","미술":"🖼️","전시회":"🏛️","복합":"✨","팝업스토어":"🏪"};
 var REG=["전국","서울","경기","인천","부산","대구","대전","광주","강원","충청","경상","전라","제주"];
 
 // ── 캐시 — 30분 유지 (static JSON은 더 오래 써도 OK) ──────────
@@ -805,7 +805,7 @@ function applyLocalReactions(events){
   // 카테고리 정규화 — 구 데이터 호환
   var ctMap={
     '영화':'박스오피스',
-    '콘서트':'콘서트/페스티벌','페스티벌':'콘서트/페스티벌',
+    '콘서트':'콘서트','페스티벌':'페스티벌',
     '클래식':'클래식/무용','국악':'클래식/무용','무용':'클래식/무용',
     '서양음악':'클래식/무용','한국음악':'클래식/무용',
     '복합':'복합','서커스/마술':'복합',
@@ -870,19 +870,14 @@ function getPoster(e){
   else if(e.sr){
     var srFirst=e.sr.split(',')[0].trim();
     var p=srFirst.split('|');
-    if(p.length>=2){var u=p.slice(1).join('|').trim();if(/\.(jpg|jpeg|gif|png)/i.test(u))url=u;}
+    if(p.length>=2){var u=p.slice(1).join('|').trim();if(u.indexOf('http')===0)url=u;}
   }
   if(!url)return '';
   var wasHttp=url.indexOf('http://')===0;
   url=url.replace('http://','https://');
-  // KOPIS 이미지는 프록시로 우회
-  if(url.indexOf('kopis.or.kr')>=0){
-    return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
-  }
-  // 한국문화정보원 이미지 프록시
-  if(url.indexOf('culture.go.kr')>=0)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
-  // http였던 외부 이미지 — Mixed Content 방지
-  if(wasHttp)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
+  if(url.indexOf('kopis.or.kr')>=0) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
+  if(url.indexOf('culture.go.kr')>=0) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
+  if(wasHttp) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
   return url;
 }
 function rkThumb(e){
@@ -1460,7 +1455,7 @@ function renderHome(){
     } else if(f==='ct_musical'){
       cnt=allScored.filter(function(e){return e.ct==='뮤지컬';}).length;
     } else if(f==='ct_concert'){
-      cnt=allScored.filter(function(e){return e.ct==='콘서트/페스티벌';}).length;
+      cnt=allScored.filter(function(e){return e.ct==='콘서트'||e.ct==='페스티벌';}).length;
     } else if(f==='ct_date'){
       var _dEx=['어린이','키즈','아동','동화','백설공주','인어공주','신데렐라','피노키오','뽀로로','콩순이','라푼젤','잠자는 숲','공주와','왕자와','유아','어린이날','가족뮤지컬','가족극','어린이극'];
       cnt=allScored.filter(function(e){
@@ -1715,7 +1710,7 @@ function renderCalendar(){
   }
   var yr=calYear,mo=calMonth;
   var fd=new Date(yr,mo,1).getDay(),dm=new Date(yr,mo+1,0).getDate(),pd=new Date(yr,mo,0).getDate();
-  var cc={"박스오피스":"#facc15","뮤지컬":"#bf5af2","연극":"#ffd60a","콘서트/페스티벌":"#ff5e3a","클래식/무용":"#4fc3f7","미술":"#ff6b9d","전시회":"#ff9f43","복합":"#30d158","팝업스토어":"#ff9500"};
+  var cc={"박스오피스":"#facc15","뮤지컬":"#bf5af2","연극":"#ffd60a","콘서트":"#ff5e3a","페스티벌":"#ff9f43","클래식/무용":"#4fc3f7","미술":"#ff6b9d","전시회":"#ff9f43","복합":"#30d158","팝업스토어":"#ff9500"};
   var mn=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
   function eod(d){
@@ -1744,7 +1739,7 @@ function renderCalendar(){
     +'<button onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}calSel=null;renderCalendar()">›</button>'
   +'</div>';
   // 카테고리 필터 탭
-  var calCats=["전체","뮤지컬","연극","전시회","콘서트/페스티벌","클래식/무용","미술","복합","박스오피스"];
+  var calCats=["전체","뮤지컬","콘서트","페스티벌","연극","전시회","클래식/무용","미술","복합","박스오피스"];
   h+='<div style="display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none">';
   calCats.forEach(function(cat){
     var on=(calCat===cat);
@@ -2583,7 +2578,7 @@ function renderTagPage(key){
       } else if(f==='ct_musical'){
         matched=ev.filter(function(e){return e.ct==='뮤지컬'&&e.st!=='ended';});
       } else if(f==='ct_concert'){
-        matched=ev.filter(function(e){return e.ct==='콘서트/페스티벌'&&e.st!=='ended';});
+        matched=ev.filter(function(e){return (e.ct==='콘서트'||e.ct==='페스티벌')&&e.st!=='ended';});
       } else if(f==='ct_date'){
         // 데이트 추천: 뮤지컬·클래식/무용·연극 중 아동/가족 키워드 제외 + 무료 제외
         var _dateExclude=['어린이','키즈','아동','동화','백설공주','인어공주','신데렐라','피노키오','뽀로로','콩순이','라푼젤','잠자는숲','잠자는 숲','공주와','왕자와','유아','어린이날','가족뮤지컬','가족극','어린이극'];
