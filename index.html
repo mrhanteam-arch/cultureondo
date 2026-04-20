@@ -877,7 +877,11 @@ function getPoster(e){
   for(var _i=0;_i<2;_i++){
     if(url.indexOf('pstatic.net')>=0){
       var m=url.match(/[?&]src=([^&]+)/);
-      if(m){url=decodeURIComponent(m[1]);}else break;
+      if(m){
+        var decoded=decodeURIComponent(m[1]).replace(/^["']+|["']+$/g,''); // 따옴표 제거
+        decoded=decoded.split('?type=')[0]; // type= 파라미터 제거
+        url=decoded;
+      }else break;
     }else break;
   }
   var wasHttp=url.indexOf('http://')===0;
