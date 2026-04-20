@@ -873,6 +873,13 @@ function getPoster(e){
     if(p.length>=2){var u=p.slice(1).join('|').trim();if(u.indexOf('http')===0)url=u;}
   }
   if(!url)return '';
+  // pstatic 중첩 URL — src= 파라미터에서 원본 추출 (최대 2회)
+  for(var _i=0;_i<2;_i++){
+    if(url.indexOf('pstatic.net')>=0){
+      var m=url.match(/[?&]src=([^&]+)/);
+      if(m){url=decodeURIComponent(m[1]);}else break;
+    }else break;
+  }
   var wasHttp=url.indexOf('http://')===0;
   url=url.replace('http://','https://');
   if(url.indexOf('kopis.or.kr')>=0) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
