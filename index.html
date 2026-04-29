@@ -886,7 +886,11 @@ function getPoster(e){
   }
   var wasHttp=url.indexOf('http://')===0;
   url=url.replace('http://','https://');
-  if(url.indexOf('kopis.or.kr')>=0) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
+  if(url.indexOf('kopis.or.kr')>=0){
+    var ext=url.split('.').pop().toLowerCase();
+    if(ext==='gif') return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=gif';
+    return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
+  }
   if(url.indexOf('culture.go.kr')>=0) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
   if(url.indexOf('pstatic.net')>=0||url.indexOf('naver.net')>=0) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
   if(wasHttp) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
