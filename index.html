@@ -888,7 +888,7 @@ function getPoster(e){
   url=url.replace('http://','https://');
   if(url.indexOf('kopis.or.kr')>=0){
     var ext=url.split('.').pop().toLowerCase();
-    if(ext==='gif') return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=gif';
+    if(ext==='gif') return url; // gif는 직접 사용
     return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
   }
   if(url.indexOf('culture.go.kr')>=0) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
