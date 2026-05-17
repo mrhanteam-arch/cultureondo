@@ -2455,22 +2455,29 @@ function _buildDetailHTML(id,e,kd){
     h+='<div class="det-sec"><div class="det-sec-title">소개</div><div class="det-desc">'+descText+'</div></div>';
   }
 
-  // 소개 이미지 (KOPIS styurls) — 접기/펼치기
+  // 소개 이미지 (KOPIS styurls) — 일부만 보이고 버튼 클릭 시 전체 펼치기
   if(introImgs.length){
     var imgSecId='styimg_'+id;
-    h+='<div class="det-sec" style="padding:0">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:10px;cursor:pointer" onclick="toggleStyImgs(\''+imgSecId+'\')">'
-        +'<div class="det-sec-title" style="margin-bottom:0">상세이미지 모두 보기 ('+introImgs.length+')</div>'
-        +'<div id="'+imgSecId+'_ic" style="font-size:18px;color:var(--mu);transition:transform 0.2s">⌵</div>'
-      +'</div>'
-      +'<div id="'+imgSecId+'" style="display:none">';
+    h+='<div class="det-sec" style="padding:0;overflow:hidden">'
+      // 이미지 컨테이너 — 처음엔 300px로 잘림
+      +'<div id="'+imgSecId+'" style="max-height:600px;overflow:hidden;position:relative;transition:max-height 0.4s ease">';
     introImgs.forEach(function(img){
       h+='<div style="width:100%;cursor:pointer;margin-bottom:4px;background:#1e1e28;line-height:0" onclick="showPoster(\''+img+'\')">'
         +'<img src="'+img+'" style="width:100%;height:auto;display:block" loading="lazy" '
         +'onerror="this.parentElement.style.display=\'none\'">'
         +'</div>';
     });
-    h+='</div></div>';
+    // 그라데이션 페이드 오버레이
+    h+='<div id="'+imgSecId+'_fade" style="position:absolute;bottom:0;left:0;right:0;height:150px;background:linear-gradient(rgba(0,0,0,0),var(--bg) 85%);pointer-events:none"></div>';
+    h+='</div>'
+    // 버튼
+    +'<div style="padding:14px 20px">'
+      +'<button onclick="toggleStyImgs(\''+imgSecId+'\')" id="'+imgSecId+'_btn" '
+        +'style="width:100%;padding:13px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">'
+        +'상세이미지 모두 보기 <span id="'+imgSecId+'_ic">⌵</span>'
+      +'</button>'
+    +'</div>'
+    +'</div>';
   }
 
   if(district||vibes.length||tags.length){
@@ -3254,10 +3261,21 @@ initApp();
 function toggleStyImgs(id){
   var el=document.getElementById(id);
   var ic=document.getElementById(id+'_ic');
+  var fade=document.getElementById(id+'_fade');
+  var btn=document.getElementById(id+'_btn');
   if(!el)return;
-  var isOpen=el.style.display!=='none';
-  el.style.display=isOpen?'none':'block';
-  if(ic)ic.style.transform=isOpen?'':'rotate(180deg)';
+  var isOpen=el.style.maxHeight==='none'||el.dataset.open==='1';
+  if(isOpen){
+    el.style.maxHeight='600px';
+    el.dataset.open='0';
+    if(fade)fade.style.display='block';
+    if(btn)btn.innerHTML='상세이미지 모두 보기 <span id="'+id+'_ic">⌵</span>';
+  }else{
+    el.style.maxHeight=el.scrollHeight+'px';
+    el.dataset.open='1';
+    if(fade)fade.style.display='none';
+    if(btn)btn.innerHTML='접기 <span>⌃</span>';
+  }
 }
 function showPoster(url){
   document.getElementById('posterModalImg').src=url;
