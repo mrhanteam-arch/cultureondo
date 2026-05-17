@@ -872,25 +872,29 @@ function getPoster(e){
     var p=srFirst.split('|');
     if(p.length>=2){var u=p.slice(1).join('|').trim();if(u.indexOf('http')===0)url=u;}
   }
+  // gif면 styurls 첫 번째 이미지로 폴백
+  if(url && url.split('.').pop().toLowerCase()==='gif'){
+    if(e.styurls){
+      var su=e.styurls.split(',')[0].trim();
+      if(su && su.indexOf('http')===0) url=su;
+      else url='';
+    } else url='';
+  }
   if(!url)return '';
   // pstatic 중첩 URL — src= 파라미터에서 원본 추출 (최대 2회)
   for(var _i=0;_i<2;_i++){
     if(url.indexOf('pstatic.net')>=0){
       var m=url.match(/[?&]src=([^&]+)/);
       if(m){
-        var decoded=decodeURIComponent(m[1]).replace(/^["']+|["']+$/g,''); // 따옴표 제거
-        decoded=decoded.split('?type=')[0]; // type= 파라미터 제거
+        var decoded=decodeURIComponent(m[1]).replace(/^["']+|["']+$/g,'');
+        decoded=decoded.split('?type=')[0];
         url=decoded;
       }else break;
     }else break;
   }
   var wasHttp=url.indexOf('http://')===0;
   url=url.replace('http://','https://');
-  if(url.indexOf('kopis.or.kr')>=0){
-    var ext=url.split('.').pop().toLowerCase();
-    if(ext==='gif') return url; // gif는 직접 사용
-    return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
-  }
+  if(url.indexOf('kopis.or.kr')>=0) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
   if(url.indexOf('culture.go.kr')>=0) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
   if(url.indexOf('pstatic.net')>=0||url.indexOf('naver.net')>=0) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
   if(wasHttp) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
@@ -2451,16 +2455,22 @@ function _buildDetailHTML(id,e,kd){
     h+='<div class="det-sec"><div class="det-sec-title">소개</div><div class="det-desc">'+descText+'</div></div>';
   }
 
-  // 소개 이미지 (KOPIS styurls) — 풀너비 세로 나열
+  // 소개 이미지 (KOPIS styurls) — 접기/펼치기
   if(introImgs.length){
-    h+='<div class="det-sec" style="padding:0"><div class="det-sec-title" style="padding:0 20px;margin-bottom:10px">소개 이미지</div>';
+    var imgSecId='styimg_'+id;
+    h+='<div class="det-sec" style="padding:0">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:10px;cursor:pointer" onclick="toggleStyImgs(\''+imgSecId+'\')">'
+        +'<div class="det-sec-title" style="margin-bottom:0">상세이미지 모두 보기 ('+introImgs.length+')</div>'
+        +'<div id="'+imgSecId+'_ic" style="font-size:18px;color:var(--mu);transition:transform 0.2s">⌵</div>'
+      +'</div>'
+      +'<div id="'+imgSecId+'" style="display:none">';
     introImgs.forEach(function(img){
       h+='<div style="width:100%;cursor:pointer;margin-bottom:4px;background:#1e1e28;line-height:0" onclick="showPoster(\''+img+'\')">'
         +'<img src="'+img+'" style="width:100%;height:auto;display:block" loading="lazy" '
         +'onerror="this.parentElement.style.display=\'none\'">'
         +'</div>';
     });
-    h+='</div>';
+    h+='</div></div>';
   }
 
   if(district||vibes.length||tags.length){
@@ -3241,6 +3251,14 @@ initApp();
   </div>
 </div>
 <script>
+function toggleStyImgs(id){
+  var el=document.getElementById(id);
+  var ic=document.getElementById(id+'_ic');
+  if(!el)return;
+  var isOpen=el.style.display!=='none';
+  el.style.display=isOpen?'none':'block';
+  if(ic)ic.style.transform=isOpen?'':'rotate(180deg)';
+}
 function showPoster(url){
   document.getElementById('posterModalImg').src=url;
   document.getElementById('posterModal').classList.add('on');
