@@ -1645,20 +1645,31 @@ function renderRanking(){
     });
     return;
   }
-  // 기간 필터 — 일간/주간/월간 날짜 범위에 실제로 겹치는 이벤트만 표시
-  var pd=pdRange();
+  // 기간별 정렬 — 전체 이벤트 풀, 탭마다 정렬 기준만 다름
   var _allScored=getScoredEvents();
   var list=_allScored.filter(function(e){
     if(e.st==="ended")return false;
     if(cCat!=="전체"&&e.ct!==cCat)return false;
     if(cRegion!=="전국"&&gr(e)!==cRegion)return false;
-    var eEnd=e.ed?new Date(e.ed):null;
-    var eSt=e.sd?new Date(e.sd):null;
-    if(eEnd&&eEnd<pd.s)return false;
-    if(eSt&&eSt>pd.e)return false;
     return true;
-  }).sort(function(a,b){return b._s-a._s;});
-  var mx=list.length?list[0]._s:1;
+  });
+  var today=new Date();today.setHours(0,0,0,0);
+  if(cPd==="일간"){
+    // 마감임박 순 (d 오름차순), 동점이면 naver_score
+    list.sort(function(a,b){
+      var da=a.ed?Math.ceil((new Date(a.ed)-today)/864e5):999;
+      var db=b.ed?Math.ceil((new Date(b.ed)-today)/864e5):999;
+      if(da!==db)return da-db;
+      return (Number(b.naver_score)||0)-(Number(a.naver_score)||0);
+    });
+  }else if(cPd==="주간"){
+    // 복합점수 _s 기준 (현재 온도 기본값)
+    list.sort(function(a,b){return b._s-a._s;});
+  }else{
+    // 월간: 네이버 검색 인기도 순
+    list.sort(function(a,b){return (Number(b.naver_score)||0)-(Number(a.naver_score)||0);});
+  }
+  var mx=list.length?(cPd==="월간"?Math.max.apply(null,list.map(function(e){return Number(e.naver_score)||0;})):list[0]._s):1;
 
   // ── 순위 변동: API에서 받은 prev_rank 사용 (서버 사이드 스냅샷) ──
   var regionActive=cRegion!=="전국";
