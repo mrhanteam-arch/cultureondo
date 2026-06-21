@@ -894,20 +894,20 @@ function getPoster(e){
   }
   var wasHttp=url.indexOf('http://')===0;
   url=url.replace('http://','https://');
-  if(url.indexOf('kopis.or.kr')>=0) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=85';
-  if(url.indexOf('culture.go.kr')>=0) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
-  if(url.indexOf('pstatic.net')>=0||url.indexOf('naver.net')>=0) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
-  if(wasHttp) return 'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=400&output=jpg&q=85';
+  if(url.indexOf('kopis.or.kr')>=0) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=75';
+  if(url.indexOf('culture.go.kr')>=0) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=75';
+  if(url.indexOf('pstatic.net')>=0||url.indexOf('naver.net')>=0) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=75';
+  if(wasHttp) return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=400&output=webp&q=75';
   return url;
 }
 function rkThumb(e){
   var p=getPoster(e);
-  if(p)return '<div class="rk-img" style="font-size:0"><img src="'+p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="lazy"></div>';
+  if(p)return '<div class="rk-img" style="font-size:0"><img src="'+p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="lazy" decoding="async"></div>';
   return '<div class="rk-img">'+IC[e.ct]+'</div>';
 }
 function hThumb(e,badge){
   var p=getPoster(e);
-  if(p)return '<div class="h-card-img" style="font-size:0"><img src="'+p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="lazy">'+badge+'</div>';
+  if(p)return '<div class="h-card-img" style="font-size:0"><img src="'+p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" loading="lazy" decoding="async">'+badge+'</div>';
   return '<div class="h-card-img">'+IC[e.ct]+badge+'</div>';
 }
 function gr(e){
@@ -1349,7 +1349,7 @@ function renderHome(){
         +'<div style="position:absolute;inset:0;display:flex;align-items:flex-end;padding:20px 20px 48px;gap:14px">'
           // 포스터 썸네일 (작게)
           +'<div style="flex-shrink:0;width:64px;height:86px;border-radius:8px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.6);background:#2a2a38;display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid rgba(255,255,255,0.1)">'
-          +(_p?'<img src="'+_p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center">':IC[e.ct])
+          +(_p?'<img src="'+_p+'" style="width:100%;height:100%;object-fit:cover;object-position:top center" decoding="async"'+(i===0?' fetchpriority="high"':' loading="lazy"')+'>':IC[e.ct])
           +'</div>'
           // 텍스트
           +'<div style="flex:1;min-width:0">'
@@ -2184,11 +2184,11 @@ function proxyImg(url){
   if(!url)return'';
   var wasHttp=url.indexOf('http://')===0;
   url=url.replace('http://','https://');
-  if(url.indexOf('kopis.or.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=80';
+  if(url.indexOf('kopis.or.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=75';
   // 한국문화정보원 이미지 프록시
-  if(url.indexOf('culture.go.kr')>=0)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=480&output=jpg&q=80';
+  if(url.indexOf('culture.go.kr')>=0)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=75';
   // http였던 외부 이미지 — Mixed Content 방지
-  if(wasHttp)return'https://images.weserv.nl/?url='+url.replace('https://','')+'&w=480&output=jpg&q=80';
+  if(wasHttp)return'https://wsrv.nl/?url='+encodeURIComponent(url)+'&w=480&output=webp&q=75';
   return url;
 }
 var _detailCache={};
@@ -2461,10 +2461,10 @@ function _buildDetailHTML(id,e,kd){
   // descText 내 img src http:// → 프록시 치환 (Mixed Content 방지)
   if(descText){
     descText=descText.replace(/src="(http:\/\/[^"]+)"/gi,function(m,u){
-      return 'src="https://images.weserv.nl/?url='+u.replace('http://','')+'&w=480&output=jpg&q=80"';
+      return 'src="https://wsrv.nl/?url='+encodeURIComponent(u)+'&w=480&output=webp&q=75"';
     });
     descText=descText.replace(/src='(http:\/\/[^']+)'/gi,function(m,u){
-      return 'src="https://images.weserv.nl/?url='+u.replace('http://','')+'&w=480&output=jpg&q=80"';
+      return 'src="https://wsrv.nl/?url='+encodeURIComponent(u)+'&w=480&output=webp&q=75"';
     });
   }
   if(descText&&descText.indexOf('요일')<0&&descText.length>10){
