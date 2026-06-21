@@ -1645,12 +1645,17 @@ function renderRanking(){
     });
     return;
   }
-  // 기간 필터 — 날짜 범위 아닌 점수 기준 랭킹만 (일간/주간/월간은 레이블 표시용)
+  // 기간 필터 — 일간/주간/월간 날짜 범위에 실제로 겹치는 이벤트만 표시
+  var pd=pdRange();
   var _allScored=getScoredEvents();
   var list=_allScored.filter(function(e){
     if(e.st==="ended")return false;
     if(cCat!=="전체"&&e.ct!==cCat)return false;
     if(cRegion!=="전국"&&gr(e)!==cRegion)return false;
+    var eEnd=e.ed?new Date(e.ed):null;
+    var eSt=e.sd?new Date(e.sd):null;
+    if(eEnd&&eEnd<pd.s)return false;
+    if(eSt&&eSt>pd.e)return false;
     return true;
   }).sort(function(a,b){return b._s-a._s;});
   var mx=list.length?list[0]._s:1;
